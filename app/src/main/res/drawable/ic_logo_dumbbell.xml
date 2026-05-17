@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Arcade Fitness Logo — hand gripping a dumbbell (v2)
+  Use inside an ImageView on top of bg_logo_tile background
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="52dp"
+    android:viewportWidth="72"
+    android:viewportHeight="52">
+
+    <!-- Dumbbell bar -->
+    <path
+        android:pathData="M9,21 L39,21 L39,27 L9,27 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.95"/>
+
+    <!-- Left weight plate outer -->
+    <path
+        android:pathData="M0,16 Q0,14 2,14 L9,14 L9,28 L2,28 Q0,28 0,26 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.95"/>
+    <!-- Left plate groove -->
+    <path
+        android:pathData="M2,19 L6,19 L6,29 L2,29 Z"
+        android:fillColor="#FF6B00"
+        android:fillAlpha="0.6"/>
+
+    <!-- Right weight plate outer -->
+    <path
+        android:pathData="M39,14 L46,14 Q48,14 48,16 L48,26 Q48,28 46,28 L39,28 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.95"/>
+    <!-- Right plate groove -->
+    <path
+        android:pathData="M42,19 L46,19 L46,29 L42,29 Z"
+        android:fillColor="#FF6B00"
+        android:fillAlpha="0.6"/>
+
+    <!-- Palm / hand body -->
+    <path
+        android:pathData="M20,29 Q20,24 25,24 L43,24 Q48,24 48,29 L48,40 Q48,44 44,44 L24,44 Q20,44 20,40 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.95"/>
+
+    <!-- Finger 1 -->
+    <path
+        android:pathData="M21,17 Q21,14 24,14 L24,25 Q21,25 21,22 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.88"/>
+    <!-- Finger 2 -->
+    <path
+        android:pathData="M26,15 Q26,12 29,12 L29,25 Q26,25 26,22 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.88"/>
+    <!-- Finger 3 -->
+    <path
+        android:pathData="M31,15 Q31,12 34,12 L34,25 Q31,25 31,22 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.88"/>
+    <!-- Finger 4 -->
+    <path
+        android:pathData="M36,17 Q36,14 39,14 L39,25 Q36,25 36,22 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.88"/>
+
+    <!-- Thumb -->
+    <path
+        android:pathData="M12,30 Q10,30 10,33 Q10,36 13,36 L20,36 L20,30 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.85"/>
+
+    <!-- Knuckle accent line -->
+    <path
+        android:pathData="M21,32 L47,32"
+        android:strokeColor="#FF6B00"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.5"
+        android:fillColor="#00000000"/>
+
+</vector>

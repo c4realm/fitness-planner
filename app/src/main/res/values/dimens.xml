@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ══ SPACING ══ -->
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_sm">8dp</dimen>
+    <dimen name="space_md">16dp</dimen>
+    <dimen name="space_lg">24dp</dimen>
+    <dimen name="space_xl">32dp</dimen>
+    <dimen name="space_xxl">48dp</dimen>
+
+    <!-- ══ SCREEN PADDING ══ -->
+    <dimen name="screen_padding_h">24dp</dimen>
+    <dimen name="screen_padding_top">20dp</dimen>
+
+    <!-- ══ CORNER RADII ══ -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_xl">20dp</dimen>
+    <dimen name="radius_logo">22dp</dimen>
+    <dimen name="radius_button">14dp</dimen>
+    <dimen name="radius_input">12dp</dimen>
+
+    <!-- ══ TYPOGRAPHY ══ -->
+    <dimen name="text_xs">10sp</dimen>
+    <dimen name="text_sm">12sp</dimen>
+    <dimen name="text_md">14sp</dimen>
+    <dimen name="text_lg">16sp</dimen>
+    <dimen name="text_xl">20sp</dimen>
+    <dimen name="text_hero">26sp</dimen>
+    <dimen name="text_display">32sp</dimen>
+
+    <!-- ══ COMPONENTS ══ -->
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="input_height">52dp</dimen>
+    <dimen name="icon_btn_size">40dp</dimen>
+    <dimen name="logo_tile_size">80dp</dimen>
+    <dimen name="nav_height">60dp</dimen>
+    <dimen name="top_bar_height">4dp</dimen>
+    <dimen name="divider_height">1dp</dimen>
+</resources>

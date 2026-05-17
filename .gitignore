@@ -1,0 +1,28 @@
+# Android generated
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+
+# Sensitive files — NEVER commit these
+google-services.json
+keystore.jks
+*.keystore
+secrets.properties
+
+# Gradle
+gradle-wrapper.jar
+.gradle
+
+# Node (Phase 2 backend)
+node_modules/
+.env
+.env.local
