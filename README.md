@@ -1,6 +1,8 @@
-# 💪 Arcade Fitness Planner
+#Arcade Fitness Planner
 
 > **Plan it. Track it. Do it.**
+> <img width="1536" height="1024" alt="ChatGPT Image May 26, 2026, 06_44_39 PM" src="https://github.com/user-attachments/assets/9f91d9a6-0243-41a4-90e5-eca837a0a9a1" />
+
 
 An Android fitness planning and tracking application developed as a final project for the Mobile Application Development course at **St. Mary's University**.
 
