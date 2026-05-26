@@ -10,10 +10,12 @@ import android.content.SharedPreferences;
  */
 public class SessionManager {
 
+    private final Context context;
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
 
     public SessionManager(Context context) {
+        this.context = context;
         prefs  = context.getSharedPreferences(AppConstants.PREF_NAME, Context.MODE_PRIVATE);
         editor = prefs.edit();
     }
@@ -46,6 +48,31 @@ public class SessionManager {
     public String  getUserName() { return prefs.getString(AppConstants.KEY_USER_NAME,  ""); }
     public String  getUserEmail(){ return prefs.getString(AppConstants.KEY_USER_EMAIL, ""); }
     public String  getToken()    { return prefs.getString(AppConstants.KEY_USER_TOKEN, ""); }
+
+    // ── REGISTERED ACCOUNTS (temporary — replace with backend) ─────
+    // Uses a separate SharedPreferences file so logout doesn't wipe accounts
+
+    private SharedPreferences getAccountPrefs() {
+        return context.getSharedPreferences("registered_accounts", Context.MODE_PRIVATE);
+    }
+
+    public void saveRegisteredAccount(String email, String password, String fullName) {
+        SharedPreferences accountPrefs = getAccountPrefs();
+        accountPrefs.edit()
+            .putString("account_pwd_" + email, password)
+            .putString("account_name_" + email, fullName)
+            .apply();
+    }
+
+    public boolean checkCredentials(String email, String password) {
+        SharedPreferences accountPrefs = getAccountPrefs();
+        String storedPassword = accountPrefs.getString("account_pwd_" + email, null);
+        return storedPassword != null && storedPassword.equals(password);
+    }
+
+    public String getRegisteredUserName(String email) {
+        return getAccountPrefs().getString("account_name_" + email, "");
+    }
 
     // ── CLEAR SESSION ─────────────────────────────────────────────────
 

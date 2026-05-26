@@ -130,8 +130,14 @@ public class LoginActivity extends AppCompatActivity {
         //     });
         // ────────────────────────────────────────────────────────────
 
-        // Temporary: save mock session and go to Dashboard (remove in Phase 2)
-        sessionManager.saveSession("user_001", "Amar", email, "mock_token");
+        // Check against locally registered accounts (remove when backend is connected)
+        if (!sessionManager.checkCredentials(email, password)) {
+            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userName = sessionManager.getRegisteredUserName(email);
+        sessionManager.saveSession("user_" + email, userName, email, "mock_token");
         goToDashboard();
     }
 
@@ -170,8 +176,13 @@ public class LoginActivity extends AppCompatActivity {
                 goToDashboard();
             }
         } catch (ApiException e) {
-            Toast.makeText(this, "Google Sign-In failed: " + e.getMessage(),
-                Toast.LENGTH_SHORT).show();
+            String message;
+            if (e.getStatusCode() == 10) {
+                message = "Google Sign-In error (code 10). Replace google-services.json with YOUR real Firebase file, then add SHA-1 in Firebase Console. Also set GOOGLE_WEB_CLIENT_ID to your Web OAuth client ID.";
+            } else {
+                message = "Google Sign-In failed: " + e.getMessage();
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
