@@ -22,6 +22,8 @@
     </style>
 
     <!-- ══ TEXT STYLES ══ -->
+    <style name="Text" />
+
     <style name="Text.Display">
         <item name="android:textSize">@dimen/text_display</item>
         <item name="android:textStyle">bold</item>
@@ -59,6 +61,8 @@
     </style>
 
     <!-- ══ BUTTON STYLES ══ -->
+    <style name="Button" />
+
     <style name="Button.Primary">
         <item name="android:background">@drawable/bg_button_primary</item>
         <item name="android:textColor">@color/white</item>
@@ -82,6 +86,8 @@
     </style>
 
     <!-- ══ INPUT STYLE ══ -->
+    <style name="Input" />
+
     <style name="Input.Dark">
         <item name="android:background">@drawable/bg_input_default</item>
         <item name="android:textColor">@color/text_primary</item>
@@ -95,6 +101,8 @@
     </style>
 
     <!-- ══ CARD STYLE ══ -->
+    <style name="Card" />
+
     <style name="Card.Dark">
         <item name="android:background">@drawable/bg_card</item>
         <item name="android:padding">@dimen/space_md</item>

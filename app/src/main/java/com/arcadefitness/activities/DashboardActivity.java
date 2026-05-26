@@ -3,33 +3,34 @@ package com.arcadefitness.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.arcadefitness.R;
+import com.arcadefitness.adapter.ExerciseAdapter;
+import com.arcadefitness.data.local.entity.ExerciseEntity;
 import com.arcadefitness.utils.SessionManager;
+import com.arcadefitness.viewmodel.DashboardViewModel;
 
-/**
- * DashboardActivity.java
- * Main shell activity — hosts the bottom navigation and all core screens.
- *
- * Phase 2 Note:
- * Each nav item will load a Fragment inside fragment_container.
- * For now, we display the static dashboard layout.
- *
- * Navigation tabs:
- *   Home | Planner | + (FAB) | History | Profile
- */
+import java.util.List;
+
 public class DashboardActivity extends AppCompatActivity {
 
     private SessionManager sessionManager;
+    private DashboardViewModel dashboardViewModel;
+    private ExerciseAdapter exerciseAdapter;
 
-    // Dashboard views
     private TextView tvUserName;
     private TextView tvStreakValue, tvWeekValue, tvCaloriesValue;
 
-    // Bottom nav items
     private View navHome, navPlanner, navFab, navHistory, navProfile;
+    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +40,12 @@ public class DashboardActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
 
         initViews();
+        setupRecyclerView();
+        setupViewModel();
         populateUserData();
         setupBottomNav();
         setupClickListeners();
     }
-
-    // ── INIT ────────────────────────────────────────────────────────
 
     private void initViews() {
         tvUserName      = findViewById(R.id.tvUserName);
@@ -57,101 +58,94 @@ public class DashboardActivity extends AppCompatActivity {
         navFab     = findViewById(R.id.navFab);
         navHistory = findViewById(R.id.navHistory);
         navProfile = findViewById(R.id.navProfile);
+
+        btnLogout  = findViewById(R.id.btnLogout);
+    }
+
+    private void setupRecyclerView() {
+        RecyclerView rvExercises = findViewById(R.id.rvExercises);
+        rvExercises.setLayoutManager(new LinearLayoutManager(this));
+        rvExercises.setHasFixedSize(true);
+        exerciseAdapter = new ExerciseAdapter();
+        rvExercises.setAdapter(exerciseAdapter);
+    }
+
+    private void setupViewModel() {
+        dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
+
+        dashboardViewModel.getAllExercises().observe(this, new Observer<List<ExerciseEntity>>() {
+            @Override
+            public void onChanged(List<ExerciseEntity> exercises) {
+                exerciseAdapter.setExercises(exercises);
+            }
+        });
     }
 
     private void populateUserData() {
-        // Get first name from session
         String fullName  = sessionManager.getUserName();
         String firstName = fullName.contains(" ")
             ? fullName.substring(0, fullName.indexOf(" "))
             : fullName;
         if (tvUserName != null) tvUserName.setText(firstName);
 
-        // ── TODO (Phase 2): Load real stats from API ─────────────────
-        // Fetch user stats (streak, weekly hours, calories) and populate:
-        // tvStreakValue.setText(String.valueOf(stats.streak));
-        // tvWeekValue.setText(String.format("%.1f", stats.weeklyHours));
-        // tvCaloriesValue.setText(String.valueOf(stats.calories));
-        // ─────────────────────────────────────────────────────────────
-
-        // Temporary mock data
         if (tvStreakValue   != null) tvStreakValue.setText("12");
         if (tvWeekValue     != null) tvWeekValue.setText("3.2");
         if (tvCaloriesValue != null) tvCaloriesValue.setText("680");
     }
 
-    // ── BOTTOM NAVIGATION ───────────────────────────────────────────
-
     private void setupBottomNav() {
-        setActiveNav(navHome); // Home is active on launch
+        setActiveNav(navHome);
     }
 
     private void setupClickListeners() {
-        navHome.setOnClickListener(v -> {
-            setActiveNav(v);
-            // TODO (Phase 2): loadFragment(new HomeFragment());
-        });
-        navPlanner.setOnClickListener(v -> {
-            setActiveNav(v);
-            // TODO (Phase 2): startActivity(new Intent(this, WorkoutPlannerActivity.class));
-        });
-        navFab.setOnClickListener(v -> {
-            // FAB — quick add workout
-            // TODO (Phase 2): show bottom sheet dialog for quick add
-        });
-        navHistory.setOnClickListener(v -> {
-            setActiveNav(v);
-            // TODO (Phase 2): startActivity(new Intent(this, WorkoutHistoryActivity.class));
-        });
-        navProfile.setOnClickListener(v -> {
-            setActiveNav(v);
-            // TODO (Phase 2): startActivity(new Intent(this, UserProfileActivity.class));
-        });
+        navHome.setOnClickListener(v -> setActiveNav(v));
+        navPlanner.setOnClickListener(v -> setActiveNav(v));
+        navFab.setOnClickListener(v -> { });
+        navHistory.setOnClickListener(v -> setActiveNav(v));
+        navProfile.setOnClickListener(v -> setActiveNav(v));
 
-        // Today's workout banner tap
         View todayBanner = findViewById(R.id.cardTodayWorkout);
         if (todayBanner != null) {
-            todayBanner.setOnClickListener(v -> {
-                // TODO (Phase 2): startActivity(new Intent(this, WorkoutTrackingActivity.class));
-            });
+            todayBanner.setOnClickListener(v -> { });
         }
 
-        // Continue workout button
         View btnContinue = findViewById(R.id.btnContinueWorkout);
         if (btnContinue != null) {
-            btnContinue.setOnClickListener(v -> {
-                // TODO (Phase 2): startActivity(new Intent(this, WorkoutTrackingActivity.class));
-            });
+            btnContinue.setOnClickListener(v -> { });
         }
 
-        // Goal card — view all
         View tvViewAll = findViewById(R.id.tvViewAll);
         if (tvViewAll != null) {
-            tvViewAll.setOnClickListener(v -> {
-                // TODO (Phase 2): startActivity(new Intent(this, GoalSettingActivity.class));
-            });
+            tvViewAll.setOnClickListener(v -> { });
         }
+
+        btnLogout.setOnClickListener(v -> logout());
     }
 
     private void setActiveNav(View activeNav) {
-        // Reset all
         View[] navItems = {navHome, navPlanner, navHistory, navProfile};
         for (View nav : navItems) {
             if (nav == null) continue;
             TextView label = nav.findViewWithTag("nav_label");
-            View     icon  = nav.findViewWithTag("nav_icon");
-            if (label != null) label.setTextColor(getColor(R.color.nav_bar));
-            // Icon tint reset handled via selector drawables in Phase 2
+            if (label != null) label.setTextColor(getColor(R.color.text_muted));
         }
-        // Set active state — highlight handled by selector drawables
+        if (activeNav != null) {
+            TextView label = activeNav.findViewWithTag("nav_label");
+            if (label != null) label.setTextColor(getColor(R.color.orange_primary));
+        }
     }
 
-    // ── LIFECYCLE ───────────────────────────────────────────────────
+    private void logout() {
+        sessionManager.clearSession();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        finish();
+    }
 
     @Override
     public void onBackPressed() {
-        // Prevent going back to Login once logged in
-        // Show exit confirmation dialog in Phase 2
         moveTaskToBack(true);
     }
 }

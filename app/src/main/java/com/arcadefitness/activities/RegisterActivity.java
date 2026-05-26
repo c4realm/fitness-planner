@@ -150,8 +150,9 @@ public class RegisterActivity extends AppCompatActivity {
         //     });
         // ─────────────────────────────────────────────────────────────
 
-        // Temporary: mock session and go to Dashboard
-        sessionManager.saveSession("user_new", fullName, email, "mock_token");
+        // Temporary: save account locally and go to Dashboard
+        sessionManager.saveRegisteredAccount(email, password, fullName);
+        sessionManager.saveSession("user_" + email, fullName, email, "mock_token");
         goToDashboard();
     }
 

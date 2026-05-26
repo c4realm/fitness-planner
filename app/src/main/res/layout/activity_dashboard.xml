@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/screen_padding_h">
+
+            <!-- Top accent bar -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/top_bar_height"
+                android:background="@color/orange_primary"
+                android:layout_marginStart="-24dp"
+                android:layout_marginEnd="-24dp" />
+
+            <!-- Greeting -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/good_morning"
+                android:textSize="13sp"
+                android:textColor="@color/text_muted"
+                android:layout_marginTop="@dimen/space_lg" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="@dimen/space_xs"
+                android:layout_marginBottom="@dimen/space_lg">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hey_prefix"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/orange_primary"
+                    android:layout_marginStart="@dimen/space_xs" />
+            </LinearLayout>
+
+            <!-- Stats row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/space_lg">
+
+                <FrameLayout
+                    style="@style/Card.Dark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/space_sm">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/space_md">
+                        <TextView
+                            android:id="@+id/tvStreakValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/orange_primary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/streak_label"
+                            android:textSize="10sp"
+                            android:textColor="@color/text_muted"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.08"
+                            android:layout_marginTop="@dimen/space_xs" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    style="@style/Card.Dark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:layout_marginEnd="@dimen/space_xs">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/space_md">
+                        <TextView
+                            android:id="@+id/tvWeekValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/week_label"
+                            android:textSize="10sp"
+                            android:textColor="@color/text_muted"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.08"
+                            android:layout_marginTop="@dimen/space_xs" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    style="@style/Card.Dark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/space_sm">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/space_md">
+                        <TextView
+                            android:id="@+id/tvCaloriesValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/calories_label"
+                            android:textSize="10sp"
+                            android:textColor="@color/text_muted"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.08"
+                            android:layout_marginTop="@dimen/space_xs" />
+                    </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <!-- Today's workout label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todays_workout_label"
+                style="@style/Text.Label"
+                android:layout_marginBottom="@dimen/space_sm" />
+
+            <!-- Today's workout card -->
+            <FrameLayout
+                android:id="@+id/cardTodayWorkout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_orange"
+                android:padding="@dimen/space_md"
+                android:layout_marginBottom="@dimen/space_lg">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_name_sample"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_meta_sample"
+                        android:textSize="12sp"
+                        android:textColor="@color/white"
+                        android:alpha="0.8"
+                        android:layout_marginTop="@dimen/space_xs" />
+                    <Button
+                        android:id="@+id/btnContinueWorkout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="@string/btn_continue_workout"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/orange_primary"
+                        android:background="@color/white"
+                        android:gravity="center"
+                        android:paddingStart="@dimen/space_md"
+                        android:paddingEnd="@dimen/space_md"
+                        android:layout_marginTop="@dimen/space_sm" />
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <!-- Active Goal section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/space_sm">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/active_goal"
+                    style="@style/Text.Label" />
+                <TextView
+                    android:id="@+id/tvViewAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_all"
+                    style="@style/Text.OrangeLink" />
+            </LinearLayout>
+
+            <!-- Goal card -->
+            <FrameLayout
+                style="@style/Card.Dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="@dimen/space_md">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/todays_plan"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:text="@string/btn_start_workout"
+                        style="@style/Button.Primary"
+                        android:layout_marginTop="@dimen/space_md" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Exercise Library section -->
+            <TextView
+                style="@style/Text.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EXERCISE LIBRARY"
+                android:layout_marginTop="@dimen/space_lg"
+                android:layout_marginBottom="@dimen/space_sm" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvExercises"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
+
+            <!-- Logout -->
+            <Button
+                android:id="@+id/btnLogout"
+                style="@style/Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="Logout"
+                android:layout_marginTop="@dimen/space_lg" />
+
+            <!-- Spacer for bottom nav -->
+            <View android:layout_width="match_parent" android:layout_height="80dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/bg_nav"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:elevation="8dp">
+
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:tag="nav_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏠"
+                android:textSize="20sp" />
+            <TextView
+                android:tag="nav_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textSize="10sp"
+                android:textColor="@color/orange_primary"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navPlanner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:tag="nav_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋"
+                android:textSize="20sp" />
+            <TextView
+                android:tag="nav_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planner"
+                android:textSize="10sp"
+                android:textColor="@color/text_muted"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/navFab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_button_primary">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="+"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/white" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/navHistory"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:tag="nav_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊"
+                android:textSize="20sp" />
+            <TextView
+                android:tag="nav_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="History"
+                android:textSize="10sp"
+                android:textColor="@color/text_muted"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:tag="nav_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👤"
+                android:textSize="20sp" />
+            <TextView
+                android:tag="nav_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textSize="10sp"
+                android:textColor="@color/text_muted"
+                android:textAllCaps="true"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
