@@ -1,70 +1,109 @@
-# 💪 Arcade Fitness Planner
+# 🏋️ Arcade Fitness Planner
 
-> **Plan it. Track it. Do it.**
+<div align="center">
 
-An Android fitness planning and tracking application developed as a final project for the Mobile Application Development course at **St. Mary's University**.
+### **Plan it. Track it. Do it.**
 
----
+<img width="700" alt="Arcade Fitness Logo" src="https://github.com/user-attachments/assets/9f91d9a6-0243-41a4-90e5-eca837a0a9a1" />
 
-## 👥 Team
-| Name | Role |
-|---|---|
-| Amar Abdulmejid | Lead Developer |
-| Kaleab Dejene | UI/UX & Frontend |
-| Kidus Kibrom | Backend & API |
-| Yonas Ajanew | Database & Testing |
+![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=for-the-badge)
+![Language](https://img.shields.io/badge/Language-Java-orange?style=for-the-badge)
+![UI](https://img.shields.io/badge/UI-Material%20Design-ff6b00?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-In%20Development-blue?style=for-the-badge)
+![University](https://img.shields.io/badge/St.%20Mary's-University-red?style=for-the-badge)
 
-**Instructor:** Dawit Yetemgeta  
-**Course:** Mobile Application Development  
-**Department:** Computer Science
+</div>
 
 ---
 
-## 🏗️ Project Status
+## 📖 About The Project
 
-### Phase 1 — Onboarding ✅
-| Screen | Status |
-|---|---|
-| Splash Screen | ✅ Done |
-| Login Screen | ✅ Done |
-| Registration Screen | ✅ Done |
-| Dashboard Screen | ✅ Done |
+**Arcade Fitness Planner** is an Android fitness planning and workout tracking application developed as a final project for the **Mobile Application Development** course at **St. Mary's University**.
 
-### Phase 2 — Core Features 🔜
-| Screen | Status |
-|---|---|
-| Workout Planner | 🔜 Next |
-| Exercise Library | 🔜 |
-| Workout Tracking | 🔜 |
-| Progress Tracking | 🔜 |
+The application is designed to help users:
 
-### Phase 3 — Tools & Profile 🔜
-| Screen | Status |
-|---|---|
-| Workout History | 🔜 |
-| Goal Setting | 🔜 |
-| BMI Calculator | 🔜 |
-| User Profile | 🔜 |
+* 🏋️ Plan workouts efficiently
+* 📊 Track workout progress
+* 🎯 Set personal fitness goals
+* 📅 Manage fitness schedules
+* 📈 Monitor overall improvement
 
 ---
 
-## 🛠️ Tech Stack
+# 👥 Team
 
-| Layer | Technology |
-|---|---|
-| Platform | Android (API 24+) |
-| Language | Java |
-| UI | XML Layouts + Material Components |
-| Database | PostgreSQL (via REST API) |
-| Networking | Retrofit2 + OkHttp3 |
-| Auth | Google Sign-In + JWT |
-| Build | Gradle |
+| Name                | Role               |
+| ------------------- | ------------------ |
+| **Amar Abdulmejid** | Lead Developer     |
+| **Kaleab Dejene**   | UI/UX & Frontend   |
+| **Kidus Kibrom**    | Backend & API      |
+| **Yonas Ajanew**    | Database & Testing |
 
 ---
 
-## 📁 Project Structure
+## 🎓 Academic Information
 
-```
+| Field           | Details                        |
+| --------------- | ------------------------------ |
+| **Instructor**  | Dawit Yetemgeta                |
+| **Course**      | Mobile Application Development |
+| **Department**  | Computer Science               |
+| **Institution** | St. Mary's University          |
+
+---
+
+# 🏗️ Development Roadmap
+
+## ✅ Phase 1 — Onboarding
+
+| Screen              | Status      |
+| ------------------- | ----------- |
+| Splash Screen       | ✅ Completed |
+| Login Screen        | ✅ Completed |
+| Registration Screen | ✅ Completed |
+| Dashboard Screen    | ✅ Completed |
+
+---
+
+## 🔜 Phase 2 — Core Features
+
+| Feature           | Status     |
+| ----------------- | ---------- |
+| Workout Planner   | 🔜 Next    |
+| Exercise Library  | 🔜 Pending |
+| Workout Tracking  | 🔜 Pending |
+| Progress Tracking | 🔜 Pending |
+
+---
+
+## 🔜 Phase 3 — Tools & Profile
+
+| Feature         | Status     |
+| --------------- | ---------- |
+| Workout History | 🔜 Pending |
+| Goal Setting    | 🔜 Pending |
+| BMI Calculator  | 🔜 Pending |
+| User Profile    | 🔜 Pending |
+
+---
+
+# 🛠️ Tech Stack
+
+| Category           | Technology                        |
+| ------------------ | --------------------------------- |
+| **Platform**       | Android (API 24+)                 |
+| **Language**       | Java                              |
+| **UI Framework**   | XML Layouts + Material Components |
+| **Database**       | PostgreSQL (via REST API)         |
+| **Networking**     | Retrofit2 + OkHttp3               |
+| **Authentication** | Google Sign-In + JWT              |
+| **Build System**   | Gradle                            |
+
+---
+
+# 📂 Project Structure
+
+```bash
 app/src/main/
 ├── java/com/arcadefitness/
 │   ├── activities/          # All screen Activity classes
@@ -72,6 +111,7 @@ app/src/main/
 │   │   ├── LoginActivity.java
 │   │   ├── RegisterActivity.java
 │   │   └── DashboardActivity.java
+│   │
 │   ├── adapters/            # RecyclerView adapters
 │   ├── models/              # Data model POJOs
 │   ├── network/             # API service interfaces
@@ -79,6 +119,7 @@ app/src/main/
 │       ├── AppConstants.java
 │       ├── SessionManager.java
 │       └── ValidationUtils.java
+│
 └── res/
     ├── layout/              # XML screen layouts
     ├── drawable/            # Shapes, selectors, vectors
@@ -89,52 +130,87 @@ app/src/main/
 
 ---
 
-## ⚙️ Setup & Installation
+# ⚙️ Setup & Installation
 
-### Prerequisites
-- Android Studio Hedgehog (2023.1.1) or newer
-- JDK 17+
-- Android SDK API 24–34
-- Git
+## 📋 Prerequisites
 
-### Steps
+Before running the project, make sure you have:
+
+* Android Studio Hedgehog (2023.1.1+)
+* JDK 17+
+* Android SDK API 24–34
+* Git
+
+---
+
+## 🚀 Installation Steps
+
 ```bash
-# 1. Clone the repo
+# 1️⃣ Clone the repository
 git clone https://github.com/YOUR_USERNAME/ArcadeFitness.git
 
-# 2. Open in Android Studio
-#    File → Open → select the ArcadeFitness folder
+# 2️⃣ Open the project in Android Studio
+# File → Open → Select the ArcadeFitness folder
 
-# 3. Sync Gradle
-#    Android Studio will prompt — click "Sync Now"
+# 3️⃣ Sync Gradle dependencies
+# Android Studio will prompt → Click "Sync Now"
 
-# 4. Run on emulator or physical device
-#    Run → Run 'app'  (Shift+F10)
+# 4️⃣ Run the application
+# Run → Run 'app'  (Shift + F10)
 ```
 
-### Google Sign-In Setup
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a project → Enable **Google Sign-In API**
-3. Create OAuth 2.0 credentials → download `google-services.json`
-4. Place `google-services.json` in `app/` directory
-5. Replace `YOUR_WEB_CLIENT_ID` in `AppConstants.java`
+---
+
+# 🔐 Google Sign-In Setup
+
+1. Go to **Google Cloud Console**
+2. Create a new project
+3. Enable **Google Sign-In API**
+4. Create OAuth 2.0 credentials
+5. Download `google-services.json`
+6. Place the file inside the `app/` directory
+7. Replace `YOUR_WEB_CLIENT_ID` inside `AppConstants.java`
 
 ---
 
-## 🎨 Design System
+# 🎨 Design System
 
-| Token | Value |
-|---|---|
-| Primary Orange | `#FF6B00` |
-| Background | `#121212` |
-| Card Surface | `#1A1A1A` |
-| Input Surface | `#1C1C1C` |
-| Border | `#252525` |
-| Text Primary | `#FFFFFF` |
-| Text Secondary | `#888888` |
-| Font | Inter (400, 500, 700, 900) |
+| Design Token       | Value                      |
+| ------------------ | -------------------------- |
+| **Primary Orange** | `#FF6B00`                  |
+| **Background**     | `#121212`                  |
+| **Card Surface**   | `#1A1A1A`                  |
+| **Input Surface**  | `#1C1C1C`                  |
+| **Border Color**   | `#252525`                  |
+| **Text Primary**   | `#FFFFFF`                  |
+| **Text Secondary** | `#888888`                  |
+| **Typography**     | Inter (400, 500, 700, 900) |
 
 ---
 
-## 📝 License
-Academic project — St. Mary's University © 2025
+# 📌 Features Overview
+
+* ✅ Modern Material UI
+* ✅ Authentication System
+* ✅ Workout Planning
+* ✅ Exercise Tracking
+* ✅ Progress Monitoring
+* ✅ Google Sign-In Integration
+* ✅ REST API Communication
+* ✅ Responsive Android Layouts
+
+---
+
+# 📜 License
+
+Academic Project — **St. Mary's University © 2025**
+
+---
+
+<div align="center">
+
+### ⭐ Built with Java & Android Studio
+
+**Arcade Fitness Planner Team**
+
+</div>
