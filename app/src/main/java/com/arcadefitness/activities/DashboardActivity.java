@@ -99,24 +99,44 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         navHome.setOnClickListener(v -> setActiveNav(v));
-        navPlanner.setOnClickListener(v -> setActiveNav(v));
-        navFab.setOnClickListener(v -> { });
-        navHistory.setOnClickListener(v -> setActiveNav(v));
+        navPlanner.setOnClickListener(v -> {
+            setActiveNav(v);
+            startActivity(new Intent(this, WorkoutPlannerActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        navFab.setOnClickListener(v -> {
+            startActivity(new Intent(this, WorkoutTrackingActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        navHistory.setOnClickListener(v -> {
+            setActiveNav(v);
+            startActivity(new Intent(this, ProgressTrackingActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
         navProfile.setOnClickListener(v -> setActiveNav(v));
 
         View todayBanner = findViewById(R.id.cardTodayWorkout);
         if (todayBanner != null) {
-            todayBanner.setOnClickListener(v -> { });
+            todayBanner.setOnClickListener(v -> {
+                startActivity(new Intent(this, WorkoutTrackingActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            });
         }
 
         View btnContinue = findViewById(R.id.btnContinueWorkout);
         if (btnContinue != null) {
-            btnContinue.setOnClickListener(v -> { });
+            btnContinue.setOnClickListener(v -> {
+                startActivity(new Intent(this, WorkoutTrackingActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            });
         }
 
         View tvViewAll = findViewById(R.id.tvViewAll);
         if (tvViewAll != null) {
-            tvViewAll.setOnClickListener(v -> { });
+            tvViewAll.setOnClickListener(v -> {
+                startActivity(new Intent(this, ExerciseLibraryActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            });
         }
 
         btnLogout.setOnClickListener(v -> logout());

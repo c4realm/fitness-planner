@@ -56,6 +56,61 @@
     <string name="btn_start_workout">Start Workout</string>
     <string name="edit">Edit</string>
 
+    <!-- Workout Planner -->
+    <string name="workout_planner_title">Workout Planner</string>
+    <string name="create_workout">Create Workout</string>
+    <string name="no_workouts_yet">No workouts yet.\nTap + to create your first workout</string>
+    <string name="start_session">Start</string>
+    <string name="exercises_label">EXERCISES</string>
+    <string name="duration_label">Duration</string>
+    <string name="volume_label">Volume</string>
+
+    <!-- Workout Tracking -->
+    <string name="workout_tracking_title">Live Workout</string>
+    <string name="btn_start">START</string>
+    <string name="btn_pause">PAUSE</string>
+    <string name="btn_resume">RESUME</string>
+    <string name="btn_complete">COMPLETE</string>
+    <string name="btn_stop">STOP</string>
+    <string name="elapsed_time">Elapsed Time</string>
+    <string name="sets_completed">Sets Completed</string>
+    <string name="current_exercise">Current Exercise</string>
+    <string name="no_active_session">No active workout session</string>
+    <string name="session_completed">Workout Complete!</string>
+    <string name="session_summary">Great work! Here\'s your session summary:</string>
+    <string name="confirm_end_workout">End this workout session?</string>
+    <string name="yes_end">Yes, End</string>
+    <string name="no_continue">No, Continue</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Progress</string>
+    <string name="workouts_this_week">Workouts This Week</string>
+    <string name="total_workouts">Total Workouts</string>
+    <string name="total_duration">Total Duration</string>
+    <string name="total_calories">Calories Burned</string>
+    <string name="minutes_label">min</string>
+    <string name="no_sessions_yet">No sessions recorded yet.\nComplete a workout to see progress.</string>
+    <string name="active_goals_section">Active Goals</string>
+    <string name="add_goal">Add Goal</string>
+    <string name="no_goals_yet">No goals set yet.\nTap + to add a fitness goal.</string>
+    <string name="goal_progress">Progress</string>
+    <string name="goal_target">Target</string>
+    <string name="goal_status_active">Active</string>
+    <string name="goal_status_completed">Completed</string>
+
+    <!-- Exercise Library -->
+    <string name="exercise_library_title">Exercise Library</string>
+    <string name="search_hint">Search exercises…</string>
+    <string name="filter_muscle_group">Filter by muscle group</string>
+    <string name="all_muscle_groups">All</string>
+    <string name="no_exercises_found">No exercises found</string>
+
+    <!-- Generic -->
+    <string name="loading_data">Loading…</string>
+    <string name="error_loading">Failed to load data</string>
+    <string name="sync_status">Syncing…</string>
+    <string name="sync_complete">All synced</string>
+
     <!-- Errors -->
     <string name="error_empty_field">This field is required</string>
     <string name="error_invalid_email">Enter a valid email address</string>

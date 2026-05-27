@@ -10,13 +10,19 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.arcadefitness.data.local.dao.ExerciseDao;
+import com.arcadefitness.data.local.dao.GoalDao;
 import com.arcadefitness.data.local.dao.SetRecordDao;
 import com.arcadefitness.data.local.dao.SyncQueueDao;
+import com.arcadefitness.data.local.dao.UserProfileDao;
 import com.arcadefitness.data.local.dao.WorkoutDao;
+import com.arcadefitness.data.local.dao.WorkoutSessionDao;
 import com.arcadefitness.data.local.entity.ExerciseEntity;
+import com.arcadefitness.data.local.entity.GoalEntity;
 import com.arcadefitness.data.local.entity.SetRecordEntity;
 import com.arcadefitness.data.local.entity.SyncQueueEntryEntity;
+import com.arcadefitness.data.local.entity.UserProfileEntity;
 import com.arcadefitness.data.local.entity.WorkoutEntity;
+import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,9 +32,12 @@ import java.util.concurrent.Executors;
         WorkoutEntity.class,
         ExerciseEntity.class,
         SetRecordEntity.class,
-        SyncQueueEntryEntity.class
+        SyncQueueEntryEntity.class,
+        UserProfileEntity.class,
+        GoalEntity.class,
+        WorkoutSessionEntity.class
     },
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -42,6 +51,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ExerciseDao exerciseDao();
     public abstract SetRecordDao setRecordDao();
     public abstract SyncQueueDao syncQueueDao();
+    public abstract UserProfileDao userProfileDao();
+    public abstract GoalDao goalDao();
+    public abstract WorkoutSessionDao workoutSessionDao();
 
     AppDatabase() {}
 

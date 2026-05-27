@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary"
+    android:orientation="vertical">
+
+    <!-- Top accent bar -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_bar_height"
+        android:background="@color/orange_primary" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/screen_padding_h">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="@dimen/space_md">
+
+                <TextView
+                    android:id="@+id/btnBack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="←"
+                    android:textSize="22sp"
+                    android:textColor="@color/text_primary"
+                    android:padding="@dimen/space_sm" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/workout_tracking_title"
+                    style="@style/Text.Hero"
+                    android:layout_marginStart="@dimen/space_sm" />
+            </LinearLayout>
+
+            <!-- Timer / Elapsed -->
+            <FrameLayout
+                style="@style/Card.Dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="@dimen/space_lg">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/elapsed_time"
+                        style="@style/Text.Label" />
+
+                    <TextView
+                        android:id="@+id/tvElapsedTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00:00"
+                        android:textSize="@dimen/text_display"
+                        android:textStyle="bold"
+                        android:textColor="@color/orange_primary"
+                        android:layout_marginTop="@dimen/space_sm" />
+
+                    <TextView
+                        android:id="@+id/tvSetsCompleted"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 sets completed"
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_muted"
+                        android:layout_marginTop="@dimen/space_sm" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Current Exercise -->
+            <TextView
+                style="@style/Text.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/current_exercise"
+                android:layout_marginTop="@dimen/space_lg"
+                android:layout_marginBottom="@dimen/space_sm" />
+
+            <FrameLayout
+                style="@style/Card.Dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+                    <TextView
+                        android:id="@+id/tvCurrentExerciseName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="@dimen/text_lg"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+                    <TextView
+                        android:id="@+id/tvCurrentSetsInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_sm"
+                        android:textColor="@color/text_muted"
+                        android:layout_marginTop="@dimen/space_xs" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Active Session Controls -->
+            <LinearLayout
+                android:id="@+id/layoutActiveControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/space_lg"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btnPause"
+                    style="@style/Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_weight="1"
+                    android:text="@string/btn_pause" />
+
+                <Button
+                    android:id="@+id/btnComplete"
+                    style="@style/Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:text="@string/btn_complete" />
+            </LinearLayout>
+
+            <!-- No Session State -->
+            <LinearLayout
+                android:id="@+id/layoutNoSession"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginTop="@dimen/space_xl"
+                android:visibility="visible">
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:text="🏋️"
+                    android:textSize="40sp"
+                    android:background="@drawable/bg_logo_tile" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_active_session"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_muted"
+                    android:gravity="center"
+                    android:layout_marginTop="@dimen/space_lg" />
+            </LinearLayout>
+
+            <!-- Session Summary (shown after completion) -->
+            <LinearLayout
+                android:id="@+id/layoutSessionSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/space_lg">
+
+                <FrameLayout
+                    style="@style/Card.Dark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/space_lg">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/session_completed"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/orange_primary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/session_summary"
+                            android:textSize="@dimen/text_sm"
+                            android:textColor="@color/text_muted"
+                            android:layout_marginTop="@dimen/space_sm" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginTop="@dimen/space_lg">
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+                                <TextView android:id="@+id/tvSummaryDuration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_primary" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/duration_label" android:textSize="10sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.08" android:layout_marginTop="@dimen/space_xs" />
+                            </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+                                <TextView android:id="@+id/tvSummaryVolume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_primary" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/volume_label" android:textSize="10sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.08" android:layout_marginTop="@dimen/space_xs" />
+                            </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+                                <TextView android:id="@+id/tvSummaryCalories" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_primary" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/total_calories" android:textSize="10sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.08" android:layout_marginTop="@dimen/space_xs" />
+                            </LinearLayout>
+                        </LinearLayout>
+                        <Button
+                            android:id="@+id/btnBackToDashboard"
+                            style="@style/Button.Primary"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/button_height"
+                            android:text="@string/btn_continue_workout"
+                            android:layout_marginTop="@dimen/space_lg" />
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

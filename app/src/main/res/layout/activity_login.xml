@@ -37,7 +37,7 @@
                     android:layout_width="22dp"
                     android:layout_height="16dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_logo_dumbbell"
+                    android:src="@drawable/ic_logo_hexagon"
                     android:contentDescription="Arcade Fitness logo" />
             </FrameLayout>
 

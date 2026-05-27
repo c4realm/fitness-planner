@@ -86,6 +86,57 @@ public interface ApiService {
     @POST("set-records/sync")
     Call<List<JsonObject>> syncSetRecords(@Body List<JsonObject> payloads);
 
+    // ── USER PROFILES ────────────────────────────────────────────────
+
+    @GET("user-profiles")
+    Call<List<JsonObject>> getUserProfiles();
+
+    @GET("user-profiles/{id}")
+    Call<JsonObject> getUserProfile(@Path("id") String remoteId);
+
+    @POST("user-profiles")
+    Call<JsonObject> createUserProfile(@Body JsonObject profile);
+
+    @PUT("user-profiles/{id}")
+    Call<JsonObject> updateUserProfile(@Path("id") String remoteId, @Body JsonObject profile);
+
+    @DELETE("user-profiles/{id}")
+    Call<JsonObject> deleteUserProfile(@Path("id") String remoteId);
+
+    // ── GOALS ────────────────────────────────────────────────────────
+
+    @GET("goals")
+    Call<List<JsonObject>> getGoals();
+
+    @GET("goals/{id}")
+    Call<JsonObject> getGoal(@Path("id") String remoteId);
+
+    @POST("goals")
+    Call<JsonObject> createGoal(@Body JsonObject goal);
+
+    @PUT("goals/{id}")
+    Call<JsonObject> updateGoal(@Path("id") String remoteId, @Body JsonObject goal);
+
+    @DELETE("goals/{id}")
+    Call<JsonObject> deleteGoal(@Path("id") String remoteId);
+
+    // ── WORKOUT SESSIONS ────────────────────────────────────────────
+
+    @GET("workout-sessions")
+    Call<List<JsonObject>> getWorkoutSessions();
+
+    @GET("workout-sessions/{id}")
+    Call<JsonObject> getWorkoutSession(@Path("id") String remoteId);
+
+    @POST("workout-sessions")
+    Call<JsonObject> createWorkoutSession(@Body JsonObject session);
+
+    @PUT("workout-sessions/{id}")
+    Call<JsonObject> updateWorkoutSession(@Path("id") String remoteId, @Body JsonObject session);
+
+    @DELETE("workout-sessions/{id}")
+    Call<JsonObject> deleteWorkoutSession(@Path("id") String remoteId);
+
     // ── SYNC ─────────────────────────────────────────────────────────
 
     @POST("sync/batch")

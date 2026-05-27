@@ -47,13 +47,32 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
-        <!-- ══ PHASE 2 — CORE FEATURES (add here as you build) ══ -->
-        <!--
-        <activity android:name=".activities.WorkoutPlannerActivity" ... />
-        <activity android:name=".activities.ExerciseLibraryActivity" ... />
-        <activity android:name=".activities.WorkoutTrackingActivity" ... />
-        <activity android:name=".activities.ProgressTrackingActivity" ... />
-        -->
+        <!-- ══ PHASE 2 — CORE FEATURES ══ -->
+        <activity
+            android:name=".activities.WorkoutPlannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ExerciseLibraryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.WorkoutTrackingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ProgressTrackingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ══ PHASE 2 — NETWORK BROADCAST RECEIVER ══ -->
+        <receiver
+            android:name=".network.NetworkChangeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
 
         <!-- ══ PHASE 3 — TOOLS & PROFILE (add here as you build) ══ -->
         <!--
