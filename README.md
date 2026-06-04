@@ -19,7 +19,7 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 **Arcade Fitness Planner** is a native Android application built in Java for the **Mobile Application Development** course at **St. Mary's University**. It follows the **MVVM architecture pattern** with a 7-table Room local database, LiveData-driven UI, an offline-first sync queue, and a polished dark-themed Material UI.
 
@@ -51,7 +51,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ## Development Roadmap
 
-### ✅ Phase 1 — Onboarding
+###  Phase 1 — Onboarding
 
 | Screen | Status |
 | ------------------- | ------------ |
@@ -60,7 +60,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 | Registration Screen | ✅ Complete |
 | Dashboard Screen | ✅ Complete |
 
-### ✅ Phase 2 — Core MVVM Engine & Features
+###  Phase 2 — Core MVVM Engine & Features
 
 | Feature | Status |
 | --------------------------------------- | ------------ |
@@ -77,7 +77,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 | Dark Theme UI Polish | ✅ Complete |
 | Animated Splash Screen | ✅ Complete |
 
-### 🔜 Phase 3 — Backend & Profile
+###  Phase 3 — Backend & Profile
 
 | Feature | Status |
 | ------------------------- | ----------- |
@@ -90,7 +90,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ---
 
-## 📐 Project Architecture
+##  Project Architecture
 
 ```
 app/src/main/java/com/arcadefitness/
@@ -155,7 +155,7 @@ app/src/main/java/com/arcadefitness/
 
 ---
 
-## 🗄️ 7-Table Database Schema
+##  7-Table Database Schema
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -239,7 +239,7 @@ app/src/main/java/com/arcadefitness/
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Category | Technology |
 | ------------------ | ---------------------------------------- |
