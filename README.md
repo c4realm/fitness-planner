@@ -2,7 +2,7 @@
 
 <img src="docs/arcade_fitness_logo_dark.png" width="180" alt="Arcade Fitness Planner Logo" />
 
-# 🏋️ Arcade Fitness Planner
+# Arcade Fitness Planner
 
 ### **Plan it. Track it. Do it.**
 
@@ -27,7 +27,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ---
 
-## 👥 Team
+## Team
 
 | Name | Role |
 | ------------------- | ----------------------- |
@@ -38,7 +38,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ---
 
-## 🎓 Academic Information
+## Academic Information
 
 | Field | Details |
 | --------------- | ------------------------------ |
@@ -49,7 +49,7 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ---
 
-## 🗺️ Development Roadmap
+## Development Roadmap
 
 ### ✅ Phase 1 — Onboarding
 
@@ -201,7 +201,7 @@ app/src/main/java/com/arcadefitness/
 
 ---
 
-## 🔄 MVVM Data Flow
+##  MVVM Data Flow
 
 ```
   ┌─────────────────────────────────┐
@@ -256,7 +256,7 @@ app/src/main/java/com/arcadefitness/
 
 ---
 
-## 🎨 Design System
+##  Design System
 
 | Token | Value | Usage |
 | -------------------- | ----------- | ------------------------------ |
@@ -270,7 +270,7 @@ app/src/main/java/com/arcadefitness/
 
 ---
 
-## ⚙️ Local Setup & Build
+## Local Setup & Build
 
 ### Prerequisites
 
@@ -302,7 +302,7 @@ git clone https://github.com/c4realm/fitness-planner.git
 
 ---
 
-## 📜 License
+##  License
 
 Academic Project — **St. Mary's University © 2025**
 
