@@ -1,38 +1,120 @@
-# Arcade Fitness Planner
+<div align="center">
 
-Phase 2 technical documentation for St. Mary's University.
+<img src="docs/arcade_fitness_logo_dark.png" width="180" alt="Arcade Fitness Planner Logo" />
 
-Instructor: Dawit Yetemgeta
+# 🏋️ Arcade Fitness Planner
 
-## Overview
+### **Plan it. Track it. Do it.**
 
-Arcade Fitness Planner is a native Android application written in Java for the St. Mary's University Mobile Application Development submission.
-Phase 2 adds the core fitness domain: workout planning, exercise browsing, workout tracking, progress monitoring, local Room storage, and offline-first sync support.
+<br/>
 
-The app uses MVVM, Room, LiveData, RecyclerView, and a repository split that keeps local reads responsive while preserving transactional writes and sync queue handling.
+![Platform](https://img.shields.io/badge/Platform-Android%20API%2024+-brightgreen?style=for-the-badge&logo=android)
+![Language](https://img.shields.io/badge/Language-Java-orange?style=for-the-badge&logo=openjdk)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM-blue?style=for-the-badge)
+![Database](https://img.shields.io/badge/Database-Room%20SQLite-ff6b00?style=for-the-badge)
+![Phase](https://img.shields.io/badge/Phase%202-Complete%20✓-brightgreen?style=for-the-badge)
+![University](https://img.shields.io/badge/St.%20Mary's%20University-Academic%20Project-red?style=for-the-badge)
 
-## Phase 2 Architecture Tree
+</div>
 
-```text
+---
+
+## 📖 Overview
+
+**Arcade Fitness Planner** is a native Android application built in Java for the **Mobile Application Development** course at **St. Mary's University**. It follows the **MVVM architecture pattern** with a 7-table Room local database, LiveData-driven UI, an offline-first sync queue, and a polished dark-themed Material UI.
+
+Users can plan workouts, browse an exercise library, track live workout sessions with set logging, monitor progress goals, and access the app as a guest before registering.
+
+---
+
+## 👥 Team
+
+| Name | Role |
+| ------------------- | ----------------------- |
+| **Amar Abdulmejid** | Lead Developer |
+| **Kaleab Dejene** | UI/UX & Frontend |
+| **Kidus Kibrom** | Backend & API |
+| **Yonas Ajanew** | Database & Testing |
+
+---
+
+## 🎓 Academic Information
+
+| Field | Details |
+| --------------- | ------------------------------ |
+| **Instructor** | Dawit Yetemgeta |
+| **Course** | Mobile Application Development |
+| **Department** | Computer Science |
+| **Institution** | St. Mary's University |
+
+---
+
+## 🗺️ Development Roadmap
+
+### ✅ Phase 1 — Onboarding
+
+| Screen | Status |
+| ------------------- | ------------ |
+| Splash Screen | ✅ Complete |
+| Login Screen | ✅ Complete |
+| Registration Screen | ✅ Complete |
+| Dashboard Screen | ✅ Complete |
+
+### ✅ Phase 2 — Core MVVM Engine & Features
+
+| Feature | Status |
+| --------------------------------------- | ------------ |
+| 7-Table Room Database Schema | ✅ Complete |
+| MVVM ViewModels — 4 screens | ✅ Complete |
+| Repository Layer — 3 repositories | ✅ Complete |
+| Workout Planner (create & browse) | ✅ Complete |
+| Exercise Library (filter by muscle) | ✅ Complete |
+| Live Workout Tracking (timer + set log) | ✅ Complete |
+| Progress & Goals Tracking | ✅ Complete |
+| Offline-First Sync Queue | ✅ Complete |
+| NetworkChangeReceiver | ✅ Complete |
+| Guest Access Flow | ✅ Complete |
+| Dark Theme UI Polish | ✅ Complete |
+| Animated Splash Screen | ✅ Complete |
+
+### 🔜 Phase 3 — Backend & Profile
+
+| Feature | Status |
+| ------------------------- | ----------- |
+| Retrofit API Integration | 🔜 Pending |
+| Google Sign-In | 🔜 Pending |
+| User Profile Screen | 🔜 Pending |
+| BMI Calculator | 🔜 Pending |
+| Workout History | 🔜 Pending |
+| Push Notifications | 🔜 Pending |
+
+---
+
+## 📐 Project Architecture
+
+```
 app/src/main/java/com/arcadefitness/
-├── activities/
-│   ├── SplashActivity.java
-│   ├── LoginActivity.java
-│   ├── RegisterActivity.java
-│   ├── DashboardActivity.java
-│   ├── WorkoutPlannerActivity.java
-│   ├── WorkoutTrackingActivity.java
-│   ├── ExerciseLibraryActivity.java
-│   └── ProgressTrackingActivity.java
-├── viewmodel/
+│
+├── activities/                         # All 8 screen controllers
+│   ├── SplashActivity.java             # Animated entry point
+│   ├── LoginActivity.java              # Email/password + guest access
+│   ├── RegisterActivity.java           # Registration + guest access
+│   ├── DashboardActivity.java          # Home screen, quick actions, stats
+│   ├── WorkoutPlannerActivity.java     # Create & browse workout plans
+│   ├── WorkoutTrackingActivity.java    # Live session timer + set logging
+│   ├── ExerciseLibraryActivity.java    # Muscle group filter + browse
+│   └── ProgressTrackingActivity.java   # Goals, weekly stats, sessions
+│
+├── viewmodel/                          # MVVM — UI state management
 │   ├── DashboardViewModel.java
 │   ├── WorkoutPlannerViewModel.java
 │   ├── WorkoutTrackingViewModel.java
 │   └── ProgressViewModel.java
+│
 ├── data/
 │   ├── local/
-│   │   ├── AppDatabase.java
-│   │   ├── dao/
+│   │   ├── AppDatabase.java            # Room DB — version 2, 7 entities
+│   │   ├── dao/                        # 7 DAO interfaces
 │   │   │   ├── WorkoutDao.java
 │   │   │   ├── ExerciseDao.java
 │   │   │   ├── SetRecordDao.java
@@ -40,7 +122,7 @@ app/src/main/java/com/arcadefitness/
 │   │   │   ├── UserProfileDao.java
 │   │   │   ├── GoalDao.java
 │   │   │   └── WorkoutSessionDao.java
-│   │   ├── entity/
+│   │   ├── entity/                     # 7 Room entity classes
 │   │   │   ├── WorkoutEntity.java
 │   │   │   ├── ExerciseEntity.java
 │   │   │   ├── SetRecordEntity.java
@@ -48,147 +130,184 @@ app/src/main/java/com/arcadefitness/
 │   │   │   ├── UserProfileEntity.java
 │   │   │   ├── GoalEntity.java
 │   │   │   └── WorkoutSessionEntity.java
-│   │   └── repository/
+│   │   └── repository/                 # LiveData-first read repositories
 │   │       ├── WorkoutRepository.java
 │   │       └── ExerciseRepository.java
 │   ├── repository/
-│   │   └── FitnessRepository.java
-│   └── remote/
+│   │   └── FitnessRepository.java      # Transactional writes + sync queue
+│   └── remote/                         # Phase 3 — Retrofit stubs
 │       ├── ApiService.java
 │       └── RetrofitClient.java
-├── adapter/
+│
+├── adapter/                            # RecyclerView — ViewHolder pattern
 │   ├── ExerciseAdapter.java
 │   ├── WorkoutSessionAdapter.java
 │   └── ProgressAdapter.java
-└── network/
-    └── NetworkChangeReceiver.java
+│
+├── network/
+│   └── NetworkChangeReceiver.java      # Connectivity listener → sync flush
+│
+└── utils/
+    ├── AppConstants.java
+    ├── SessionManager.java
+    └── ValidationUtils.java
 ```
 
-## 7-Table Database Schema
+---
 
-### 1. `workouts`
+## 🗄️ 7-Table Database Schema
 
-Key columns: `id`, `name`, `description`, `target_muscle_group`, `estimated_duration_minutes`, `exercise_count`, `created_at`, `updated_at`, `is_synced`, `remote_id`
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        workouts                             │
+│  id · name · target_muscle_group · estimated_duration       │
+│  created_at · is_synced · remote_id                         │
+└──────────────┬──────────────────────────┬───────────────────┘
+               │ 1:N                      │ 1:N
+               ▼                          ▼
+┌──────────────────────────┐  ┌──────────────────────────────┐
+│     workout_sessions     │  │         set_records          │
+│  id · workout_id         │  │  id · workout_id             │
+│  start_timestamp         │  │  exercise_id · set_number    │
+│  end_timestamp           │  │  weight · reps               │
+│  duration_minutes        │  │  is_completed · timestamp    │
+│  calories_burned         │  │  is_synced · remote_id       │
+│  status · is_synced      │  └──────────┬───────────────────┘
+└──────────────────────────┘             │ N:1
+                                         ▼
+                             ┌──────────────────────────────┐
+                             │          exercises           │
+                             │  id · name                   │
+                             │  target_muscle_group         │
+                             │  default_sets · default_reps │
+                             │  is_synced · remote_id       │
+                             └──────────────────────────────┘
 
-Purpose: stores workout plans shown in the planner and used as the parent record for workout sessions and set records.
-
-Relationships: parent table for `workout_sessions.workout_id` and `set_records.workout_id`.
-
-### 2. `exercises`
-
-Key columns: `id`, `name`, `description`, `target_muscle_group`, `default_sets`, `default_reps`, `thumbnail_url`, `created_at`, `is_synced`, `remote_id`
-
-Purpose: stores the exercise library used by the exercise browser and as the child table for set logging.
-
-Relationships: parent table for `set_records.exercise_id`.
-
-### 3. `set_records`
-
-Key columns: `id`, `workout_id`, `exercise_id`, `set_number`, `weight`, `reps`, `is_completed`, `timestamp`, `is_synced`, `remote_id`
-
-Purpose: stores each logged set during workout tracking.
-
-Relationships: `set_records.workout_id -> workouts.id CASCADE`, `set_records.exercise_id -> exercises.id CASCADE`.
-
-### 4. `sync_queue`
-
-Key columns: `id`, `table_name`, `record_id`, `operation`, `payload`, `status`, `created_at`, `last_attempt_at`, `attempt_count`
-
-Purpose: queues local writes for deferred upload when connectivity is available.
-
-Relationships: references local records by table name and record id; processed by the sync pipeline.
-
-### 5. `user_profiles`
-
-Key columns: `id`, `full_name`, `email`, `age`, `gender`, `goal`, `profile_image_url`, `created_at`, `updated_at`, `is_synced`, `remote_id`
-
-Purpose: stores user profile metadata for the authenticated user.
-
-Relationships: standalone table, used by profile and sync features.
-
-### 6. `goals`
-
-Key columns: `id`, `title`, `description`, `type`, `target_value`, `current_value`, `unit`, `start_date`, `target_date`, `status`, `created_at`, `updated_at`, `is_synced`, `remote_id`
-
-Purpose: stores active and completed progress goals shown on the progress screen.
-
-Relationships: standalone table, tracked through the repository and sync queue.
-
-### 7. `workout_sessions`
-
-Key columns: `id`, `workout_id`, `start_timestamp`, `end_timestamp`, `duration_minutes`, `calories_burned`, `total_volume`, `status`, `notes`, `rating`, `created_at`, `is_synced`, `remote_id`
-
-Purpose: stores each workout execution instance and drives progress statistics.
-
-Relationships: `workout_sessions.workout_id -> workouts.id CASCADE`.
-
-## MVVM Data Flow
-
-```text
-UI Screen (Activity)
-   |
-   v
-ViewModel
-   |
-   +------------------------------+
-   |                              |
-   v                              v
-LiveData read path            FitnessRepository write path
-   |                              |
-   v                              v
-Repository                     DAO / Transaction
-   |                              |
-   v                              v
-DAO ---------------------------> Room
-   |                              |
-   v                              v
-SQLite                      SyncQueueEntryEntity
-                                   |
-                                   v
-                           NetworkChangeReceiver
-                                   |
-                                   v
-                          Retrofit / ApiService
-                                   |
-                                   v
-                              Remote backend
+┌──────────────────────┐  ┌─────────────────────┐  ┌──────────────────────┐
+│     user_profiles    │  │       goals         │  │      sync_queue      │
+│  id · full_name      │  │  id · title · type  │  │  id · table_name     │
+│  email · age         │  │  target_value        │  │  record_id           │
+│  gender · goal       │  │  current_value       │  │  operation · payload │
+│  is_synced           │  │  unit · status       │  │  status              │
+└──────────────────────┘  │  is_synced           │  │  attempt_count       │
+                          └─────────────────────┘  └──────────────────────┘
 ```
 
-## Local Build Instructions
+**Relationships:**
+- `workout_sessions.workout_id → workouts.id` (CASCADE DELETE)
+- `set_records.workout_id → workouts.id` (CASCADE DELETE)
+- `set_records.exercise_id → exercises.id` (CASCADE DELETE)
+- `sync_queue` — flat queue, references any table by name + record_id
+
+---
+
+## 🔄 MVVM Data Flow
+
+```
+  ┌─────────────────────────────────┐
+  │        Activity / Fragment      │  ← UI layer (no business logic)
+  └────────────────┬────────────────┘
+                   │ observes LiveData / calls methods
+                   ▼
+  ┌─────────────────────────────────┐
+  │            ViewModel            │  ← State holder, survives rotation
+  └────────┬────────────────┬───────┘
+           │                │
+    reads  │                │ writes
+           ▼                ▼
+  ┌──────────────┐  ┌──────────────────────┐
+  │  Workout /   │  │   FitnessRepository  │  ← Transactional writes
+  │  Exercise    │  │   (singleton)        │      + sync queue enqueue
+  │  Repository  │  └──────────┬───────────┘
+  └──────┬───────┘             │
+         │                     │
+         ▼                     ▼
+  ┌─────────────────────────────────┐
+  │          Room (SQLite)          │  ← 7-table local database
+  └────────────────┬────────────────┘
+                   │ on connectivity change
+                   ▼
+  ┌─────────────────────────────────┐
+  │      NetworkChangeReceiver      │  ← BroadcastReceiver
+  └────────────────┬────────────────┘
+                   │ flushes pending sync_queue entries
+                   ▼
+  ┌─────────────────────────────────┐
+  │      Retrofit / ApiService      │  ← Phase 3 remote backend
+  └─────────────────────────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+| ------------------ | ---------------------------------------- |
+| **Platform** | Android API 24+ (Android 7.0 and above) |
+| **Language** | Java |
+| **Architecture** | MVVM + Repository Pattern |
+| **UI** | XML Layouts + Material Design Components |
+| **Local Database** | Room (SQLite) — 7 tables |
+| **Reactive UI** | LiveData + Observer pattern |
+| **Async** | ExecutorService (background threads) |
+| **Networking** | Retrofit2 + OkHttp3 (Phase 3) |
+| **Auth** | Email/Password local · Google (Phase 3) |
+| **Build** | Gradle 9.0 · AGP 8.10 · JDK 17 |
+
+---
+
+## 🎨 Design System
+
+| Token | Value | Usage |
+| -------------------- | ----------- | ------------------------------ |
+| **Background** | `#121212` | Screen backgrounds |
+| **Card Surface** | `#1A1A1A` | Cards, list items |
+| **Input Surface** | `#1C1C1C` | Text fields |
+| **Primary Accent** | `#FF6B00` | Buttons, highlights, icons |
+| **Text Primary** | `#FFFFFF` | Headings, labels |
+| **Text Secondary** | `#888888` | Subtitles, hints |
+| **Typography** | Inter | 400 · 500 · 700 · 900 weights |
+
+---
+
+## ⚙️ Local Setup & Build
 
 ### Prerequisites
 
-* Android Studio Hedgehog or newer
-* JDK 17
-* Android SDK 34
-* Device or emulator running Android 7.0+ (minSdk 24)
+- Android Studio Hedgehog (2023.1.1) or newer
+- JDK 17
+- Android SDK 34
+- Physical device or emulator — Android 7.0+ (API 24+)
 
-### Build and Run
+### Steps
 
-1. Clone the repository.
-2. Open the project in Android Studio.
-3. Let Gradle sync finish.
-4. Run the `app` configuration on a connected device or emulator.
+```bash
+# 1. Clone the repository
+git clone https://github.com/c4realm/fitness-planner.git
 
-### Offline-first note
+# 2. Open in Android Studio
+# File → Open → Select the fitness-planner folder
 
-`google-services.json` has been intentionally removed for Phase 2 offline-first development.
-Google Sign-In is disabled in this phase, and the app now builds without Firebase or Play Services auth configuration.
+# 3. Sync Gradle
+# Click "Sync Now" when prompted — all dependencies resolve automatically
 
-## Key Architectural Decisions
+# 4. Run on device or emulator
+# Run → Run 'app'   or press Shift + F10
+```
 
-### Two repository layers
+> **Note:** `google-services.json` is intentionally absent for Phase 2.
+> Google Sign-In is preserved in the UI and wired to a Phase 3 placeholder.
+> The app runs fully offline. Use **Browse as Guest** on the login screen
+> to explore all features without an account.
 
-* `WorkoutRepository` and `ExerciseRepository` are LiveData-first repositories used by the UI for fast local reads and automatic RecyclerView refresh.
-* `FitnessRepository` handles transactional writes, query callbacks, and sync queue creation for offline-first persistence.
+---
 
-### Offline-first sync queue
+## 📜 License
 
-* Every write inserted through `FitnessRepository` also creates a `SyncQueueEntryEntity` record.
-* `NetworkChangeReceiver` watches connectivity and allows deferred sync work to resume when the device is online.
-* This keeps the UI responsive and preserves local data even when the network is unavailable.
+Academic Project — **St. Mary's University © 2025**
 
-### Cascading workout sessions
+<div align="center">
 
-* `WorkoutSessionEntity` uses `@ForeignKey(... onDelete = CASCADE)` to `WorkoutEntity`.
-* When a workout is removed, its related sessions stay consistent with the parent lifecycle.
+*Built with Java & Android Studio by the Arcade Fitness Planner Team*
+
+</div>
