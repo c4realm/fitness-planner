@@ -140,6 +140,24 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         btnLogout.setOnClickListener(v -> logout());
+
+        // Quick action grid
+        findViewById(R.id.cardActionPlanner).setOnClickListener(v -> {
+            startActivity(new Intent(this, WorkoutPlannerActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        findViewById(R.id.cardActionTrack).setOnClickListener(v -> {
+            startActivity(new Intent(this, WorkoutTrackingActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        findViewById(R.id.cardActionExercises).setOnClickListener(v -> {
+            startActivity(new Intent(this, ExerciseLibraryActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        findViewById(R.id.cardActionProgress).setOnClickListener(v -> {
+            startActivity(new Intent(this, ProgressTrackingActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
     }
 
     private void setActiveNav(View activeNav) {

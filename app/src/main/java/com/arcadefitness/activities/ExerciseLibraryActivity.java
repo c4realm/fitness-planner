@@ -1,160 +1,143 @@
 package com.arcadefitness.activities;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.arcadefitness.R;
 import com.arcadefitness.adapter.ExerciseAdapter;
 import com.arcadefitness.data.local.entity.ExerciseEntity;
-import com.arcadefitness.viewmodel.DashboardViewModel;
+import com.arcadefitness.data.local.repository.ExerciseRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ExerciseLibraryActivity extends AppCompatActivity {
 
-    private DashboardViewModel viewModel;
+    private static final String FILTER_ALL = "All";
+
+    private ExerciseRepository exerciseRepository;
     private ExerciseAdapter adapter;
-    private EditText etSearch;
     private View layoutEmpty;
-    private LinearLayout layoutFilters;
+    private RecyclerView rvExercises;
 
-    private String activeFilter = null;
-    private List<ExerciseEntity> allExercises = new ArrayList<>();
+    private LiveData<List<ExerciseEntity>> currentSource;
+    private Observer<List<ExerciseEntity>> currentObserver;
 
-    private static final List<String> MUSCLE_GROUPS = Arrays.asList(
-        "All", "Chest", "Back", "Shoulders", "Legs", "Arms", "Core", "Full Body"
-    );
+    private Button btnFilterAll;
+    private Button btnFilterChest;
+    private Button btnFilterBack;
+    private Button btnFilterShoulders;
+    private Button btnFilterLegs;
+    private Button btnFilterArms;
+    private Button btnFilterCore;
+    private Button btnFilterFullBody;
+
+    private String activeFilter = FILTER_ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exercise_library);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        exerciseRepository = new ExerciseRepository(this);
 
         initViews();
         setupRecyclerView();
-        setupViewModel();
-        setupSearch();
-        setupFilters();
+        setupButtons();
+        observeExercises(exerciseRepository.getAllExercises());
     }
 
     private void initViews() {
-        etSearch = findViewById(R.id.etSearch);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        rvExercises = findViewById(R.id.rvExercises);
         layoutEmpty = findViewById(R.id.layoutEmpty);
-        layoutFilters = findViewById(R.id.layoutFilters);
+
+        btnFilterAll = findViewById(R.id.btnFilterAll);
+        btnFilterChest = findViewById(R.id.btnFilterChest);
+        btnFilterBack = findViewById(R.id.btnFilterBack);
+        btnFilterShoulders = findViewById(R.id.btnFilterShoulders);
+        btnFilterLegs = findViewById(R.id.btnFilterLegs);
+        btnFilterArms = findViewById(R.id.btnFilterArms);
+        btnFilterCore = findViewById(R.id.btnFilterCore);
+        btnFilterFullBody = findViewById(R.id.btnFilterFullBody);
     }
 
     private void setupRecyclerView() {
-        RecyclerView rv = findViewById(R.id.rvExercises);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setHasFixedSize(true);
+        rvExercises.setLayoutManager(new LinearLayoutManager(this));
+        rvExercises.setHasFixedSize(true);
         adapter = new ExerciseAdapter();
-        rv.setAdapter(adapter);
+        rvExercises.setAdapter(adapter);
     }
 
-    private void setupViewModel() {
-        viewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
+    private void setupButtons() {
+        btnFilterAll.setOnClickListener(v -> showAllExercises());
+        btnFilterChest.setOnClickListener(v -> showExercisesByGroup("Chest"));
+        btnFilterBack.setOnClickListener(v -> showExercisesByGroup("Back"));
+        btnFilterShoulders.setOnClickListener(v -> showExercisesByGroup("Shoulders"));
+        btnFilterLegs.setOnClickListener(v -> showExercisesByGroup("Legs"));
+        btnFilterArms.setOnClickListener(v -> showExercisesByGroup("Arms"));
+        btnFilterCore.setOnClickListener(v -> showExercisesByGroup("Core"));
+        btnFilterFullBody.setOnClickListener(v -> showExercisesByGroup("Full Body"));
 
-        viewModel.getAllExercises().observe(this, new Observer<List<ExerciseEntity>>() {
-            @Override
-            public void onChanged(List<ExerciseEntity> exercises) {
-                allExercises.clear();
-                if (exercises != null) {
-                    allExercises.addAll(exercises);
-                }
-                applyFilters();
-            }
-        });
+        updateFilterStyles();
     }
 
-    private void setupSearch() {
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applyFilters();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
+    private void showAllExercises() {
+        activeFilter = FILTER_ALL;
+        updateFilterStyles();
+        observeExercises(exerciseRepository.getAllExercises());
     }
 
-    private void setupFilters() {
-        for (String group : MUSCLE_GROUPS) {
-            TextView chip = new TextView(this);
-            chip.setText(group);
-            chip.setPadding(16, 8, 16, 8);
-            chip.setTextSize(12);
-            chip.setBackgroundResource(R.drawable.bg_card);
-            chip.setTextColor(getColor(group.equals(activeFilter)
-                    ? R.color.orange_primary : R.color.text_muted));
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMarginEnd(8);
-            chip.setLayoutParams(params);
-
-            chip.setOnClickListener(v -> {
-                activeFilter = group.equals("All") ? null : group;
-                applyFilters();
-                updateFilterChips();
-            });
-
-            layoutFilters.addView(chip);
-        }
+    private void showExercisesByGroup(String group) {
+        activeFilter = group;
+        updateFilterStyles();
+        observeExercises(exerciseRepository.getExercisesByMuscleGroup(group));
     }
 
-    private void applyFilters() {
-        String query = etSearch.getText().toString().toLowerCase().trim();
-        List<ExerciseEntity> filtered = new ArrayList<>();
-
-        for (ExerciseEntity ex : allExercises) {
-            boolean matchesFilter = activeFilter == null
-                    || ex.getTargetMuscleGroup().equalsIgnoreCase(activeFilter);
-            boolean matchesSearch = query.isEmpty()
-                    || ex.getName().toLowerCase().contains(query)
-                    || ex.getTargetMuscleGroup().toLowerCase().contains(query);
-            if (matchesFilter && matchesSearch) {
-                filtered.add(ex);
-            }
+    private void observeExercises(LiveData<List<ExerciseEntity>> source) {
+        if (currentSource != null && currentObserver != null) {
+            currentSource.removeObserver(currentObserver);
         }
 
-        adapter.setExercises(filtered);
-        layoutEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
-        findViewById(R.id.rvExercises).setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
+        currentSource = source;
+        currentObserver = exercises -> {
+            adapter.setExercises(exercises);
+            boolean empty = exercises == null || exercises.isEmpty();
+            layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+            rvExercises.setVisibility(empty ? View.GONE : View.VISIBLE);
+        };
+
+        currentSource.observe(this, currentObserver);
     }
 
-    private void updateFilterChips() {
-        for (int i = 0; i < layoutFilters.getChildCount(); i++) {
-            View chip = layoutFilters.getChildAt(i);
-            if (chip instanceof TextView) {
-                String text = ((TextView) chip).getText().toString();
-                boolean isActive = (activeFilter == null && text.equals("All"))
-                        || (text.equalsIgnoreCase(activeFilter != null ? activeFilter : ""));
-                ((TextView) chip).setTextColor(getColor(isActive
-                        ? R.color.orange_primary : R.color.text_muted));
-            }
+    private void updateFilterStyles() {
+        styleFilterButton(btnFilterAll, FILTER_ALL.equals(activeFilter));
+        styleFilterButton(btnFilterChest, "Chest".equals(activeFilter));
+        styleFilterButton(btnFilterBack, "Back".equals(activeFilter));
+        styleFilterButton(btnFilterShoulders, "Shoulders".equals(activeFilter));
+        styleFilterButton(btnFilterLegs, "Legs".equals(activeFilter));
+        styleFilterButton(btnFilterArms, "Arms".equals(activeFilter));
+        styleFilterButton(btnFilterCore, "Core".equals(activeFilter));
+        styleFilterButton(btnFilterFullBody, "Full Body".equals(activeFilter));
+    }
+
+    private void styleFilterButton(Button button, boolean active) {
+        button.setBackgroundColor(getColor(active ? R.color.orange_primary : R.color.bg_card));
+        button.setTextColor(getColor(active ? R.color.text_primary : R.color.text_muted));
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (currentSource != null && currentObserver != null) {
+            currentSource.removeObserver(currentObserver);
         }
+        super.onDestroy();
     }
 }

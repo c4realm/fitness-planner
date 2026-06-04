@@ -1,0 +1,1648 @@
+diff --git a/README.md b/README.md
+index 4c5b26a..1fc22a1 100644
+--- a/README.md
++++ b/README.md
+@@ -1,216 +1,194 @@
+-# 🏋️ Arcade Fitness Planner
+-
+-<div align="center">
+-
+-### **Plan it. Track it. Do it.**
+-
+-<img width="700" alt="Arcade Fitness Logo" src="https://github.com/user-attachments/assets/9f91d9a6-0243-41a4-90e5-eca837a0a9a1" />
+-
+-![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=for-the-badge)
+-![Language](https://img.shields.io/badge/Language-Java-orange?style=for-the-badge)
+-![UI](https://img.shields.io/badge/UI-Material%20Design-ff6b00?style=for-the-badge)
+-![Status](https://img.shields.io/badge/Status-In%20Development-blue?style=for-the-badge)
+-![University](https://img.shields.io/badge/St.%20Mary's-University-red?style=for-the-badge)
+-
+-</div>
+-
+----
+-
+-## 📖 About The Project
+-
+-**Arcade Fitness Planner** is an Android fitness planning and workout tracking application developed as a final project for the **Mobile Application Development** course at **St. Mary's University**.
+-
+-The application is designed to help users:
+-
+-* 🏋️ Plan workouts efficiently
+-* 📊 Track workout progress
+-* 🎯 Set personal fitness goals
+-* 📅 Manage fitness schedules
+-* 📈 Monitor overall improvement
+-
+----
++# Arcade Fitness Planner
++
++Phase 2 technical documentation for St. Mary's University.
++
++Instructor: Dawit Yetemgeta
++
++## Overview
++
++Arcade Fitness Planner is a native Android application written in Java for the St. Mary's University Mobile Application Development submission.
++Phase 2 adds the core fitness domain: workout planning, exercise browsing, workout tracking, progress monitoring, local Room storage, and offline-first sync support.
++
++The app uses MVVM, Room, LiveData, RecyclerView, and a repository split that keeps local reads responsive while preserving transactional writes and sync queue handling.
++
++## Phase 2 Architecture Tree
++
++```text
++app/src/main/java/com/arcadefitness/
++├── activities/
++│   ├── SplashActivity.java
++│   ├── LoginActivity.java
++│   ├── RegisterActivity.java
++│   ├── DashboardActivity.java
++│   ├── WorkoutPlannerActivity.java
++│   ├── WorkoutTrackingActivity.java
++│   ├── ExerciseLibraryActivity.java
++│   └── ProgressTrackingActivity.java
++├── viewmodel/
++│   ├── DashboardViewModel.java
++│   ├── WorkoutPlannerViewModel.java
++│   ├── WorkoutTrackingViewModel.java
++│   └── ProgressViewModel.java
++├── data/
++│   ├── local/
++│   │   ├── AppDatabase.java
++│   │   ├── dao/
++│   │   │   ├── WorkoutDao.java
++│   │   │   ├── ExerciseDao.java
++│   │   │   ├── SetRecordDao.java
++│   │   │   ├── SyncQueueDao.java
++│   │   │   ├── UserProfileDao.java
++│   │   │   ├── GoalDao.java
++│   │   │   └── WorkoutSessionDao.java
++│   │   ├── entity/
++│   │   │   ├── WorkoutEntity.java
++│   │   │   ├── ExerciseEntity.java
++│   │   │   ├── SetRecordEntity.java
++│   │   │   ├── SyncQueueEntryEntity.java
++│   │   │   ├── UserProfileEntity.java
++│   │   │   ├── GoalEntity.java
++│   │   │   └── WorkoutSessionEntity.java
++│   │   └── repository/
++│   │       ├── WorkoutRepository.java
++│   │       └── ExerciseRepository.java
++│   ├── repository/
++│   │   └── FitnessRepository.java
++│   └── remote/
++│       ├── ApiService.java
++│       └── RetrofitClient.java
++├── adapter/
++│   ├── ExerciseAdapter.java
++│   ├── WorkoutSessionAdapter.java
++│   └── ProgressAdapter.java
++└── network/
++    └── NetworkChangeReceiver.java
++```
+ 
+-# 👥 Team
++## 7-Table Database Schema
+ 
+-| Name                | Role               |
+-| ------------------- | ------------------ |
+-| **Amar Abdulmejid** | Lead Developer     |
+-| **Kaleab Dejene**   | UI/UX & Frontend   |
+-| **Kidus Kibrom**    | Backend & API      |
+-| **Yonas Ajanew**    | Database & Testing |
++### 1. `workouts`
+ 
+----
++Key columns: `id`, `name`, `description`, `target_muscle_group`, `estimated_duration_minutes`, `exercise_count`, `created_at`, `updated_at`, `is_synced`, `remote_id`
+ 
+-## 🎓 Academic Information
++Purpose: stores workout plans shown in the planner and used as the parent record for workout sessions and set records.
+ 
+-| Field           | Details                        |
+-| --------------- | ------------------------------ |
+-| **Instructor**  | Dawit Yetemgeta                |
+-| **Course**      | Mobile Application Development |
+-| **Department**  | Computer Science               |
+-| **Institution** | St. Mary's University          |
++Relationships: parent table for `workout_sessions.workout_id` and `set_records.workout_id`.
+ 
+----
++### 2. `exercises`
+ 
+-# 🏗️ Development Roadmap
++Key columns: `id`, `name`, `description`, `target_muscle_group`, `default_sets`, `default_reps`, `thumbnail_url`, `created_at`, `is_synced`, `remote_id`
+ 
+-## ✅ Phase 1 — Onboarding
++Purpose: stores the exercise library used by the exercise browser and as the child table for set logging.
+ 
+-| Screen              | Status      |
+-| ------------------- | ----------- |
+-| Splash Screen       | ✅ Completed |
+-| Login Screen        | ✅ Completed |
+-| Registration Screen | ✅ Completed |
+-| Dashboard Screen    | ✅ Completed |
++Relationships: parent table for `set_records.exercise_id`.
+ 
+----
++### 3. `set_records`
+ 
+-## 🔜 Phase 2 — Core Features
++Key columns: `id`, `workout_id`, `exercise_id`, `set_number`, `weight`, `reps`, `is_completed`, `timestamp`, `is_synced`, `remote_id`
+ 
+-| Feature           | Status     |
+-| ----------------- | ---------- |
+-| Workout Planner   | 🔜 Next    |
+-| Exercise Library  | 🔜 Pending |
+-| Workout Tracking  | 🔜 Pending |
+-| Progress Tracking | 🔜 Pending |
++Purpose: stores each logged set during workout tracking.
+ 
+----
++Relationships: `set_records.workout_id -> workouts.id CASCADE`, `set_records.exercise_id -> exercises.id CASCADE`.
+ 
+-## 🔜 Phase 3 — Tools & Profile
++### 4. `sync_queue`
+ 
+-| Feature         | Status     |
+-| --------------- | ---------- |
+-| Workout History | 🔜 Pending |
+-| Goal Setting    | 🔜 Pending |
+-| BMI Calculator  | 🔜 Pending |
+-| User Profile    | 🔜 Pending |
++Key columns: `id`, `table_name`, `record_id`, `operation`, `payload`, `status`, `created_at`, `last_attempt_at`, `attempt_count`
+ 
+----
++Purpose: queues local writes for deferred upload when connectivity is available.
+ 
+-# 🛠️ Tech Stack
++Relationships: references local records by table name and record id; processed by the sync pipeline.
+ 
+-| Category           | Technology                        |
+-| ------------------ | --------------------------------- |
+-| **Platform**       | Android (API 24+)                 |
+-| **Language**       | Java                              |
+-| **UI Framework**   | XML Layouts + Material Components |
+-| **Database**       | PostgreSQL (via REST API)         |
+-| **Networking**     | Retrofit2 + OkHttp3               |
+-| **Authentication** | Google Sign-In + JWT              |
+-| **Build System**   | Gradle                            |
++### 5. `user_profiles`
+ 
+----
++Key columns: `id`, `full_name`, `email`, `age`, `gender`, `goal`, `profile_image_url`, `created_at`, `updated_at`, `is_synced`, `remote_id`
+ 
+-# 📂 Project Structure
+-
+-```bash
+-app/src/main/
+-├── java/com/arcadefitness/
+-│   ├── activities/          # All screen Activity classes
+-│   │   ├── SplashActivity.java
+-│   │   ├── LoginActivity.java
+-│   │   ├── RegisterActivity.java
+-│   │   └── DashboardActivity.java
+-│   │
+-│   ├── adapters/            # RecyclerView adapters
+-│   ├── models/              # Data model POJOs
+-│   ├── network/             # API service interfaces
+-│   └── utils/               # Helpers, constants, SharedPrefs
+-│       ├── AppConstants.java
+-│       ├── SessionManager.java
+-│       └── ValidationUtils.java
+-│
+-└── res/
+-    ├── layout/              # XML screen layouts
+-    ├── drawable/            # Shapes, selectors, vectors
+-    ├── values/              # colors.xml, strings.xml, themes.xml, dimens.xml
+-    ├── font/                # Inter font family
+-    └── anim/                # Transition animations
+-```
++Purpose: stores user profile metadata for the authenticated user.
+ 
+----
++Relationships: standalone table, used by profile and sync features.
+ 
+-# ⚙️ Setup & Installation
++### 6. `goals`
+ 
+-## 📋 Prerequisites
++Key columns: `id`, `title`, `description`, `type`, `target_value`, `current_value`, `unit`, `start_date`, `target_date`, `status`, `created_at`, `updated_at`, `is_synced`, `remote_id`
+ 
+-Before running the project, make sure you have:
++Purpose: stores active and completed progress goals shown on the progress screen.
+ 
+-* Android Studio Hedgehog (2023.1.1+)
+-* JDK 17+
+-* Android SDK API 24–34
+-* Git
++Relationships: standalone table, tracked through the repository and sync queue.
+ 
+----
++### 7. `workout_sessions`
+ 
+-## 🚀 Installation Steps
++Key columns: `id`, `workout_id`, `start_timestamp`, `end_timestamp`, `duration_minutes`, `calories_burned`, `total_volume`, `status`, `notes`, `rating`, `created_at`, `is_synced`, `remote_id`
+ 
+-```bash
+-# 1️⃣ Clone the repository
+-git clone https://github.com/YOUR_USERNAME/ArcadeFitness.git
++Purpose: stores each workout execution instance and drives progress statistics.
+ 
+-# 2️⃣ Open the project in Android Studio
+-# File → Open → Select the ArcadeFitness folder
++Relationships: `workout_sessions.workout_id -> workouts.id CASCADE`.
+ 
+-# 3️⃣ Sync Gradle dependencies
+-# Android Studio will prompt → Click "Sync Now"
++## MVVM Data Flow
+ 
+-# 4️⃣ Run the application
+-# Run → Run 'app'  (Shift + F10)
++```text
++UI Screen (Activity)
++   |
++   v
++ViewModel
++   |
++   +------------------------------+
++   |                              |
++   v                              v
++LiveData read path            FitnessRepository write path
++   |                              |
++   v                              v
++Repository                     DAO / Transaction
++   |                              |
++   v                              v
++DAO ---------------------------> Room
++   |                              |
++   v                              v
++SQLite                      SyncQueueEntryEntity
++                                   |
++                                   v
++                           NetworkChangeReceiver
++                                   |
++                                   v
++                          Retrofit / ApiService
++                                   |
++                                   v
++                              Remote backend
+ ```
+ 
+----
+-
+-# 🔐 Google Sign-In Setup
+-
+-1. Go to **Google Cloud Console**
+-2. Create a new project
+-3. Enable **Google Sign-In API**
+-4. Create OAuth 2.0 credentials
+-5. Download `google-services.json`
+-6. Place the file inside the `app/` directory
+-7. Replace `YOUR_WEB_CLIENT_ID` inside `AppConstants.java`
+-
+----
++## Local Build Instructions
+ 
+-# 🎨 Design System
++### Prerequisites
+ 
+-| Design Token       | Value                      |
+-| ------------------ | -------------------------- |
+-| **Primary Orange** | `#FF6B00`                  |
+-| **Background**     | `#121212`                  |
+-| **Card Surface**   | `#1A1A1A`                  |
+-| **Input Surface**  | `#1C1C1C`                  |
+-| **Border Color**   | `#252525`                  |
+-| **Text Primary**   | `#FFFFFF`                  |
+-| **Text Secondary** | `#888888`                  |
+-| **Typography**     | Inter (400, 500, 700, 900) |
++* Android Studio Hedgehog or newer
++* JDK 17
++* Android SDK 34
++* Device or emulator running Android 7.0+ (minSdk 24)
+ 
+----
++### Build and Run
+ 
+-# 📌 Features Overview
++1. Clone the repository.
++2. Open the project in Android Studio.
++3. Let Gradle sync finish.
++4. Run the `app` configuration on a connected device or emulator.
+ 
+-* ✅ Modern Material UI
+-* ✅ Authentication System
+-* ✅ Workout Planning
+-* ✅ Exercise Tracking
+-* ✅ Progress Monitoring
+-* ✅ Google Sign-In Integration
+-* ✅ REST API Communication
+-* ✅ Responsive Android Layouts
++### Offline-first note
+ 
+----
++`google-services.json` has been intentionally removed for Phase 2 offline-first development.
++Google Sign-In is disabled in this phase, and the app now builds without Firebase or Play Services auth configuration.
+ 
+-# 📜 License
++## Key Architectural Decisions
+ 
+-Academic Project — **St. Mary's University © 2025**
++### Two repository layers
+ 
+----
++* `WorkoutRepository` and `ExerciseRepository` are LiveData-first repositories used by the UI for fast local reads and automatic RecyclerView refresh.
++* `FitnessRepository` handles transactional writes, query callbacks, and sync queue creation for offline-first persistence.
+ 
+-<div align="center">
++### Offline-first sync queue
+ 
+-### ⭐ Built with Java & Android Studio
++* Every write inserted through `FitnessRepository` also creates a `SyncQueueEntryEntity` record.
++* `NetworkChangeReceiver` watches connectivity and allows deferred sync work to resume when the device is online.
++* This keeps the UI responsive and preserves local data even when the network is unavailable.
+ 
+-**Arcade Fitness Planner Team**
++### Cascading workout sessions
+ 
+-</div>
++* `WorkoutSessionEntity` uses `@ForeignKey(... onDelete = CASCADE)` to `WorkoutEntity`.
++* When a workout is removed, its related sessions stay consistent with the parent lifecycle.
+diff --git a/app/build.gradle b/app/build.gradle
+index 3771f2b..67428e3 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -1,6 +1,5 @@
+ plugins {
+     id 'com.android.application'
+-    id 'com.google.gms.google-services'
+ }
+ 
+ android {
+@@ -59,9 +58,6 @@ dependencies {
+     implementation 'androidx.room:room-runtime:2.6.1'
+     annotationProcessor 'androidx.room:room-compiler:2.6.1'
+ 
+-    // Google Sign-In
+-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+-
+     // Networking — Retrofit + OkHttp
+     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+@@ -79,4 +75,4 @@ dependencies {
+ 
+     // Dots indicator (for onboarding)
+     implementation 'com.tbuonomo:dotsindicator:5.0'
+-}
+\ No newline at end of file
++}
+diff --git a/app/src/main/java/com/arcadefitness/activities/ExerciseLibraryActivity.java b/app/src/main/java/com/arcadefitness/activities/ExerciseLibraryActivity.java
+index 275c38a..b8e14b4 100644
+--- a/app/src/main/java/com/arcadefitness/activities/ExerciseLibraryActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/ExerciseLibraryActivity.java
+@@ -1,160 +1,143 @@
+ package com.arcadefitness.activities;
+ 
+ import android.os.Bundle;
+-import android.text.Editable;
+-import android.text.TextWatcher;
+ import android.view.View;
+-import android.widget.EditText;
+-import android.widget.LinearLayout;
++import android.widget.Button;
+ import android.widget.TextView;
+ 
+ import androidx.appcompat.app.AppCompatActivity;
++import androidx.lifecycle.LiveData;
+ import androidx.lifecycle.Observer;
+-import androidx.lifecycle.ViewModelProvider;
+ import androidx.recyclerview.widget.LinearLayoutManager;
+ import androidx.recyclerview.widget.RecyclerView;
+ 
+ import com.arcadefitness.R;
+ import com.arcadefitness.adapter.ExerciseAdapter;
+ import com.arcadefitness.data.local.entity.ExerciseEntity;
+-import com.arcadefitness.viewmodel.DashboardViewModel;
++import com.arcadefitness.data.local.repository.ExerciseRepository;
+ 
+-import java.util.ArrayList;
+-import java.util.Arrays;
+ import java.util.List;
+ 
+ public class ExerciseLibraryActivity extends AppCompatActivity {
+ 
+-    private DashboardViewModel viewModel;
++    private static final String FILTER_ALL = "All";
++
++    private ExerciseRepository exerciseRepository;
+     private ExerciseAdapter adapter;
+-    private EditText etSearch;
+     private View layoutEmpty;
+-    private LinearLayout layoutFilters;
++    private RecyclerView rvExercises;
++
++    private LiveData<List<ExerciseEntity>> currentSource;
++    private Observer<List<ExerciseEntity>> currentObserver;
+ 
+-    private String activeFilter = null;
+-    private List<ExerciseEntity> allExercises = new ArrayList<>();
++    private Button btnFilterAll;
++    private Button btnFilterChest;
++    private Button btnFilterBack;
++    private Button btnFilterShoulders;
++    private Button btnFilterLegs;
++    private Button btnFilterArms;
++    private Button btnFilterCore;
++    private Button btnFilterFullBody;
+ 
+-    private static final List<String> MUSCLE_GROUPS = Arrays.asList(
+-        "All", "Chest", "Back", "Shoulders", "Legs", "Arms", "Core", "Full Body"
+-    );
++    private String activeFilter = FILTER_ALL;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_exercise_library);
+ 
+-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
++        exerciseRepository = new ExerciseRepository(this);
+ 
+         initViews();
+         setupRecyclerView();
+-        setupViewModel();
+-        setupSearch();
+-        setupFilters();
++        setupButtons();
++        observeExercises(exerciseRepository.getAllExercises());
+     }
+ 
+     private void initViews() {
+-        etSearch = findViewById(R.id.etSearch);
++        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
++        rvExercises = findViewById(R.id.rvExercises);
+         layoutEmpty = findViewById(R.id.layoutEmpty);
+-        layoutFilters = findViewById(R.id.layoutFilters);
++
++        btnFilterAll = findViewById(R.id.btnFilterAll);
++        btnFilterChest = findViewById(R.id.btnFilterChest);
++        btnFilterBack = findViewById(R.id.btnFilterBack);
++        btnFilterShoulders = findViewById(R.id.btnFilterShoulders);
++        btnFilterLegs = findViewById(R.id.btnFilterLegs);
++        btnFilterArms = findViewById(R.id.btnFilterArms);
++        btnFilterCore = findViewById(R.id.btnFilterCore);
++        btnFilterFullBody = findViewById(R.id.btnFilterFullBody);
+     }
+ 
+     private void setupRecyclerView() {
+-        RecyclerView rv = findViewById(R.id.rvExercises);
+-        rv.setLayoutManager(new LinearLayoutManager(this));
+-        rv.setHasFixedSize(true);
++        rvExercises.setLayoutManager(new LinearLayoutManager(this));
++        rvExercises.setHasFixedSize(true);
+         adapter = new ExerciseAdapter();
+-        rv.setAdapter(adapter);
++        rvExercises.setAdapter(adapter);
+     }
+ 
+-    private void setupViewModel() {
+-        viewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
+-
+-        viewModel.getAllExercises().observe(this, new Observer<List<ExerciseEntity>>() {
+-            @Override
+-            public void onChanged(List<ExerciseEntity> exercises) {
+-                allExercises.clear();
+-                if (exercises != null) {
+-                    allExercises.addAll(exercises);
+-                }
+-                applyFilters();
+-            }
+-        });
++    private void setupButtons() {
++        btnFilterAll.setOnClickListener(v -> showAllExercises());
++        btnFilterChest.setOnClickListener(v -> showExercisesByGroup("Chest"));
++        btnFilterBack.setOnClickListener(v -> showExercisesByGroup("Back"));
++        btnFilterShoulders.setOnClickListener(v -> showExercisesByGroup("Shoulders"));
++        btnFilterLegs.setOnClickListener(v -> showExercisesByGroup("Legs"));
++        btnFilterArms.setOnClickListener(v -> showExercisesByGroup("Arms"));
++        btnFilterCore.setOnClickListener(v -> showExercisesByGroup("Core"));
++        btnFilterFullBody.setOnClickListener(v -> showExercisesByGroup("Full Body"));
++
++        updateFilterStyles();
+     }
+ 
+-    private void setupSearch() {
+-        etSearch.addTextChangedListener(new TextWatcher() {
+-            @Override
+-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+-            }
+-
+-            @Override
+-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+-                applyFilters();
+-            }
+-
+-            @Override
+-            public void afterTextChanged(Editable s) {
+-            }
+-        });
++    private void showAllExercises() {
++        activeFilter = FILTER_ALL;
++        updateFilterStyles();
++        observeExercises(exerciseRepository.getAllExercises());
+     }
+ 
+-    private void setupFilters() {
+-        for (String group : MUSCLE_GROUPS) {
+-            TextView chip = new TextView(this);
+-            chip.setText(group);
+-            chip.setPadding(16, 8, 16, 8);
+-            chip.setTextSize(12);
+-            chip.setBackgroundResource(R.drawable.bg_card);
+-            chip.setTextColor(getColor(group.equals(activeFilter)
+-                    ? R.color.orange_primary : R.color.text_muted));
+-
+-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+-                    LinearLayout.LayoutParams.WRAP_CONTENT,
+-                    LinearLayout.LayoutParams.WRAP_CONTENT
+-            );
+-            params.setMarginEnd(8);
+-            chip.setLayoutParams(params);
+-
+-            chip.setOnClickListener(v -> {
+-                activeFilter = group.equals("All") ? null : group;
+-                applyFilters();
+-                updateFilterChips();
+-            });
+-
+-            layoutFilters.addView(chip);
+-        }
++    private void showExercisesByGroup(String group) {
++        activeFilter = group;
++        updateFilterStyles();
++        observeExercises(exerciseRepository.getExercisesByMuscleGroup(group));
+     }
+ 
+-    private void applyFilters() {
+-        String query = etSearch.getText().toString().toLowerCase().trim();
+-        List<ExerciseEntity> filtered = new ArrayList<>();
+-
+-        for (ExerciseEntity ex : allExercises) {
+-            boolean matchesFilter = activeFilter == null
+-                    || ex.getTargetMuscleGroup().equalsIgnoreCase(activeFilter);
+-            boolean matchesSearch = query.isEmpty()
+-                    || ex.getName().toLowerCase().contains(query)
+-                    || ex.getTargetMuscleGroup().toLowerCase().contains(query);
+-            if (matchesFilter && matchesSearch) {
+-                filtered.add(ex);
+-            }
++    private void observeExercises(LiveData<List<ExerciseEntity>> source) {
++        if (currentSource != null && currentObserver != null) {
++            currentSource.removeObserver(currentObserver);
+         }
+ 
+-        adapter.setExercises(filtered);
+-        layoutEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+-        findViewById(R.id.rvExercises).setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
++        currentSource = source;
++        currentObserver = exercises -> {
++            adapter.setExercises(exercises);
++            boolean empty = exercises == null || exercises.isEmpty();
++            layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
++            rvExercises.setVisibility(empty ? View.GONE : View.VISIBLE);
++        };
++
++        currentSource.observe(this, currentObserver);
++    }
++
++    private void updateFilterStyles() {
++        styleFilterButton(btnFilterAll, FILTER_ALL.equals(activeFilter));
++        styleFilterButton(btnFilterChest, "Chest".equals(activeFilter));
++        styleFilterButton(btnFilterBack, "Back".equals(activeFilter));
++        styleFilterButton(btnFilterShoulders, "Shoulders".equals(activeFilter));
++        styleFilterButton(btnFilterLegs, "Legs".equals(activeFilter));
++        styleFilterButton(btnFilterArms, "Arms".equals(activeFilter));
++        styleFilterButton(btnFilterCore, "Core".equals(activeFilter));
++        styleFilterButton(btnFilterFullBody, "Full Body".equals(activeFilter));
+     }
+ 
+-    private void updateFilterChips() {
+-        for (int i = 0; i < layoutFilters.getChildCount(); i++) {
+-            View chip = layoutFilters.getChildAt(i);
+-            if (chip instanceof TextView) {
+-                String text = ((TextView) chip).getText().toString();
+-                boolean isActive = (activeFilter == null && text.equals("All"))
+-                        || (text.equalsIgnoreCase(activeFilter != null ? activeFilter : ""));
+-                ((TextView) chip).setTextColor(getColor(isActive
+-                        ? R.color.orange_primary : R.color.text_muted));
+-            }
++    private void styleFilterButton(Button button, boolean active) {
++        button.setBackgroundColor(getColor(active ? R.color.orange_primary : R.color.bg_card));
++        button.setTextColor(getColor(active ? R.color.text_primary : R.color.text_muted));
++    }
++
++    @Override
++    protected void onDestroy() {
++        if (currentSource != null && currentObserver != null) {
++            currentSource.removeObserver(currentObserver);
+         }
++        super.onDestroy();
+     }
+ }
+diff --git a/app/src/main/java/com/arcadefitness/activities/LoginActivity.java b/app/src/main/java/com/arcadefitness/activities/LoginActivity.java
+index 4e3cca8..ca9c568 100644
+--- a/app/src/main/java/com/arcadefitness/activities/LoginActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/LoginActivity.java
+@@ -13,20 +13,12 @@ import android.widget.Toast;
+ import androidx.appcompat.app.AppCompatActivity;
+ 
+ import com.arcadefitness.R;
+-import com.arcadefitness.utils.AppConstants;
+ import com.arcadefitness.utils.SessionManager;
+ import com.arcadefitness.utils.ValidationUtils;
+ 
+-import com.google.android.gms.auth.api.signin.GoogleSignIn;
+-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+-import com.google.android.gms.common.api.ApiException;
+-import com.google.android.gms.tasks.Task;
+-
+ /**
+  * LoginActivity.java
+- * Handles email/password login and Google Sign-In.
++ * Handles email/password login.
+  *
+  * Phase 2: replace the TODO sections with actual Retrofit API calls.
+  */
+@@ -35,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
+     // Views
+     private EditText    etEmail, etPassword;
+     private ImageButton btnTogglePassword;
+-    private Button      btnSignIn, btnGoogle;
++    private Button      btnSignIn;
+     private TextView    tvForgotPassword, tvCreateAccount;
+ 
+     // State
+@@ -43,7 +35,6 @@ public class LoginActivity extends AppCompatActivity {
+ 
+     // Utilities
+     private SessionManager    sessionManager;
+-    private GoogleSignInClient googleSignInClient;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -52,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
+ 
+         sessionManager = new SessionManager(this);
+         initViews();
+-        setupGoogleSignIn();
+         setupClickListeners();
+         setupInputFocusHighlight();
+     }
+@@ -64,22 +54,12 @@ public class LoginActivity extends AppCompatActivity {
+         etPassword        = findViewById(R.id.etPassword);
+         btnTogglePassword = findViewById(R.id.btnTogglePassword);
+         btnSignIn         = findViewById(R.id.btnSignIn);
+-        btnGoogle         = findViewById(R.id.btnGoogle);
+         tvForgotPassword  = findViewById(R.id.tvForgotPassword);
+         tvCreateAccount   = findViewById(R.id.tvCreateAccount);
+     }
+ 
+-    private void setupGoogleSignIn() {
+-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+-            .requestEmail()
+-            .requestIdToken(AppConstants.GOOGLE_WEB_CLIENT_ID)
+-            .build();
+-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+-    }
+-
+     private void setupClickListeners() {
+         btnSignIn.setOnClickListener(v -> attemptEmailLogin());
+-        btnGoogle.setOnClickListener(v -> startGoogleSignIn());
+         tvCreateAccount.setOnClickListener(v -> goToRegister());
+         tvForgotPassword.setOnClickListener(v -> handleForgotPassword());
+         btnTogglePassword.setOnClickListener(v -> togglePasswordVisibility());
+@@ -141,51 +121,6 @@ public class LoginActivity extends AppCompatActivity {
+         goToDashboard();
+     }
+ 
+-    // ── GOOGLE SIGN-IN ──────────────────────────────────────────────
+-
+-    private void startGoogleSignIn() {
+-        Intent signInIntent = googleSignInClient.getSignInIntent();
+-        startActivityForResult(signInIntent, AppConstants.RC_GOOGLE_SIGN_IN);
+-    }
+-
+-    @Override
+-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+-        super.onActivityResult(requestCode, resultCode, data);
+-        if (requestCode == AppConstants.RC_GOOGLE_SIGN_IN) {
+-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+-            handleGoogleSignInResult(task);
+-        }
+-    }
+-
+-    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
+-        try {
+-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+-            if (account != null) {
+-                String userId   = account.getId() != null ? account.getId() : "";
+-                String userName = account.getDisplayName() != null ? account.getDisplayName() : "";
+-                String email    = account.getEmail() != null ? account.getEmail() : "";
+-                String idToken  = account.getIdToken() != null ? account.getIdToken() : "";
+-
+-                // ── TODO (Phase 2): Send idToken to your Node.js backend ──
+-                // ApiClient.getInstance().getApiService().googleAuth(new GoogleAuthRequest(idToken))
+-                //     .enqueue(...) → on success → sessionManager.saveGoogleSession(...)
+-                // ──────────────────────────────────────────────────────────
+-
+-                // Temporary: save Google session directly
+-                sessionManager.saveGoogleSession(userId, userName, email);
+-                goToDashboard();
+-            }
+-        } catch (ApiException e) {
+-            String message;
+-            if (e.getStatusCode() == 10) {
+-                message = "Google Sign-In error (code 10). Replace google-services.json with YOUR real Firebase file, then add SHA-1 in Firebase Console. Also set GOOGLE_WEB_CLIENT_ID to your Web OAuth client ID.";
+-            } else {
+-                message = "Google Sign-In failed: " + e.getMessage();
+-            }
+-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+-        }
+-    }
+-
+     // ── HELPERS ──────────────────────────────────────────────────────
+ 
+     private void togglePasswordVisibility() {
+diff --git a/app/src/main/java/com/arcadefitness/activities/ProgressTrackingActivity.java b/app/src/main/java/com/arcadefitness/activities/ProgressTrackingActivity.java
+index 8747083..768b804 100644
+--- a/app/src/main/java/com/arcadefitness/activities/ProgressTrackingActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/ProgressTrackingActivity.java
+@@ -1,8 +1,13 @@
+ package com.arcadefitness.activities;
+ 
++import android.app.AlertDialog;
+ import android.os.Bundle;
++import android.text.InputType;
+ import android.view.View;
++import android.widget.EditText;
++import android.widget.LinearLayout;
+ import android.widget.TextView;
++import android.widget.Toast;
+ 
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.lifecycle.Observer;
+@@ -13,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
+ import com.arcadefitness.R;
+ import com.arcadefitness.adapter.ProgressAdapter;
+ import com.arcadefitness.data.local.entity.GoalEntity;
++import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
++import com.arcadefitness.data.repository.FitnessRepository;
+ import com.arcadefitness.viewmodel.ProgressViewModel;
+ 
+ import java.util.List;
+@@ -22,8 +29,8 @@ public class ProgressTrackingActivity extends AppCompatActivity {
+     private ProgressViewModel viewModel;
+     private ProgressAdapter progressAdapter;
+     private View layoutNoGoals;
+-
+-    private TextView tvWeekWorkouts, tvWeekDuration, tvWeekCalories;
++    private RecyclerView rvGoals;
++    private TextView tvWeekWorkouts, tvWeekDuration, tvWeekCalories, tvTotalSessions;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -35,18 +42,19 @@ public class ProgressTrackingActivity extends AppCompatActivity {
+         setupViewModel();
+ 
+         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+-        findViewById(R.id.btnAddGoal).setOnClickListener(v -> { });
++        findViewById(R.id.btnAddGoal).setOnClickListener(v -> showAddGoalDialog());
+     }
+ 
+     private void initViews() {
+         tvWeekWorkouts = findViewById(R.id.tvWeekWorkouts);
+         tvWeekDuration = findViewById(R.id.tvWeekDuration);
+         tvWeekCalories = findViewById(R.id.tvWeekCalories);
++        tvTotalSessions = findViewById(R.id.tvTotalSessions);
+         layoutNoGoals = findViewById(R.id.layoutNoGoals);
+     }
+ 
+     private void setupRecyclerView() {
+-        RecyclerView rvGoals = findViewById(R.id.rvGoals);
++        rvGoals = findViewById(R.id.rvGoals);
+         rvGoals.setLayoutManager(new LinearLayoutManager(this));
+         rvGoals.setHasFixedSize(true);
+         progressAdapter = new ProgressAdapter();
+@@ -56,28 +64,110 @@ public class ProgressTrackingActivity extends AppCompatActivity {
+     private void setupViewModel() {
+         viewModel = new ViewModelProvider(this).get(ProgressViewModel.class);
+ 
++        viewModel.getWeeklyStats().observe(this, new Observer<int[]>() {
++            @Override
++            public void onChanged(int[] stats) {
++                if (stats != null && stats.length >= 3) {
++                    tvWeekWorkouts.setText(String.valueOf(stats[0]));
++                    tvWeekDuration.setText(stats[1] + " min");
++                    tvWeekCalories.setText(stats[2] + " kcal");
++                }
++            }
++        });
++
+         viewModel.getGoals().observe(this, new Observer<List<GoalEntity>>() {
+             @Override
+             public void onChanged(List<GoalEntity> goals) {
+                 progressAdapter.setGoals(goals);
+                 boolean empty = goals == null || goals.isEmpty();
+                 layoutNoGoals.setVisibility(empty ? View.VISIBLE : View.GONE);
+-                findViewById(R.id.rvGoals).setVisibility(empty ? View.GONE : View.VISIBLE);
++                rvGoals.setVisibility(empty ? View.GONE : View.VISIBLE);
+             }
+         });
+ 
+-        viewModel.getWeeklyStats().observe(this, new Observer<int[]>() {
++        viewModel.getCompletedSessions().observe(this, new Observer<List<WorkoutSessionEntity>>() {
+             @Override
+-            public void onChanged(int[] stats) {
+-                if (stats != null && stats.length >= 4) {
+-                    tvWeekWorkouts.setText(String.valueOf(stats[0]));
+-                    tvWeekDuration.setText(stats[1] + "m");
+-                    tvWeekCalories.setText(String.valueOf(stats[2]));
+-                }
++            public void onChanged(List<WorkoutSessionEntity> sessions) {
++                int count = sessions == null ? 0 : sessions.size();
++                tvTotalSessions.setText(count + " sessions completed");
+             }
+         });
+     }
+ 
++    private void showAddGoalDialog() {
++        LinearLayout container = new LinearLayout(this);
++        container.setOrientation(LinearLayout.VERTICAL);
++        int padding = (int) (16 * getResources().getDisplayMetrics().density);
++        container.setPadding(padding, padding, padding, padding);
++
++        EditText etTitle = new EditText(this);
++        etTitle.setHint("Goal title");
++        etTitle.setTextColor(getColor(R.color.text_primary));
++        etTitle.setHintTextColor(getColor(R.color.text_muted));
++        etTitle.setBackgroundColor(getColor(R.color.bg_input));
++        etTitle.setPadding(padding, padding, padding, padding);
++        container.addView(etTitle);
++
++        EditText etTarget = new EditText(this);
++        etTarget.setHint("Target value");
++        etTarget.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
++        etTarget.setTextColor(getColor(R.color.text_primary));
++        etTarget.setHintTextColor(getColor(R.color.text_muted));
++        etTarget.setBackgroundColor(getColor(R.color.bg_input));
++        etTarget.setPadding(padding, padding, padding, padding);
++        LinearLayout.LayoutParams targetParams = new LinearLayout.LayoutParams(
++                LinearLayout.LayoutParams.MATCH_PARENT,
++                LinearLayout.LayoutParams.WRAP_CONTENT
++        );
++        targetParams.topMargin = padding;
++        etTarget.setLayoutParams(targetParams);
++        container.addView(etTarget);
++
++        AlertDialog dialog = new AlertDialog.Builder(this)
++                .setTitle("Add Goal")
++                .setView(container)
++                .setPositiveButton("Save", null)
++                .setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.dismiss())
++                .create();
++
++        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
++            String title = etTitle.getText().toString().trim();
++            String targetText = etTarget.getText().toString().trim();
++
++            if (title.isEmpty()) {
++                etTitle.setError("Goal title is required");
++                etTitle.requestFocus();
++                return;
++            }
++
++            double targetValue;
++            try {
++                targetValue = Double.parseDouble(targetText);
++            } catch (NumberFormatException e) {
++                etTarget.setError("Enter a valid number");
++                etTarget.requestFocus();
++                return;
++            }
++
++            GoalEntity goal = new GoalEntity(title, "CUSTOM", targetValue, "sessions", 0L);
++            FitnessRepository.getInstance(this).insertGoal(goal, new FitnessRepository.RepositoryCallback<Integer>() {
++                @Override
++                public void onSuccess(Integer result) {
++                    dialog.dismiss();
++                    viewModel.refresh();
++                    Toast.makeText(ProgressTrackingActivity.this, "Goal saved", Toast.LENGTH_SHORT).show();
++                }
++
++                @Override
++                public void onError(String errorMessage) {
++                    Toast.makeText(ProgressTrackingActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
++                }
++            });
++        }));
++
++        dialog.show();
++    }
++
+     @Override
+     protected void onResume() {
+         super.onResume();
+diff --git a/app/src/main/java/com/arcadefitness/activities/RegisterActivity.java b/app/src/main/java/com/arcadefitness/activities/RegisterActivity.java
+index 850f843..f5b077d 100644
+--- a/app/src/main/java/com/arcadefitness/activities/RegisterActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/RegisterActivity.java
+@@ -19,18 +19,9 @@ import com.arcadefitness.utils.AppConstants;
+ import com.arcadefitness.utils.SessionManager;
+ import com.arcadefitness.utils.ValidationUtils;
+ 
+-import com.google.android.gms.auth.api.signin.GoogleSignIn;
+-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+-import com.google.android.gms.common.api.ApiException;
+-import com.google.android.gms.tasks.Task;
+-
+ /**
+  * RegisterActivity.java
+  * Collects: full name, email, age, gender, password, confirm password.
+- * Also supports Google registration (same flow as login).
+- *
+  * Phase 2: replace TODO sections with Retrofit API calls.
+  */
+ public class RegisterActivity extends AppCompatActivity {
+@@ -39,7 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
+     private EditText    etFullName, etEmail, etAge, etPassword, etConfirmPassword;
+     private Spinner     spinnerGender;
+     private ImageButton btnTogglePassword, btnToggleConfirm;
+-    private Button      btnCreateAccount, btnGoogle;
++    private Button      btnCreateAccount;
+     private TextView    tvSignIn;
+ 
+     // State
+@@ -48,7 +39,6 @@ public class RegisterActivity extends AppCompatActivity {
+ 
+     // Utils
+     private SessionManager    sessionManager;
+-    private GoogleSignInClient googleSignInClient;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -58,7 +48,6 @@ public class RegisterActivity extends AppCompatActivity {
+         sessionManager = new SessionManager(this);
+         initViews();
+         setupGenderSpinner();
+-        setupGoogleSignIn();
+         setupClickListeners();
+         setupInputFocusHighlight();
+     }
+@@ -75,7 +64,6 @@ public class RegisterActivity extends AppCompatActivity {
+         btnTogglePassword = findViewById(R.id.btnTogglePassword);
+         btnToggleConfirm  = findViewById(R.id.btnToggleConfirm);
+         btnCreateAccount  = findViewById(R.id.btnCreateAccount);
+-        btnGoogle         = findViewById(R.id.btnGoogle);
+         tvSignIn          = findViewById(R.id.tvSignIn);
+     }
+ 
+@@ -89,17 +77,8 @@ public class RegisterActivity extends AppCompatActivity {
+         spinnerGender.setAdapter(adapter);
+     }
+ 
+-    private void setupGoogleSignIn() {
+-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+-            .requestEmail()
+-            .requestIdToken(AppConstants.GOOGLE_WEB_CLIENT_ID)
+-            .build();
+-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+-    }
+-
+     private void setupClickListeners() {
+         btnCreateAccount.setOnClickListener(v -> attemptRegistration());
+-        btnGoogle.setOnClickListener(v -> startGoogleSignIn());
+         tvSignIn.setOnClickListener(v -> goToLogin());
+         btnTogglePassword.setOnClickListener(v -> togglePassword());
+         btnToggleConfirm.setOnClickListener(v -> toggleConfirm());
+@@ -156,33 +135,6 @@ public class RegisterActivity extends AppCompatActivity {
+         goToDashboard();
+     }
+ 
+-    // ── GOOGLE SIGN-IN ──────────────────────────────────────────────
+-
+-    private void startGoogleSignIn() {
+-        startActivityForResult(googleSignInClient.getSignInIntent(), AppConstants.RC_GOOGLE_SIGN_IN);
+-    }
+-
+-    @Override
+-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+-        super.onActivityResult(requestCode, resultCode, data);
+-        if (requestCode == AppConstants.RC_GOOGLE_SIGN_IN) {
+-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+-            try {
+-                GoogleSignInAccount account = task.getResult(ApiException.class);
+-                if (account != null) {
+-                    sessionManager.saveGoogleSession(
+-                        account.getId() != null ? account.getId() : "",
+-                        account.getDisplayName() != null ? account.getDisplayName() : "",
+-                        account.getEmail() != null ? account.getEmail() : ""
+-                    );
+-                    goToDashboard();
+-                }
+-            } catch (ApiException e) {
+-                Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
+-            }
+-        }
+-    }
+-
+     // ── HELPERS ──────────────────────────────────────────────────────
+ 
+     private void togglePassword() {
+diff --git a/app/src/main/java/com/arcadefitness/activities/WorkoutPlannerActivity.java b/app/src/main/java/com/arcadefitness/activities/WorkoutPlannerActivity.java
+index 5a26a80..01efea5 100644
+--- a/app/src/main/java/com/arcadefitness/activities/WorkoutPlannerActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/WorkoutPlannerActivity.java
+@@ -1,9 +1,14 @@
+ package com.arcadefitness.activities;
+ 
+-import android.content.Intent;
++import android.app.AlertDialog;
+ import android.os.Bundle;
++import android.text.InputType;
+ import android.view.View;
+-import android.widget.TextView;
++import android.widget.ArrayAdapter;
++import android.widget.EditText;
++import android.widget.LinearLayout;
++import android.widget.Spinner;
++import android.widget.Toast;
+ 
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.lifecycle.Observer;
+@@ -13,17 +18,22 @@ import androidx.recyclerview.widget.RecyclerView;
+ 
+ import com.arcadefitness.R;
+ import com.arcadefitness.adapter.WorkoutSessionAdapter;
+-import com.arcadefitness.data.local.entity.ExerciseEntity;
+ import com.arcadefitness.data.local.entity.WorkoutEntity;
+ import com.arcadefitness.viewmodel.WorkoutPlannerViewModel;
+ 
++import java.util.Arrays;
+ import java.util.List;
+ 
+ public class WorkoutPlannerActivity extends AppCompatActivity {
+ 
++    private static final String[] MUSCLE_GROUPS = {
++            "Chest", "Back", "Shoulders", "Legs", "Arms", "Core", "Full Body"
++    };
++
+     private WorkoutPlannerViewModel viewModel;
+     private WorkoutSessionAdapter adapter;
+     private View layoutEmpty;
++    private RecyclerView rvWorkouts;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -38,23 +48,22 @@ public class WorkoutPlannerActivity extends AppCompatActivity {
+     private void initViews() {
+         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+         findViewById(R.id.btnCreateWorkout).setOnClickListener(v -> {
+-            Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+-            startActivity(intent);
++            showCreateWorkoutDialog();
+         });
+         layoutEmpty = findViewById(R.id.layoutEmpty);
+     }
+ 
+     private void setupRecyclerView() {
+-        RecyclerView rv = findViewById(R.id.rvWorkoutSessions);
+-        rv.setLayoutManager(new LinearLayoutManager(this));
+-        rv.setHasFixedSize(true);
++        rvWorkouts = findViewById(R.id.rvWorkoutSessions);
++        rvWorkouts.setLayoutManager(new LinearLayoutManager(this));
++        rvWorkouts.setHasFixedSize(true);
+         adapter = new WorkoutSessionAdapter();
+         adapter.setOnWorkoutClickListener(workout -> {
+-            Intent intent = new Intent(this, WorkoutTrackingActivity.class);
++            android.content.Intent intent = new android.content.Intent(this, WorkoutTrackingActivity.class);
+             intent.putExtra("workout_id", workout.getId());
+             startActivity(intent);
+         });
+-        rv.setAdapter(adapter);
++        rvWorkouts.setAdapter(adapter);
+     }
+ 
+     private void setupViewModel() {
+@@ -65,9 +74,93 @@ public class WorkoutPlannerActivity extends AppCompatActivity {
+             public void onChanged(List<WorkoutEntity> workouts) {
+                 adapter.setWorkouts(workouts);
+                 layoutEmpty.setVisibility(workouts == null || workouts.isEmpty() ? View.VISIBLE : View.GONE);
+-                findViewById(R.id.rvWorkoutSessions)
+-                        .setVisibility(workouts == null || workouts.isEmpty() ? View.GONE : View.VISIBLE);
++                rvWorkouts.setVisibility(workouts == null || workouts.isEmpty() ? View.GONE : View.VISIBLE);
+             }
+         });
+     }
++
++    private void showCreateWorkoutDialog() {
++        LinearLayout container = new LinearLayout(this);
++        container.setOrientation(LinearLayout.VERTICAL);
++        int padding = (int) (16 * getResources().getDisplayMetrics().density);
++        container.setPadding(padding, padding, padding, padding);
++
++        EditText etName = new EditText(this);
++        etName.setHint("Workout name");
++        etName.setTextColor(getColor(R.color.text_primary));
++        etName.setHintTextColor(getColor(R.color.text_muted));
++        etName.setBackgroundColor(getColor(R.color.bg_input));
++        etName.setPadding(padding, padding, padding, padding);
++        container.addView(etName);
++
++        Spinner spinnerMuscleGroup = new Spinner(this);
++        ArrayAdapter<String> muscleAdapter = new ArrayAdapter<>(
++                this,
++                android.R.layout.simple_spinner_item,
++                Arrays.asList(MUSCLE_GROUPS)
++        );
++        muscleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
++        spinnerMuscleGroup.setAdapter(muscleAdapter);
++        LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(
++                LinearLayout.LayoutParams.MATCH_PARENT,
++                LinearLayout.LayoutParams.WRAP_CONTENT
++        );
++        spinnerParams.topMargin = padding;
++        spinnerMuscleGroup.setLayoutParams(spinnerParams);
++        container.addView(spinnerMuscleGroup);
++
++        EditText etDuration = new EditText(this);
++        etDuration.setHint("Estimated duration (minutes)");
++        etDuration.setInputType(InputType.TYPE_CLASS_NUMBER);
++        etDuration.setTextColor(getColor(R.color.text_primary));
++        etDuration.setHintTextColor(getColor(R.color.text_muted));
++        etDuration.setBackgroundColor(getColor(R.color.bg_input));
++        etDuration.setPadding(padding, padding, padding, padding);
++        LinearLayout.LayoutParams durationParams = new LinearLayout.LayoutParams(
++                LinearLayout.LayoutParams.MATCH_PARENT,
++                LinearLayout.LayoutParams.WRAP_CONTENT
++        );
++        durationParams.topMargin = padding;
++        etDuration.setLayoutParams(durationParams);
++        container.addView(etDuration);
++
++        AlertDialog dialog = new AlertDialog.Builder(this)
++                .setTitle("Create Workout")
++                .setView(container)
++                .setPositiveButton("Create", null)
++                .setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.dismiss())
++                .create();
++
++        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
++            String name = etName.getText().toString().trim();
++            if (name.isEmpty()) {
++                etName.setError("Workout name is required");
++                etName.requestFocus();
++                return;
++            }
++
++            String durationText = etDuration.getText().toString().trim();
++            int durationMinutes;
++            try {
++                durationMinutes = Integer.parseInt(durationText);
++            } catch (NumberFormatException e) {
++                etDuration.setError("Enter a valid number");
++                etDuration.requestFocus();
++                return;
++            }
++
++            String muscleGroup = (String) spinnerMuscleGroup.getSelectedItem();
++            WorkoutEntity workout = new WorkoutEntity();
++            workout.setName(name);
++            workout.setTargetMuscleGroup(muscleGroup);
++            workout.setEstimatedDurationMinutes(durationMinutes);
++
++            viewModel.getWorkoutRepository().insert(workout, () -> {
++                Toast.makeText(WorkoutPlannerActivity.this, "Workout created", Toast.LENGTH_SHORT).show();
++                dialog.dismiss();
++            });
++        }));
++
++        dialog.show();
++    }
+ }
+diff --git a/app/src/main/java/com/arcadefitness/activities/WorkoutTrackingActivity.java b/app/src/main/java/com/arcadefitness/activities/WorkoutTrackingActivity.java
+index 8cf2d70..195faff 100644
+--- a/app/src/main/java/com/arcadefitness/activities/WorkoutTrackingActivity.java
++++ b/app/src/main/java/com/arcadefitness/activities/WorkoutTrackingActivity.java
+@@ -3,9 +3,11 @@ package com.arcadefitness.activities;
+ import android.os.Bundle;
+ import android.os.CountDownTimer;
+ import android.view.View;
++import android.widget.EditText;
+ import android.widget.Button;
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
++import android.widget.Toast;
+ 
+ import androidx.appcompat.app.AlertDialog;
+ import androidx.appcompat.app.AppCompatActivity;
+@@ -13,8 +15,10 @@ import androidx.lifecycle.Observer;
+ import androidx.lifecycle.ViewModelProvider;
+ 
+ import com.arcadefitness.R;
++import com.arcadefitness.data.local.entity.SetRecordEntity;
+ import com.arcadefitness.data.local.entity.WorkoutEntity;
+ import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
++import com.arcadefitness.data.repository.FitnessRepository;
+ import com.arcadefitness.viewmodel.WorkoutTrackingViewModel;
+ 
+ public class WorkoutTrackingActivity extends AppCompatActivity {
+@@ -26,8 +30,11 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
+     private LinearLayout layoutActiveControls, layoutNoSession, layoutSessionSummary;
+     private TextView tvSummaryDuration, tvSummaryVolume, tvSummaryCalories;
+     private Button btnPause, btnComplete, btnBackToDashboard;
++    private EditText etSetWeight, etSetReps;
++    private Button btnMarkSetDone;
+ 
+     private CountDownTimer timer;
++    private int completedSetsCount = 0;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -61,6 +68,13 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
+         btnPause = findViewById(R.id.btnPause);
+         btnComplete = findViewById(R.id.btnComplete);
+         btnBackToDashboard = findViewById(R.id.btnBackToDashboard);
++        etSetWeight = findViewById(R.id.etSetWeight);
++        etSetReps = findViewById(R.id.etSetReps);
++        btnMarkSetDone = findViewById(R.id.btnMarkSetDone);
++
++        updateSetsCompletedText();
++
++        btnMarkSetDone.setOnClickListener(v -> markSetDone());
+ 
+         btnPause.setOnClickListener(v -> {
+             if (Boolean.TRUE.equals(viewModel.getIsRunning().getValue())) {
+@@ -104,6 +118,8 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
+                     layoutNoSession.setVisibility(View.GONE);
+                     layoutActiveControls.setVisibility(View.VISIBLE);
+                     layoutSessionSummary.setVisibility(View.GONE);
++                    completedSetsCount = 0;
++                    updateSetsCompletedText();
+                 }
+             }
+         });
+@@ -142,6 +158,75 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
+         });
+     }
+ 
++    private void updateSetsCompletedText() {
++        tvSetsCompleted.setText(completedSetsCount + " sets completed");
++    }
++
++    private void markSetDone() {
++        WorkoutSessionEntity session = viewModel.getCurrentSession().getValue();
++        if (session == null) {
++            Toast.makeText(this, "No active session", Toast.LENGTH_SHORT).show();
++            return;
++        }
++
++        String weightText = etSetWeight.getText().toString().trim();
++        String repsText = etSetReps.getText().toString().trim();
++
++        if (weightText.isEmpty()) {
++            etSetWeight.setError("Weight is required");
++            etSetWeight.requestFocus();
++            return;
++        }
++        if (repsText.isEmpty()) {
++            etSetReps.setError("Reps are required");
++            etSetReps.requestFocus();
++            return;
++        }
++
++        double weight;
++        int reps;
++        try {
++            weight = Double.parseDouble(weightText);
++        } catch (NumberFormatException e) {
++            etSetWeight.setError("Enter a valid number");
++            etSetWeight.requestFocus();
++            return;
++        }
++
++        try {
++            reps = Integer.parseInt(repsText);
++        } catch (NumberFormatException e) {
++            etSetReps.setError("Enter a valid number");
++            etSetReps.requestFocus();
++            return;
++        }
++
++        SetRecordEntity setRecord = new SetRecordEntity();
++        setRecord.setWorkoutId(session.getWorkoutId());
++        setRecord.setExerciseId(1);
++        setRecord.setWeight(weight);
++        setRecord.setReps(reps);
++        setRecord.setSetNumber(completedSetsCount + 1);
++        setRecord.setIsCompleted(1);
++        setRecord.setTimestamp(System.currentTimeMillis());
++
++        FitnessRepository.getInstance(this).insertSetRecord(setRecord, new FitnessRepository.RepositoryCallback<Integer>() {
++            @Override
++            public void onSuccess(Integer result) {
++                completedSetsCount++;
++                updateSetsCompletedText();
++                etSetWeight.setText("");
++                etSetReps.setText("");
++                Toast.makeText(WorkoutTrackingActivity.this, "Set logged", Toast.LENGTH_SHORT).show();
++            }
++
++            @Override
++            public void onError(String errorMessage) {
++                Toast.makeText(WorkoutTrackingActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
++            }
++        });
++    }
++
+     private void startTimer() {
+         stopTimer();
+         timer = new CountDownTimer(Long.MAX_VALUE, 1000) {
+diff --git a/app/src/main/res/layout/activity_exercise_library.xml b/app/src/main/res/layout/activity_exercise_library.xml
+index 0f94b4b..70b01bf 100644
+--- a/app/src/main/res/layout/activity_exercise_library.xml
++++ b/app/src/main/res/layout/activity_exercise_library.xml
+@@ -5,13 +5,11 @@
+     android:background="@color/bg_primary"
+     android:orientation="vertical">
+ 
+-    <!-- Top accent bar -->
+     <View
+         android:layout_width="match_parent"
+         android:layout_height="@dimen/top_bar_height"
+         android:background="@color/orange_primary" />
+ 
+-    <!-- Header -->
+     <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+@@ -33,77 +31,75 @@
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+-            android:text="@string/exercise_library_title"
++            android:text="Exercise Library"
+             style="@style/Text.Hero"
+             android:layout_marginStart="@dimen/space_sm" />
+     </LinearLayout>
+ 
+-    <!-- Search bar -->
+-    <FrameLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:layout_marginHorizontal="@dimen/screen_padding_h"
+-        android:layout_marginTop="@dimen/space_md"
+-        android:layout_marginBottom="@dimen/space_sm">
+-        <EditText
+-            android:id="@+id/etSearch"
+-            style="@style/Input.Dark"
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:hint="@string/search_hint"
+-            android:maxLines="1"
+-            android:imeOptions="actionSearch" />
+-    </FrameLayout>
+-
+-    <!-- Filter chips -->
+     <HorizontalScrollView
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+-        android:layout_marginBottom="@dimen/space_sm"
++        android:layout_marginTop="@dimen/space_md"
+         android:paddingHorizontal="@dimen/screen_padding_h"
+         android:overScrollMode="never">
++
+         <LinearLayout
+             android:id="@+id/layoutFilters"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+-            android:orientation="horizontal" />
++            android:orientation="horizontal">
++
++            <Button android:id="@+id/btnFilterAll" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="All" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterChest" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chest" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterBack" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Back" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterShoulders" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Shoulders" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterLegs" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Legs" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterArms" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Arms" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterCore" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Core" android:layout_marginEnd="@dimen/space_sm" />
++            <Button android:id="@+id/btnFilterFullBody" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Full Body" />
++        </LinearLayout>
+     </HorizontalScrollView>
+ 
+-    <!-- Exercise list -->
+-    <androidx.recyclerview.widget.RecyclerView
+-        android:id="@+id/rvExercises"
++    <FrameLayout
+         android:layout_width="match_parent"
+         android:layout_height="0dp"
+         android:layout_weight="1"
+-        android:paddingHorizontal="@dimen/screen_padding_h"
+-        android:clipToPadding="false"
+-        android:overScrollMode="never" />
++        android:layout_marginTop="@dimen/space_md">
+ 
+-    <!-- Empty state -->
+-    <LinearLayout
+-        android:id="@+id/layoutEmpty"
+-        android:layout_width="match_parent"
+-        android:layout_height="0dp"
+-        android:layout_weight="1"
+-        android:gravity="center"
+-        android:orientation="vertical"
+-        android:visibility="gone"
+-        android:padding="@dimen/space_xl">
+-        <TextView
+-            android:layout_width="80dp"
+-            android:layout_height="80dp"
+-            android:gravity="center"
+-            android:text="💪"
+-            android:textSize="40sp"
+-            android:background="@drawable/bg_logo_tile" />
+-        <TextView
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:text="@string/no_exercises_found"
+-            android:textSize="15sp"
+-            android:textColor="@color/text_muted"
++        <androidx.recyclerview.widget.RecyclerView
++            android:id="@+id/rvExercises"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
++            android:paddingHorizontal="@dimen/screen_padding_h"
++            android:clipToPadding="false"
++            android:overScrollMode="never" />
++
++        <LinearLayout
++            android:id="@+id/layoutEmpty"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
+             android:gravity="center"
+-            android:layout_marginTop="@dimen/space_lg" />
+-    </LinearLayout>
++            android:orientation="vertical"
++            android:visibility="gone"
++            android:padding="@dimen/space_xl">
++
++            <TextView
++                android:layout_width="80dp"
++                android:layout_height="80dp"
++                android:gravity="center"
++                android:text="💪"
++                android:textSize="40sp"
++                android:background="@drawable/bg_logo_tile" />
++
++            <TextView
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="No exercises found"
++                android:textSize="15sp"
++                android:textColor="@color/text_muted"
++                android:gravity="center"
++                android:layout_marginTop="@dimen/space_lg" />
++        </LinearLayout>
++    </FrameLayout>
+ 
+ </LinearLayout>
+diff --git a/app/src/main/res/layout/activity_progress_tracking.xml b/app/src/main/res/layout/activity_progress_tracking.xml
+index dfb603f..aa878a5 100644
+--- a/app/src/main/res/layout/activity_progress_tracking.xml
++++ b/app/src/main/res/layout/activity_progress_tracking.xml
+@@ -158,6 +158,16 @@
+                 </FrameLayout>
+             </LinearLayout>
+ 
++            <TextView
++                android:id="@+id/tvTotalSessions"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="0 sessions completed"
++                android:textSize="14sp"
++                android:textStyle="bold"
++                android:textColor="@color/text_primary"
++                android:layout_marginBottom="@dimen/space_lg" />
++
+             <!-- Active Goals Section -->
+             <LinearLayout
+                 android:layout_width="match_parent"
+diff --git a/app/src/main/res/layout/activity_workout_tracking.xml b/app/src/main/res/layout/activity_workout_tracking.xml
+index a835812..4da1408 100644
+--- a/app/src/main/res/layout/activity_workout_tracking.xml
++++ b/app/src/main/res/layout/activity_workout_tracking.xml
+@@ -131,27 +131,78 @@
+                 android:id="@+id/layoutActiveControls"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:orientation="horizontal"
++                android:orientation="vertical"
+                 android:gravity="center"
+                 android:layout_marginTop="@dimen/space_lg"
+                 android:visibility="gone">
+ 
+-                <Button
+-                    android:id="@+id/btnPause"
+-                    style="@style/Button.Secondary"
+-                    android:layout_width="0dp"
+-                    android:layout_height="@dimen/button_height"
+-                    android:layout_weight="1"
+-                    android:text="@string/btn_pause" />
++                <LinearLayout
++                    android:id="@+id/layoutSetLogger"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:orientation="vertical"
++                    android:background="@color/bg_card"
++                    android:padding="@dimen/space_md">
+ 
+-                <Button
+-                    android:id="@+id/btnComplete"
+-                    style="@style/Button.Primary"
+-                    android:layout_width="0dp"
+-                    android:layout_height="@dimen/button_height"
+-                    android:layout_weight="1"
+-                    android:layout_marginStart="@dimen/space_sm"
+-                    android:text="@string/btn_complete" />
++                    <TextView
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:text="Log Set"
++                        android:textColor="@color/text_primary"
++                        android:textStyle="bold"
++                        android:textSize="16sp"
++                        android:layout_marginBottom="@dimen/space_sm" />
++
++                    <EditText
++                        android:id="@+id/etSetWeight"
++                        style="@style/Input.Dark"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Weight (kg)"
++                        android:inputType="numberDecimal"
++                        android:layout_marginBottom="@dimen/space_sm" />
++
++                    <EditText
++                        android:id="@+id/etSetReps"
++                        style="@style/Input.Dark"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Reps"
++                        android:inputType="number"
++                        android:layout_marginBottom="@dimen/space_sm" />
++
++                    <Button
++                        android:id="@+id/btnMarkSetDone"
++                        style="@style/Button.Primary"
++                        android:layout_width="match_parent"
++                        android:layout_height="@dimen/button_height"
++                        android:text="Mark Set Done" />
++                </LinearLayout>
++
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:orientation="horizontal"
++                    android:gravity="center"
++                    android:layout_marginTop="@dimen/space_lg">
++
++                    <Button
++                        android:id="@+id/btnPause"
++                        style="@style/Button.Secondary"
++                        android:layout_width="0dp"
++                        android:layout_height="@dimen/button_height"
++                        android:layout_weight="1"
++                        android:text="@string/btn_pause" />
++
++                    <Button
++                        android:id="@+id/btnComplete"
++                        style="@style/Button.Primary"
++                        android:layout_width="0dp"
++                        android:layout_height="@dimen/button_height"
++                        android:layout_weight="1"
++                        android:layout_marginStart="@dimen/space_sm"
++                        android:text="@string/btn_complete" />
++                </LinearLayout>
+             </LinearLayout>
+ 
+             <!-- No Session State -->
+diff --git a/build.gradle b/build.gradle
+index db0c5b1..44c45c4 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -1,5 +1,4 @@
+ // Top-level build file for Arcade Fitness Planner
+ plugins {
+     id 'com.android.application' version '8.10.0' apply false
+-    id 'com.google.gms.google-services' version '4.4.2' apply false
+ }

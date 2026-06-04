@@ -131,27 +131,78 @@
                 android:id="@+id/layoutActiveControls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:gravity="center"
                 android:layout_marginTop="@dimen/space_lg"
                 android:visibility="gone">
 
-                <Button
-                    android:id="@+id/btnPause"
-                    style="@style/Button.Secondary"
-                    android:layout_width="0dp"
-                    android:layout_height="@dimen/button_height"
-                    android:layout_weight="1"
-                    android:text="@string/btn_pause" />
+                <LinearLayout
+                    android:id="@+id/layoutSetLogger"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/space_md">
 
-                <Button
-                    android:id="@+id/btnComplete"
-                    style="@style/Button.Primary"
-                    android:layout_width="0dp"
-                    android:layout_height="@dimen/button_height"
-                    android:layout_weight="1"
-                    android:layout_marginStart="@dimen/space_sm"
-                    android:text="@string/btn_complete" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Log Set"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="@dimen/space_sm" />
+
+                    <EditText
+                        android:id="@+id/etSetWeight"
+                        style="@style/Input.Dark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Weight (kg)"
+                        android:inputType="numberDecimal"
+                        android:layout_marginBottom="@dimen/space_sm" />
+
+                    <EditText
+                        android:id="@+id/etSetReps"
+                        style="@style/Input.Dark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Reps"
+                        android:inputType="number"
+                        android:layout_marginBottom="@dimen/space_sm" />
+
+                    <Button
+                        android:id="@+id/btnMarkSetDone"
+                        style="@style/Button.Primary"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:text="Mark Set Done" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="@dimen/space_lg">
+
+                    <Button
+                        android:id="@+id/btnPause"
+                        style="@style/Button.Secondary"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_weight="1"
+                        android:text="@string/btn_pause" />
+
+                    <Button
+                        android:id="@+id/btnComplete"
+                        style="@style/Button.Primary"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:text="@string/btn_complete" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- No Session State -->

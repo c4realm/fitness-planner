@@ -5,13 +5,11 @@
     android:background="@color/bg_primary"
     android:orientation="vertical">
 
-    <!-- Top accent bar -->
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:background="@color/orange_primary" />
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,77 +31,75 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/exercise_library_title"
+            android:text="Exercise Library"
             style="@style/Text.Hero"
             android:layout_marginStart="@dimen/space_sm" />
     </LinearLayout>
 
-    <!-- Search bar -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/screen_padding_h"
-        android:layout_marginTop="@dimen/space_md"
-        android:layout_marginBottom="@dimen/space_sm">
-        <EditText
-            android:id="@+id/etSearch"
-            style="@style/Input.Dark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search_hint"
-            android:maxLines="1"
-            android:imeOptions="actionSearch" />
-    </FrameLayout>
-
-    <!-- Filter chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_sm"
+        android:layout_marginTop="@dimen/space_md"
         android:paddingHorizontal="@dimen/screen_padding_h"
         android:overScrollMode="never">
+
         <LinearLayout
             android:id="@+id/layoutFilters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" />
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnFilterAll" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="All" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterChest" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chest" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterBack" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Back" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterShoulders" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Shoulders" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterLegs" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Legs" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterArms" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Arms" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterCore" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Core" android:layout_marginEnd="@dimen/space_sm" />
+            <Button android:id="@+id/btnFilterFullBody" style="@style/Button.Secondary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Full Body" />
+        </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Exercise list -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExercises"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="@dimen/screen_padding_h"
-        android:clipToPadding="false"
-        android:overScrollMode="never" />
+        android:layout_marginTop="@dimen/space_md">
 
-    <!-- Empty state -->
-    <LinearLayout
-        android:id="@+id/layoutEmpty"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:padding="@dimen/space_xl">
-        <TextView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvExercises"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="@dimen/screen_padding_h"
+            android:clipToPadding="false"
+            android:overScrollMode="never" />
+
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:text="💪"
-            android:textSize="40sp"
-            android:background="@drawable/bg_logo_tile" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_exercises_found"
-            android:textSize="15sp"
-            android:textColor="@color/text_muted"
-            android:gravity="center"
-            android:layout_marginTop="@dimen/space_lg" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="@dimen/space_xl">
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="💪"
+                android:textSize="40sp"
+                android:background="@drawable/bg_logo_tile" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No exercises found"
+                android:textSize="15sp"
+                android:textColor="@color/text_muted"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/space_lg" />
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

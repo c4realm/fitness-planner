@@ -3,9 +3,11 @@ package com.arcadefitness.activities;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +15,10 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.arcadefitness.R;
+import com.arcadefitness.data.local.entity.SetRecordEntity;
 import com.arcadefitness.data.local.entity.WorkoutEntity;
 import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
+import com.arcadefitness.data.repository.FitnessRepository;
 import com.arcadefitness.viewmodel.WorkoutTrackingViewModel;
 
 public class WorkoutTrackingActivity extends AppCompatActivity {
@@ -26,8 +30,11 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
     private LinearLayout layoutActiveControls, layoutNoSession, layoutSessionSummary;
     private TextView tvSummaryDuration, tvSummaryVolume, tvSummaryCalories;
     private Button btnPause, btnComplete, btnBackToDashboard;
+    private EditText etSetWeight, etSetReps;
+    private Button btnMarkSetDone;
 
     private CountDownTimer timer;
+    private int completedSetsCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,13 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
         btnPause = findViewById(R.id.btnPause);
         btnComplete = findViewById(R.id.btnComplete);
         btnBackToDashboard = findViewById(R.id.btnBackToDashboard);
+        etSetWeight = findViewById(R.id.etSetWeight);
+        etSetReps = findViewById(R.id.etSetReps);
+        btnMarkSetDone = findViewById(R.id.btnMarkSetDone);
+
+        updateSetsCompletedText();
+
+        btnMarkSetDone.setOnClickListener(v -> markSetDone());
 
         btnPause.setOnClickListener(v -> {
             if (Boolean.TRUE.equals(viewModel.getIsRunning().getValue())) {
@@ -104,6 +118,8 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                     layoutNoSession.setVisibility(View.GONE);
                     layoutActiveControls.setVisibility(View.VISIBLE);
                     layoutSessionSummary.setVisibility(View.GONE);
+                    completedSetsCount = 0;
+                    updateSetsCompletedText();
                 }
             }
         });
@@ -138,6 +154,75 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                 } else {
                     stopTimer();
                 }
+            }
+        });
+    }
+
+    private void updateSetsCompletedText() {
+        tvSetsCompleted.setText(completedSetsCount + " sets completed");
+    }
+
+    private void markSetDone() {
+        WorkoutSessionEntity session = viewModel.getCurrentSession().getValue();
+        if (session == null) {
+            Toast.makeText(this, "No active session", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String weightText = etSetWeight.getText().toString().trim();
+        String repsText = etSetReps.getText().toString().trim();
+
+        if (weightText.isEmpty()) {
+            etSetWeight.setError("Weight is required");
+            etSetWeight.requestFocus();
+            return;
+        }
+        if (repsText.isEmpty()) {
+            etSetReps.setError("Reps are required");
+            etSetReps.requestFocus();
+            return;
+        }
+
+        double weight;
+        int reps;
+        try {
+            weight = Double.parseDouble(weightText);
+        } catch (NumberFormatException e) {
+            etSetWeight.setError("Enter a valid number");
+            etSetWeight.requestFocus();
+            return;
+        }
+
+        try {
+            reps = Integer.parseInt(repsText);
+        } catch (NumberFormatException e) {
+            etSetReps.setError("Enter a valid number");
+            etSetReps.requestFocus();
+            return;
+        }
+
+        SetRecordEntity setRecord = new SetRecordEntity();
+        setRecord.setWorkoutId(session.getWorkoutId());
+        setRecord.setExerciseId(1);
+        setRecord.setWeight(weight);
+        setRecord.setReps(reps);
+        setRecord.setSetNumber(completedSetsCount + 1);
+        setRecord.setIsCompleted(1);
+        setRecord.setTimestamp(System.currentTimeMillis());
+
+        FitnessRepository.getInstance(this).insertSetRecord(setRecord, new FitnessRepository.RepositoryCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                completedSetsCount++;
+                updateSetsCompletedText();
+                etSetWeight.setText("");
+                etSetReps.setText("");
+                Toast.makeText(WorkoutTrackingActivity.this, "Set logged", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(WorkoutTrackingActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }

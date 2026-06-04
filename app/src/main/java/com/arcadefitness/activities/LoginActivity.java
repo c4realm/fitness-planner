@@ -13,37 +13,28 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.arcadefitness.R;
-import com.arcadefitness.utils.AppConstants;
 import com.arcadefitness.utils.SessionManager;
 import com.arcadefitness.utils.ValidationUtils;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
-
 /**
  * LoginActivity.java
- * Handles email/password login and Google Sign-In.
- *
- * Phase 2: replace the TODO sections with actual Retrofit API calls.
+ * Handles email/password login.
+ * Google Sign-In: UI preserved, wired to Phase 3 placeholder toast.
+ * Guest access: bypasses login, lands directly on Dashboard.
  */
 public class LoginActivity extends AppCompatActivity {
 
     // Views
     private EditText    etEmail, etPassword;
     private ImageButton btnTogglePassword;
-    private Button      btnSignIn, btnGoogle;
+    private Button      btnSignIn, btnGoogle, btnGuest;
     private TextView    tvForgotPassword, tvCreateAccount;
 
     // State
-    private boolean     isPasswordVisible = false;
+    private boolean isPasswordVisible = false;
 
     // Utilities
-    private SessionManager    sessionManager;
-    private GoogleSignInClient googleSignInClient;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
         initViews();
-        setupGoogleSignIn();
         setupClickListeners();
         setupInputFocusHighlight();
     }
@@ -65,21 +55,17 @@ public class LoginActivity extends AppCompatActivity {
         btnTogglePassword = findViewById(R.id.btnTogglePassword);
         btnSignIn         = findViewById(R.id.btnSignIn);
         btnGoogle         = findViewById(R.id.btnGoogle);
+        btnGuest          = findViewById(R.id.btnGuest);
         tvForgotPassword  = findViewById(R.id.tvForgotPassword);
         tvCreateAccount   = findViewById(R.id.tvCreateAccount);
     }
 
-    private void setupGoogleSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestIdToken(AppConstants.GOOGLE_WEB_CLIENT_ID)
-            .build();
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
     private void setupClickListeners() {
         btnSignIn.setOnClickListener(v -> attemptEmailLogin());
-        btnGoogle.setOnClickListener(v -> startGoogleSignIn());
+        btnGoogle.setOnClickListener(v ->
+            Toast.makeText(this,
+                "Google Sign-In coming in Phase 3", Toast.LENGTH_SHORT).show());
+        btnGuest.setOnClickListener(v -> goToDashboard());
         tvCreateAccount.setOnClickListener(v -> goToRegister());
         tvForgotPassword.setOnClickListener(v -> handleForgotPassword());
         btnTogglePassword.setOnClickListener(v -> togglePasswordVisibility());
@@ -103,7 +89,6 @@ public class LoginActivity extends AppCompatActivity {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString();
 
-        // Validate
         String emailError    = ValidationUtils.validateEmail(email);
         String passwordError = ValidationUtils.validatePassword(password);
 
@@ -118,19 +103,12 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // ── TODO (Phase 2): Replace with Retrofit API call ──────────
-        // ApiService.login(email, password) → on success → sessionManager.saveSession(...)
-        //
-        // Example:
-        // showLoading(true);
-        // ApiClient.getInstance().getApiService().login(new LoginRequest(email, password))
-        //     .enqueue(new Callback<LoginResponse>() {
-        //         @Override public void onResponse(...) { handleLoginSuccess(response); }
-        //         @Override public void onFailure(...)  { showError("Network error"); }
-        //     });
+        // ── TODO (Phase 3): Replace with Retrofit API call ──────────
+        // ApiClient.getInstance().getApiService()
+        //     .login(new LoginRequest(email, password))
+        //     .enqueue(...);
         // ────────────────────────────────────────────────────────────
 
-        // Check against locally registered accounts (remove when backend is connected)
         if (!sessionManager.checkCredentials(email, password)) {
             Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
             return;
@@ -139,51 +117,6 @@ public class LoginActivity extends AppCompatActivity {
         String userName = sessionManager.getRegisteredUserName(email);
         sessionManager.saveSession("user_" + email, userName, email, "mock_token");
         goToDashboard();
-    }
-
-    // ── GOOGLE SIGN-IN ──────────────────────────────────────────────
-
-    private void startGoogleSignIn() {
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, AppConstants.RC_GOOGLE_SIGN_IN);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AppConstants.RC_GOOGLE_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleGoogleSignInResult(task);
-        }
-    }
-
-    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            if (account != null) {
-                String userId   = account.getId() != null ? account.getId() : "";
-                String userName = account.getDisplayName() != null ? account.getDisplayName() : "";
-                String email    = account.getEmail() != null ? account.getEmail() : "";
-                String idToken  = account.getIdToken() != null ? account.getIdToken() : "";
-
-                // ── TODO (Phase 2): Send idToken to your Node.js backend ──
-                // ApiClient.getInstance().getApiService().googleAuth(new GoogleAuthRequest(idToken))
-                //     .enqueue(...) → on success → sessionManager.saveGoogleSession(...)
-                // ──────────────────────────────────────────────────────────
-
-                // Temporary: save Google session directly
-                sessionManager.saveGoogleSession(userId, userName, email);
-                goToDashboard();
-            }
-        } catch (ApiException e) {
-            String message;
-            if (e.getStatusCode() == 10) {
-                message = "Google Sign-In error (code 10). Replace google-services.json with YOUR real Firebase file, then add SHA-1 in Firebase Console. Also set GOOGLE_WEB_CLIENT_ID to your Web OAuth client ID.";
-            } else {
-                message = "Google Sign-In failed: " + e.getMessage();
-            }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        }
     }
 
     // ── HELPERS ──────────────────────────────────────────────────────
@@ -202,8 +135,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleForgotPassword() {
-        // TODO (Phase 2): Open ForgotPasswordActivity or dialog
-        Toast.makeText(this, "Forgot password — coming in Phase 2", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Forgot password — coming in Phase 3", Toast.LENGTH_SHORT).show();
     }
 
     private void goToRegister() {

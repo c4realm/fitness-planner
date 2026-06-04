@@ -8,7 +8,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,52 +25,264 @@
                 android:layout_marginStart="-24dp"
                 android:layout_marginEnd="-24dp" />
 
-            <!-- Greeting -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- ── HERO BANNER ── -->
+            <FrameLayout
+                android:id="@+id/cardTodayWorkout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/good_morning"
-                android:textSize="13sp"
-                android:textColor="@color/text_muted"
-                android:layout_marginTop="@dimen/space_lg" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="@dimen/space_xs"
+                android:background="@drawable/bg_card_orange"
+                android:padding="20dp"
+                android:layout_marginTop="@dimen/space_lg"
                 android:layout_marginBottom="@dimen/space_lg">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hey_prefix"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
-                <TextView
-                    android:id="@+id/tvUserName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/orange_primary"
-                    android:layout_marginStart="@dimen/space_xs" />
-            </LinearLayout>
 
-            <!-- Stats row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TODAY'S PLAN"
+                        android:textSize="10sp"
+                        android:textColor="@color/white"
+                        android:alpha="0.7"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.12"
+                        android:layout_marginBottom="@dimen/space_xs" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hey_prefix"
+                            android:textSize="26sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/white" />
+                        <TextView
+                            android:id="@+id/tvUserName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="26sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/white"
+                            android:layout_marginStart="@dimen/space_xs" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ready to crush today's workout?"
+                        android:textSize="13sp"
+                        android:textColor="@color/white"
+                        android:alpha="0.75"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:layout_marginBottom="@dimen/space_md" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <Button
+                            android:id="@+id/btnContinueWorkout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:text="Start Workout"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/orange_primary"
+                            android:background="@color/white"
+                            android:gravity="center"
+                            android:paddingStart="@dimen/space_md"
+                            android:paddingEnd="@dimen/space_md"
+                            android:letterSpacing="0.03" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/tvStreakValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/white"
+                                android:gravity="center" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="DAY STREAK"
+                                android:textSize="9sp"
+                                android:textColor="@color/white"
+                                android:alpha="0.6"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.06" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- ── STATS ROW ── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/space_lg">
 
                 <FrameLayout
-                    style="@style/Card.Dark"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:layout_marginEnd="@dimen/space_sm">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/orange_primary" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_sm">
+                            <TextView
+                                android:id="@+id/tvWeekValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/orange_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="THIS WEEK"
+                                android:textSize="9sp"
+                                android:textColor="@color/text_muted"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.08"
+                                android:layout_marginTop="@dimen/space_xs" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:layout_marginEnd="@dimen/space_sm">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/orange_primary" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_sm">
+                            <TextView
+                                android:id="@+id/tvCaloriesValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/orange_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="KCAL"
+                                android:textSize="9sp"
+                                android:textColor="@color/text_muted"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.08"
+                                android:layout_marginTop="@dimen/space_xs" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/orange_primary" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_sm">
+                            <TextView
+                                android:id="@+id/tvTodayExercises"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/orange_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EXERCISES"
+                                android:textSize="9sp"
+                                android:textColor="@color/text_muted"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.08"
+                                android:layout_marginTop="@dimen/space_xs" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <!-- ── QUICK ACTIONS ── -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="QUICK ACTIONS"
+                style="@style/Text.Label"
+                android:layout_marginBottom="@dimen/space_sm" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="@dimen/space_sm">
+
+                <FrameLayout
+                    android:id="@+id/cardActionPlanner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:minHeight="90dp"
                     android:layout_marginEnd="@dimen/space_sm">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -78,31 +291,35 @@
                         android:gravity="center"
                         android:padding="@dimen/space_md">
                         <TextView
-                            android:id="@+id/tvStreakValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/orange_primary" />
+                            android:text="📋"
+                            android:textSize="28sp"
+                            android:gravity="center" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/streak_label"
-                            android:textSize="10sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
+                            android:text="Planner"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
                             android:layout_marginTop="@dimen/space_xs" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Plan workouts"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_muted" />
                     </LinearLayout>
                 </FrameLayout>
 
                 <FrameLayout
-                    style="@style/Card.Dark"
+                    android:id="@+id/cardActionTrack"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="@dimen/space_xs"
-                    android:layout_marginEnd="@dimen/space_xs">
+                    android:background="@drawable/bg_card"
+                    android:minHeight="90dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -110,111 +327,112 @@
                         android:gravity="center"
                         android:padding="@dimen/space_md">
                         <TextView
-                            android:id="@+id/tvWeekValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="24sp"
+                            android:text="💪"
+                            android:textSize="28sp"
+                            android:gravity="center" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Track"
+                            android:textSize="13sp"
                             android:textStyle="bold"
-                            android:textColor="@color/text_primary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/week_label"
-                            android:textSize="10sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
+                            android:textColor="@color/text_primary"
                             android:layout_marginTop="@dimen/space_xs" />
-                    </LinearLayout>
-                </FrameLayout>
-
-                <FrameLayout
-                    style="@style/Card.Dark"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="@dimen/space_sm">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="@dimen/space_md">
-                        <TextView
-                            android:id="@+id/tvCaloriesValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/text_primary" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/calories_label"
-                            android:textSize="10sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
-                            android:layout_marginTop="@dimen/space_xs" />
+                            android:text="Log a session"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_muted" />
                     </LinearLayout>
                 </FrameLayout>
 
             </LinearLayout>
 
-            <!-- Today's workout label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/todays_workout_label"
-                style="@style/Text.Label"
-                android:layout_marginBottom="@dimen/space_sm" />
-
-            <!-- Today's workout card -->
-            <FrameLayout
-                android:id="@+id/cardTodayWorkout"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_orange"
-                android:padding="@dimen/space_md"
+                android:orientation="horizontal"
                 android:layout_marginBottom="@dimen/space_lg">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <FrameLayout
+                    android:id="@+id/cardActionExercises"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:minHeight="90dp"
+                    android:layout_marginEnd="@dimen/space_sm">
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/workout_name_sample"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/workout_meta_sample"
-                        android:textSize="12sp"
-                        android:textColor="@color/white"
-                        android:alpha="0.8"
-                        android:layout_marginTop="@dimen/space_xs" />
-                    <Button
-                        android:id="@+id/btnContinueWorkout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:text="@string/btn_continue_workout"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/orange_primary"
-                        android:background="@color/white"
+                        android:orientation="vertical"
                         android:gravity="center"
-                        android:paddingStart="@dimen/space_md"
-                        android:paddingEnd="@dimen/space_md"
-                        android:layout_marginTop="@dimen/space_sm" />
-                </LinearLayout>
+                        android:padding="@dimen/space_md">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📚"
+                            android:textSize="28sp"
+                            android:gravity="center" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Exercises"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="@dimen/space_xs" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Browse library"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_muted" />
+                    </LinearLayout>
+                </FrameLayout>
 
-            </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/cardActionProgress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:minHeight="90dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="@dimen/space_md">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📊"
+                            android:textSize="28sp"
+                            android:gravity="center" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Progress"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="@dimen/space_xs" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View your stats"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_muted" />
+                    </LinearLayout>
+                </FrameLayout>
 
-            <!-- Active Goal section -->
+            </LinearLayout>
+
+            <!-- ── ACTIVE GOAL ── -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -235,11 +453,11 @@
                     style="@style/Text.OrangeLink" />
             </LinearLayout>
 
-            <!-- Goal card -->
             <FrameLayout
                 style="@style/Card.Dark"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_lg">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -258,17 +476,17 @@
                         android:layout_height="@dimen/button_height"
                         android:text="@string/btn_start_workout"
                         style="@style/Button.Primary"
+                        android:letterSpacing="0.03"
                         android:layout_marginTop="@dimen/space_md" />
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Exercise Library section -->
+            <!-- ── EXERCISE LIBRARY ── -->
             <TextView
                 style="@style/Text.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="EXERCISE LIBRARY"
-                android:layout_marginTop="@dimen/space_lg"
                 android:layout_marginBottom="@dimen/space_sm" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -278,26 +496,25 @@
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never" />
 
-            <!-- Logout -->
+            <!-- Logout — kept because DashboardActivity.java requires btnLogout -->
             <Button
                 android:id="@+id/btnLogout"
                 style="@style/Button.Secondary"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:text="Logout"
+                android:letterSpacing="0.03"
                 android:layout_marginTop="@dimen/space_lg" />
 
-            <!-- Spacer for bottom nav -->
             <View android:layout_width="match_parent" android:layout_height="80dp" />
 
         </LinearLayout>
-
     </ScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- ── BOTTOM NAV ── -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="68dp"
         android:background="@color/bg_nav"
         android:orientation="horizontal"
         android:gravity="center"
@@ -315,7 +532,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏠"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
             <TextView
                 android:tag="nav_label"
                 android:layout_width="wrap_content"
@@ -339,7 +556,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="📋"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
             <TextView
                 android:tag="nav_label"
                 android:layout_width="wrap_content"
@@ -353,10 +570,10 @@
 
         <FrameLayout
             android:id="@+id/navFab"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/bg_button_primary">
             <TextView
                 android:layout_width="wrap_content"
@@ -380,7 +597,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="📊"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
             <TextView
                 android:tag="nav_label"
                 android:layout_width="wrap_content"
@@ -404,7 +621,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="👤"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
             <TextView
                 android:tag="nav_label"
                 android:layout_width="wrap_content"

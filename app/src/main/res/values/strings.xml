@@ -118,4 +118,8 @@
     <string name="error_password_mismatch">Passwords do not match</string>
     <string name="error_network">No internet connection</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Auth -->
+    <string name="btn_google_soon">Google Sign-In (Coming Soon)</string>
+    <string name="btn_guest">Continue as Guest</string>
 </resources>
