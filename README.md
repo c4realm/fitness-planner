@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/readme_banner.png" width="200" alt="Arcade Fitness Planner Logo" />
+<img src="docs/readme_banner.png" width="100%" alt="Arcade Fitness Planner Logo" />
 
 # Arcade Fitness Planner
 
