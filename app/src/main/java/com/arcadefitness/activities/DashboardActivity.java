@@ -79,18 +79,28 @@ public class DashboardActivity extends AppCompatActivity {
                 exerciseAdapter.setExercises(exercises);
             }
         });
+
+        // Real stats from Room
+        dashboardViewModel.getWeeklySessionCount().observe(this, count -> {
+            if (tvWeekValue != null) tvWeekValue.setText(String.valueOf(count));
+        });
+        dashboardViewModel.getWeeklyCalories().observe(this, kcal -> {
+            if (tvCaloriesValue != null) tvCaloriesValue.setText(String.valueOf(kcal));
+        });
+        // Streak = total completed sessions (simple proxy until streak logic built)
+        dashboardViewModel.getWeeklySessionCount().observe(this, count -> {
+            if (tvStreakValue != null) tvStreakValue.setText(String.valueOf(count));
+        });
     }
 
     private void populateUserData() {
         String fullName  = sessionManager.getUserName();
         String firstName = fullName.contains(" ")
-            ? fullName.substring(0, fullName.indexOf(" "))
-            : fullName;
+                ? fullName.substring(0, fullName.indexOf(" "))
+                : fullName;
+        if (firstName.isEmpty()) firstName = "there";
         if (tvUserName != null) tvUserName.setText(firstName);
-
-        if (tvStreakValue   != null) tvStreakValue.setText("12");
-        if (tvWeekValue     != null) tvWeekValue.setText("3.2");
-        if (tvCaloriesValue != null) tvCaloriesValue.setText("680");
+        // Stats populated by ViewModel observers — no hardcoded values
     }
 
     private void setupBottomNav() {
@@ -180,6 +190,12 @@ public class DashboardActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (dashboardViewModel != null) dashboardViewModel.loadWeeklyStats();
     }
 
     @Override

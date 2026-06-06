@@ -1,229 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/bg_primary"
-    android:orientation="vertical">
-
-    <!-- Top accent bar -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        android:background="@color/orange_primary" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/screen_padding_h">
-
-            <!-- Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="@dimen/space_md"
-                android:layout_marginBottom="@dimen/space_lg">
-
-                <TextView
-                    android:id="@+id/btnBack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="←"
-                    android:textSize="22sp"
-                    android:textColor="@color/text_primary"
-                    android:padding="@dimen/space_sm" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/progress_title"
-                    style="@style/Text.Hero"
-                    android:layout_marginStart="@dimen/space_sm" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/bg_primary" android:orientation="vertical">
+    <!--  Top accent bar  -->
+    <View android:layout_width="match_parent" android:layout_height="@dimen/top_bar_height" android:background="@color/orange_primary"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="@dimen/screen_padding_h">
+            <!--  Header  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="@dimen/space_md" android:layout_marginBottom="@dimen/space_lg">
+                <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="←" android:textSize="22sp" android:textColor="@color/text_primary" android:padding="@dimen/space_sm"/>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/progress_title" style="@style/Text.Hero" android:layout_marginStart="@dimen/space_sm"/>
             </LinearLayout>
-
-            <!-- Stats row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/space_lg">
-
-                <FrameLayout
-                    style="@style/Card.Dark"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="@dimen/space_sm">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="@dimen/space_md">
-                        <TextView
-                            android:id="@+id/tvWeekWorkouts"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/orange_primary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/workouts_this_week"
-                            android:textSize="9sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
-                            android:layout_marginTop="@dimen/space_xs"
-                            android:gravity="center_horizontal" />
+            <!--  Stats row  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal" android:layout_marginBottom="@dimen/space_lg">
+                <FrameLayout style="@style/Card.Dark" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="@dimen/space_sm">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:padding="@dimen/space_md" android:minHeight="90dp">
+                        <TextView android:id="@+id/tvWeekWorkouts" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="28sp" android:textStyle="bold" android:textColor="@color/orange_primary"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SESSIONS" android:textSize="9sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.06" android:layout_marginTop="@dimen/space_xs" android:gravity="center_horizontal"/>
                     </LinearLayout>
                 </FrameLayout>
-
-                <FrameLayout
-                    style="@style/Card.Dark"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="@dimen/space_xs"
-                    android:layout_marginEnd="@dimen/space_xs">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="@dimen/space_md">
-                        <TextView
-                            android:id="@+id/tvWeekDuration"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/text_primary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/total_duration"
-                            android:textSize="9sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
-                            android:layout_marginTop="@dimen/space_xs"
-                            android:gravity="center_horizontal" />
+                <FrameLayout style="@style/Card.Dark" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="@dimen/space_xs" android:layout_marginEnd="@dimen/space_xs">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:padding="@dimen/space_md" android:minHeight="90dp">
+                        <TextView android:id="@+id/tvWeekDuration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="28sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MINUTES" android:textSize="9sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.06" android:layout_marginTop="@dimen/space_xs" android:gravity="center_horizontal"/>
                     </LinearLayout>
                 </FrameLayout>
-
-                <FrameLayout
-                    style="@style/Card.Dark"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="@dimen/space_sm">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="@dimen/space_md">
-                        <TextView
-                            android:id="@+id/tvWeekCalories"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/text_primary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/total_calories"
-                            android:textSize="9sp"
-                            android:textColor="@color/text_muted"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.08"
-                            android:layout_marginTop="@dimen/space_xs"
-                            android:gravity="center_horizontal" />
+                <FrameLayout style="@style/Card.Dark" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="@dimen/space_sm">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:padding="@dimen/space_md" android:minHeight="90dp">
+                        <TextView android:id="@+id/tvWeekCalories" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="28sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="KCAL" android:textSize="9sp" android:textColor="@color/text_muted" android:textAllCaps="true" android:letterSpacing="0.06" android:layout_marginTop="@dimen/space_xs" android:gravity="center_horizontal"/>
                     </LinearLayout>
                 </FrameLayout>
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvTotalSessions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 sessions completed"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
-                android:layout_marginBottom="@dimen/space_lg" />
-
-            <!-- Active Goals Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="@dimen/space_sm">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/active_goals_section"
-                    style="@style/Text.Label" />
-                <TextView
-                    android:id="@+id/btnAddGoal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_goal"
-                    style="@style/Text.OrangeLink" />
+            <!--  Active Goals Section  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="@dimen/space_sm">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/active_goals_section" style="@style/Text.Label"/>
+                <TextView android:id="@+id/btnAddGoal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/add_goal" style="@style/Text.OrangeLink"/>
             </LinearLayout>
-
-            <!-- Goals RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvGoals"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
-            <!-- No Goals State -->
-            <LinearLayout
-                android:id="@+id/layoutNoGoals"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:padding="@dimen/space_xl">
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:gravity="center"
-                    android:text="🎯"
-                    android:textSize="40sp"
-                    android:background="@drawable/bg_logo_tile" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_goals_yet"
-                    android:textSize="15sp"
-                    android:textColor="@color/text_muted"
-                    android:gravity="center"
-                    android:layout_marginTop="@dimen/space_lg"
-                    android:lineSpacingExtra="4dp" />
+            <!--  Total sessions completed  -->
+            <TextView android:id="@+id/tvTotalSessions" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 sessions completed" android:textSize="13sp" android:textColor="@color/text_muted" android:layout_marginBottom="@dimen/space_md"/>
+            <!--  Goals RecyclerView  -->
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvGoals" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" android:overScrollMode="never"/>
+            <!--  No Goals State  -->
+            <LinearLayout android:id="@+id/layoutNoGoals" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:visibility="gone" android:padding="@dimen/space_xl">
+                <TextView android:layout_width="80dp" android:layout_height="80dp" android:gravity="center" android:text="🎯" android:textSize="40sp" android:background="@drawable/bg_logo_tile"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_goals_yet" android:textSize="15sp" android:textColor="@color/text_muted" android:gravity="center" android:layout_marginTop="@dimen/space_lg" android:lineSpacingExtra="4dp"/>
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
