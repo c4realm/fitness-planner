@@ -79,8 +79,11 @@
         <activity android:name=".activities.WorkoutHistoryActivity" ... />
         <activity android:name=".activities.GoalSettingActivity" ... />
         <activity android:name=".activities.BmiCalculatorActivity" ... />
-        <activity android:name=".activities.UserProfileActivity" ... />
         -->
+        <activity
+            android:name=".activities.UserProfileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
     </application>
 

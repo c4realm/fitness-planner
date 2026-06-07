@@ -3,7 +3,6 @@ package com.arcadefitness.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +29,6 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView tvStreakValue, tvWeekValue, tvCaloriesValue;
 
     private View navHome, navPlanner, navFab, navHistory, navProfile;
-    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +56,6 @@ public class DashboardActivity extends AppCompatActivity {
         navFab     = findViewById(R.id.navFab);
         navHistory = findViewById(R.id.navHistory);
         navProfile = findViewById(R.id.navProfile);
-
-        btnLogout  = findViewById(R.id.btnLogout);
     }
 
     private void setupRecyclerView() {
@@ -123,7 +119,11 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(new Intent(this, ProgressTrackingActivity.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-        navProfile.setOnClickListener(v -> setActiveNav(v));
+        navProfile.setOnClickListener(v -> {
+            setActiveNav(v);
+            startActivity(new Intent(this, UserProfileActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
 
         View btnContinue = findViewById(R.id.btnContinueWorkout);
         if (btnContinue != null) {
@@ -148,8 +148,6 @@ public class DashboardActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             });
         }
-
-        btnLogout.setOnClickListener(v -> logout());
 
         // Quick action grid
         findViewById(R.id.cardActionPlanner).setOnClickListener(v -> {
@@ -181,15 +179,6 @@ public class DashboardActivity extends AppCompatActivity {
             TextView label = activeNav.findViewWithTag("nav_label");
             if (label != null) label.setTextColor(getColor(R.color.orange_primary));
         }
-    }
-
-    private void logout() {
-        sessionManager.clearSession();
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-        finish();
     }
 
     @Override

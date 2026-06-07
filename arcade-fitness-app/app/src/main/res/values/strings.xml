@@ -122,4 +122,20 @@
     <!-- Auth -->
     <string name="btn_google_soon">Google Sign-In (Coming Soon)</string>
     <string name="btn_guest">Continue as Guest</string>
+    <string name="logout">Logout</string>
+
+    <!-- Profile -->
+    <string name="my_profile">My Profile</string>
+    <string name="personal_info">Personal Info</string>
+    <string name="fitness_level">Fitness Level</string>
+    <string name="beginner">Beginner</string>
+    <string name="intermediate">Intermediate</string>
+    <string name="advanced">Advanced</string>
+    <string name="hint_full_name_profile">Full name</string>
+    <string name="hint_age_profile">Age</string>
+    <string name="hint_height">Height (cm)</string>
+    <string name="hint_weight">Weight (kg)</string>
+    <string name="hint_weekly_goal">Workouts per week</string>
+    <string name="btn_save_changes">Save Changes</string>
+    <string name="profile_saved">Profile saved</string>
 </resources>
