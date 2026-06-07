@@ -58,6 +58,9 @@ public class UserProfileActivity extends AppCompatActivity {
         btnSaveProfile = findViewById(R.id.btnSaveProfile);
         btnSaveProfile.setOnClickListener(v -> saveProfile());
 
+        findViewById(R.id.btnBmiCalculator).setOnClickListener(v ->
+                startActivity(new Intent(UserProfileActivity.this, BmiCalculatorActivity.class)));
+
         btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> logout());
     }

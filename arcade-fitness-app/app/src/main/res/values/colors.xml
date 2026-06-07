@@ -33,4 +33,10 @@
     <color name="transparent">#00000000</color>
     <color name="status_bar">#F5F5F5</color>
     <color name="nav_bar">#FFFFFF</color>
+
+    <!-- BMI -->
+    <color name="bmi_underweight">#3B8BD4</color>
+    <color name="bmi_normal">#27A06E</color>
+    <color name="bmi_overweight">#FF6B00</color>
+    <color name="bmi_obese">#E53935</color>
 </resources>

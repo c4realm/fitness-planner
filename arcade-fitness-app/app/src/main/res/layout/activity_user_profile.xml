@@ -203,6 +203,15 @@
                 android:text="@string/btn_save_changes"
                 android:layout_marginTop="@dimen/space_lg" />
 
+            <!-- BMI Calculator button -->
+            <Button
+                android:id="@+id/btnBmiCalculator"
+                style="@style/Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="BMI Calculator"
+                android:layout_marginTop="@dimen/space_md" />
+
             <!-- Logout button -->
             <Button
                 android:id="@+id/btnLogout"
