@@ -1,9 +1,12 @@
 package com.arcadefitness.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +25,13 @@ public class UserProfileActivity extends AppCompatActivity {
     private FitnessRepository fitnessRepository;
 
     private TextView tvAvatarInitials, tvProfileName, tvProfileEmail;
+
+    private LinearLayout layoutViewMode, layoutEditMode;
+    private TextView tvViewName, tvViewAge, tvViewHeight, tvViewWeight, tvViewWeeklyGoal, tvViewFitnessLevel;
+
     private EditText etDisplayName, etAge, etHeight, etWeight, etWeeklyGoal;
     private RadioGroup rgFitnessLevel;
-    private Button btnSaveProfile, btnLogout;
+    private Button btnSaveProfile;
 
     private UserProfileEntity currentProfile;
     private String userEmail;
@@ -44,9 +51,21 @@ public class UserProfileActivity extends AppCompatActivity {
     private void initViews() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
+        findViewById(R.id.btnSettings).setOnClickListener(v -> showSettingsDialog());
+
         tvAvatarInitials = findViewById(R.id.tvAvatarInitials);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
+
+        layoutViewMode = findViewById(R.id.layoutViewMode);
+        layoutEditMode = findViewById(R.id.layoutEditMode);
+
+        tvViewName = findViewById(R.id.tvViewName);
+        tvViewAge = findViewById(R.id.tvViewAge);
+        tvViewHeight = findViewById(R.id.tvViewHeight);
+        tvViewWeight = findViewById(R.id.tvViewWeight);
+        tvViewWeeklyGoal = findViewById(R.id.tvViewWeeklyGoal);
+        tvViewFitnessLevel = findViewById(R.id.tvViewFitnessLevel);
 
         etDisplayName = findViewById(R.id.etDisplayName);
         etAge = findViewById(R.id.etAge);
@@ -59,18 +78,29 @@ public class UserProfileActivity extends AppCompatActivity {
         btnSaveProfile = findViewById(R.id.btnSaveProfile);
         btnSaveProfile.setOnClickListener(v -> saveProfile());
 
-        btnLogout = findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(v -> logout());
-
-        TextView tvThemeLabel = findViewById(R.id.tvThemeLabel);
-        TextView btnThemeToggle = findViewById(R.id.btnThemeToggle);
-        boolean isDark = ThemeUtil.isDarkMode(this);
-        tvThemeLabel.setText(isDark ? "Dark Mode" : "Light Mode");
-        btnThemeToggle.setText(isDark ? "🌙" : "☀️");
-        btnThemeToggle.setOnClickListener(v -> {
-            ThemeUtil.setDarkMode(this, !ThemeUtil.isDarkMode(this));
-            recreate();
+        findViewById(R.id.btnEditProfile).setOnClickListener(v -> {
+            layoutViewMode.setVisibility(View.GONE);
+            layoutEditMode.setVisibility(View.VISIBLE);
         });
+    }
+
+    private void showSettingsDialog() {
+        boolean isDark = ThemeUtil.isDarkMode(this);
+        String[] items = {
+            isDark ? "\u2600\uFE0F Light Mode" : "\uD83C\uDF11 Dark Mode",
+            "Logout"
+        };
+        new AlertDialog.Builder(this)
+            .setTitle("Settings")
+            .setItems(items, (dialog, which) -> {
+                if (which == 0) {
+                    ThemeUtil.setDarkMode(this, !ThemeUtil.isDarkMode(this));
+                    recreate();
+                } else if (which == 1) {
+                    logout();
+                }
+            })
+            .show();
     }
 
     private void loadProfile() {
@@ -113,18 +143,28 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void populateFields(UserProfileEntity profile) {
+        populateViewFields(profile);
+
         etDisplayName.setText(profile.getDisplayName());
         if (profile.getAge() > 0) {
             etAge.setText(String.valueOf(profile.getAge()));
+        } else {
+            etAge.setText("");
         }
         if (profile.getHeightCm() > 0) {
             etHeight.setText(String.valueOf(profile.getHeightCm()));
+        } else {
+            etHeight.setText("");
         }
         if (profile.getWeightKg() > 0) {
             etWeight.setText(String.valueOf(profile.getWeightKg()));
+        } else {
+            etWeight.setText("");
         }
         if (profile.getWeeklyGoal() > 0) {
             etWeeklyGoal.setText(String.valueOf(profile.getWeeklyGoal()));
+        } else {
+            etWeeklyGoal.setText("");
         }
 
         String level = profile.getFitnessLevel();
@@ -140,6 +180,31 @@ public class UserProfileActivity extends AppCompatActivity {
                     rgFitnessLevel.check(R.id.rbAdvanced);
                     break;
             }
+        }
+    }
+
+    private void populateViewFields(UserProfileEntity profile) {
+        tvViewName.setText(profile.getDisplayName() != null ? profile.getDisplayName() : "-");
+        tvViewAge.setText(profile.getAge() > 0 ? String.valueOf(profile.getAge()) : "-");
+        tvViewHeight.setText(profile.getHeightCm() > 0 ? String.valueOf(profile.getHeightCm()) + " cm" : "-");
+        tvViewWeight.setText(profile.getWeightKg() > 0 ? String.valueOf(profile.getWeightKg()) + " kg" : "-");
+        tvViewWeeklyGoal.setText(profile.getWeeklyGoal() > 0 ? String.valueOf(profile.getWeeklyGoal()) + " days" : "-");
+
+        String level = profile.getFitnessLevel();
+        if (level != null) {
+            switch (level) {
+                case "BEGINNER":
+                    tvViewFitnessLevel.setText(getString(R.string.beginner));
+                    break;
+                case "INTERMEDIATE":
+                    tvViewFitnessLevel.setText(getString(R.string.intermediate));
+                    break;
+                case "ADVANCED":
+                    tvViewFitnessLevel.setText(getString(R.string.advanced));
+                    break;
+            }
+        } else {
+            tvViewFitnessLevel.setText("-");
         }
     }
 
@@ -213,7 +278,10 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Integer id) {
                     currentProfile.setId(id);
-                    runOnUiThread(() -> Toast.makeText(UserProfileActivity.this, R.string.profile_saved, Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        Toast.makeText(UserProfileActivity.this, R.string.profile_saved, Toast.LENGTH_SHORT).show();
+                        switchToViewMode();
+                    });
                 }
 
                 @Override
@@ -231,7 +299,10 @@ public class UserProfileActivity extends AppCompatActivity {
             fitnessRepository.updateUserProfile(currentProfile, new FitnessRepository.RepositoryCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    runOnUiThread(() -> Toast.makeText(UserProfileActivity.this, R.string.profile_saved, Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        Toast.makeText(UserProfileActivity.this, R.string.profile_saved, Toast.LENGTH_SHORT).show();
+                        switchToViewMode();
+                    });
                 }
 
                 @Override
@@ -245,6 +316,14 @@ public class UserProfileActivity extends AppCompatActivity {
         if (!name.isEmpty()) {
             tvAvatarInitials.setText(String.valueOf(Character.toUpperCase(name.charAt(0))));
         }
+    }
+
+    private void switchToViewMode() {
+        if (currentProfile != null) {
+            populateViewFields(currentProfile);
+        }
+        layoutEditMode.setVisibility(View.GONE);
+        layoutViewMode.setVisibility(View.VISIBLE);
     }
 
     private void logout() {
