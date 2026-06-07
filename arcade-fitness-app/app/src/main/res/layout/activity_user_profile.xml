@@ -194,6 +194,43 @@
                 </RadioGroup>
             </LinearLayout>
 
+            <!-- Appearance -->
+            <TextView
+                style="@style/Text.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Appearance"
+                android:layout_marginTop="@dimen/space_lg"
+                android:layout_marginBottom="@dimen/space_sm" />
+
+            <LinearLayout
+                style="@style/Card.Dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_card">
+
+                <TextView
+                    android:id="@+id/tvThemeLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Dark Mode"
+                    android:textSize="@dimen/text_md"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/btnThemeToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="22sp"
+                    android:paddingStart="@dimen/space_sm"
+                    android:paddingEnd="@dimen/space_sm" />
+            </LinearLayout>
+
             <!-- Save button -->
             <Button
                 android:id="@+id/btnSaveProfile"

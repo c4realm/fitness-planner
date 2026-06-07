@@ -14,6 +14,7 @@ import com.arcadefitness.R;
 import com.arcadefitness.data.local.entity.UserProfileEntity;
 import com.arcadefitness.data.repository.FitnessRepository;
 import com.arcadefitness.utils.SessionManager;
+import com.arcadefitness.utils.ThemeUtil;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -60,6 +61,16 @@ public class UserProfileActivity extends AppCompatActivity {
 
         btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> logout());
+
+        TextView tvThemeLabel = findViewById(R.id.tvThemeLabel);
+        TextView btnThemeToggle = findViewById(R.id.btnThemeToggle);
+        boolean isDark = ThemeUtil.isDarkMode(this);
+        tvThemeLabel.setText(isDark ? "Dark Mode" : "Light Mode");
+        btnThemeToggle.setText(isDark ? "🌙" : "☀️");
+        btnThemeToggle.setOnClickListener(v -> {
+            ThemeUtil.setDarkMode(this, !ThemeUtil.isDarkMode(this));
+            recreate();
+        });
     }
 
     private void loadProfile() {

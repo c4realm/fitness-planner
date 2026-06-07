@@ -15,7 +15,6 @@ import com.arcadefitness.R;
 import com.arcadefitness.adapter.ExerciseAdapter;
 import com.arcadefitness.data.local.entity.ExerciseEntity;
 import com.arcadefitness.utils.SessionManager;
-import com.arcadefitness.utils.ThemeUtil;
 import com.arcadefitness.viewmodel.DashboardViewModel;
 
 import java.util.List;
@@ -105,14 +104,6 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        TextView btnThemeToggle = findViewById(R.id.btnThemeToggle);
-        btnThemeToggle.setText(ThemeUtil.isDarkMode(this) ? "☀️" : "🌙");
-        btnThemeToggle.setOnClickListener(v -> {
-            boolean isDark = ThemeUtil.isDarkMode(this);
-            ThemeUtil.setDarkMode(this, !isDark);
-            recreate();
-        });
-
         navHome.setOnClickListener(v -> setActiveNav(v));
         navPlanner.setOnClickListener(v -> {
             setActiveNav(v);
