@@ -125,14 +125,6 @@ public class DashboardActivity extends AppCompatActivity {
         });
         navProfile.setOnClickListener(v -> setActiveNav(v));
 
-        View todayBanner = findViewById(R.id.cardTodayWorkout);
-        if (todayBanner != null) {
-            todayBanner.setOnClickListener(v -> {
-                startActivity(new Intent(this, WorkoutTrackingActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            });
-        }
-
         View btnContinue = findViewById(R.id.btnContinueWorkout);
         if (btnContinue != null) {
             btnContinue.setOnClickListener(v -> {
