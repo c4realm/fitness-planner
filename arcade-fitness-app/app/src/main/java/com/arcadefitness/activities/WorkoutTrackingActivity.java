@@ -109,7 +109,7 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                     int selectedId = workouts.get(which).getId();
                     viewModel.startSession(selectedId);
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .setNegativeButton("Cancel", null)
                 .setCancelable(false)
                 .show();
     }
@@ -161,6 +161,11 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
     private void initViews() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        View btnStartWorkout = findViewById(R.id.btnStartWorkout);
+        if (btnStartWorkout != null) {
+            btnStartWorkout.setOnClickListener(v -> showWorkoutPickerOrResume());
+        }
 
         tvElapsedTime         = findViewById(R.id.tvElapsedTime);
         tvSetsCompleted       = findViewById(R.id.tvSetsCompleted);

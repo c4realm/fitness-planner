@@ -245,6 +245,13 @@
                     android:textColor="@color/text_muted"
                     android:gravity="center"
                     android:layout_marginTop="@dimen/space_lg" />
+                <Button
+                    android:id="@+id/btnStartWorkout"
+                    style="@style/Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:text="Start Workout"
+                    android:layout_marginTop="@dimen/space_lg" />
             </LinearLayout>
 
             <!-- Session Summary (shown after completion) -->
