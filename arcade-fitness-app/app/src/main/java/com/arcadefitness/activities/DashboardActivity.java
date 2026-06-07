@@ -133,6 +133,14 @@ public class DashboardActivity extends AppCompatActivity {
             });
         }
 
+        View btnStartWorkout = findViewById(R.id.btnStartWorkout);
+        if (btnStartWorkout != null) {
+            btnStartWorkout.setOnClickListener(v -> {
+                startActivity(new Intent(this, WorkoutTrackingActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            });
+        }
+
         View tvViewAll = findViewById(R.id.tvViewAll);
         if (tvViewAll != null) {
             tvViewAll.setOnClickListener(v -> {
