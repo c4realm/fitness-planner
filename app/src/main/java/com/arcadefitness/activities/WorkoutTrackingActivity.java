@@ -1,5 +1,6 @@
 package com.arcadefitness.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -11,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.arcadefitness.R;
@@ -38,10 +38,8 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
     private Button btnMarkSetDone;
 
     private CountDownTimer timer;
-    private int completedSetsCount = 0;
-
-    // First valid exercise ID from the database — resolved on start
-    private int resolvedExerciseId = -1;
+    private int completedSetsCount  = 0;
+    private int resolvedExerciseId  = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +52,87 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
         int workoutId = getIntent().getIntExtra("workout_id", -1);
         if (workoutId > 0) {
+            // Came from Planner — start immediately
             viewModel.startSession(workoutId);
         } else {
-            viewModel.loadCurrentSession();
+            // Came from Dashboard / FAB — show picker first
+            showWorkoutPickerOrResume();
         }
+    }
+
+    // ── WORKOUT PICKER ───────────────────────────────────────────────
+
+    /**
+     * Loads all workouts from Room on a background thread.
+     * If an active session already exists, resumes it.
+     * If workouts exist, shows a picker dialog.
+     * If no workouts exist yet, prompts the user to create one.
+     */
+    private void showWorkoutPickerOrResume() {
+        AppDatabase.DATABASE_WRITE_EXECUTOR.execute(() -> {
+            WorkoutSessionEntity active = AppDatabase.getInstance(this)
+                    .workoutSessionDao().getCurrentSession();
+
+            if (active != null) {
+                // Resume existing session — no picker needed
+                runOnUiThread(() -> viewModel.loadCurrentSession());
+                return;
+            }
+
+            List<WorkoutEntity> workouts = AppDatabase.getInstance(this)
+                    .workoutDao().getAll();
+
+            runOnUiThread(() -> {
+                if (workouts == null || workouts.isEmpty()) {
+                    showNoWorkoutsDialog();
+                } else {
+                    showPickerDialog(workouts);
+                }
+            });
+        });
+    }
+
+    private void showPickerDialog(List<WorkoutEntity> workouts) {
+        String[] names = new String[workouts.size()];
+        for (int i = 0; i < workouts.size(); i++) {
+            WorkoutEntity w = workouts.get(i);
+            names[i] = w.getName() + "  ·  " + w.getTargetMuscleGroup();
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Choose a Workout")
+                .setItems(names, (dialog, which) -> {
+                    int selectedId = workouts.get(which).getId();
+                    viewModel.startSession(selectedId);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .setCancelable(false)
+                .show();
+    }
+
+    private void showNoWorkoutsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("No Workouts Yet")
+                .setMessage("Create a workout in the Planner first, then come back to track it.")
+                .setPositiveButton("Go to Planner", (dialog, which) -> {
+                    startActivity(new Intent(this, WorkoutPlannerActivity.class));
+                    finish();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .setCancelable(false)
+                .show();
+    }
+
+    // ── RESOLVE EXERCISE ID ──────────────────────────────────────────
+
+    private void resolveFirstExerciseId() {
+        AppDatabase.DATABASE_WRITE_EXECUTOR.execute(() -> {
+            List<ExerciseEntity> all = AppDatabase.getInstance(this)
+                    .exerciseDao().getAll();
+            if (all != null && !all.isEmpty()) {
+                resolvedExerciseId = all.get(0).getId();
+            }
+        });
     }
 
     // ── INIT ────────────────────────────────────────────────────────
@@ -83,7 +158,6 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
         btnMarkSetDone        = findViewById(R.id.btnMarkSetDone);
 
         updateSetsCompletedText();
-
         btnMarkSetDone.setOnClickListener(v -> markSetDone());
 
         btnPause.setOnClickListener(v -> {
@@ -108,21 +182,6 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
         );
 
         btnBackToDashboard.setOnClickListener(v -> finish());
-    }
-
-    // ── RESOLVE EXERCISE ID ──────────────────────────────────────────
-    /**
-     * Fetches the first exercise ID from the database on a background thread.
-     * This prevents the FOREIGN KEY constraint failure when logging a set,
-     * because set_records.exercise_id must reference a real row in exercises.
-     */
-    private void resolveFirstExerciseId() {
-        AppDatabase.DATABASE_WRITE_EXECUTOR.execute(() -> {
-            List<ExerciseEntity> all = AppDatabase.getInstance(this).exerciseDao().getAll();
-            if (all != null && !all.isEmpty()) {
-                resolvedExerciseId = all.get(0).getId();
-            }
-        });
     }
 
     // ── VIEWMODEL ────────────────────────────────────────────────────
@@ -208,7 +267,6 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
             return;
         }
 
-        // Use resolved exercise ID — must be a real row in exercises table
         int exerciseId = resolvedExerciseId > 0 ? resolvedExerciseId : 1;
 
         SetRecordEntity setRecord = new SetRecordEntity();
