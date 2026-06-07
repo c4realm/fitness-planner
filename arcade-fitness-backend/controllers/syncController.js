@@ -14,6 +14,7 @@ exports.batchSync = async (req, res, next) => {
     await client.query('BEGIN');
 
     const results = [];
+    const syncIds = [];
 
     for (const op of operations) {
       const { table, action, data } = op;
@@ -22,11 +23,13 @@ exports.batchSync = async (req, res, next) => {
         throw new AppError('Each operation requires table, action, and data fields', 400);
       }
 
-      await client.query(
+      const syncInsert = await client.query(
         `INSERT INTO sync_queue (user_id, table_name, operation, payload, status, attempt_count)
-         VALUES ($1, $2, $3, $4, 'pending', 0)`,
+         VALUES ($1, $2, $3, $4, 'pending', 0) RETURNING sync_id`,
         [req.user.user_id, table, action.toUpperCase(), JSON.stringify(data)]
       );
+      const syncId = syncInsert.rows[0].sync_id;
+      syncIds.push(syncId);
 
       let query;
       switch (`${table}:${action}`) {
@@ -98,11 +101,13 @@ exports.batchSync = async (req, res, next) => {
       results.push({ table, action, status: 'committed' });
     }
 
-    await client.query(
-      `UPDATE sync_queue SET status = 'completed', processed_at = NOW()
-       WHERE user_id = $1 AND status = 'pending'`,
-      [req.user.user_id]
-    );
+    if (syncIds.length > 0) {
+      await client.query(
+        `UPDATE sync_queue SET status = 'completed', processed_at = NOW()
+         WHERE sync_id = ANY($1::int[])`,
+        [syncIds]
+      );
+    }
 
     await client.query('COMMIT');
 
@@ -114,11 +119,13 @@ exports.batchSync = async (req, res, next) => {
   } catch (err) {
     await client.query('ROLLBACK');
 
-    await db.query(
-      `UPDATE sync_queue SET status = 'failed', error_message = $1, attempt_count = attempt_count + 1
-       WHERE user_id = $2 AND status = 'pending'`,
-      [err.message, req.user.user_id]
-    ).catch(() => {});
+    if (syncIds.length > 0) {
+      await db.query(
+        `UPDATE sync_queue SET status = 'failed', error_message = $1, attempt_count = attempt_count + 1
+         WHERE sync_id = ANY($2::int[])`,
+        [err.message, syncIds]
+      ).catch(() => {});
+    }
 
     next(err);
   } finally {

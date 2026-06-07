@@ -27,6 +27,7 @@ public class DashboardViewModel extends AndroidViewModel {
     private final androidx.lifecycle.MutableLiveData<Integer> weeklySessionCount  = new androidx.lifecycle.MutableLiveData<>(0);
     private final androidx.lifecycle.MutableLiveData<Integer> weeklyCalories      = new androidx.lifecycle.MutableLiveData<>(0);
     private final androidx.lifecycle.MutableLiveData<Integer> weeklyDuration      = new androidx.lifecycle.MutableLiveData<>(0);
+    private final androidx.lifecycle.MutableLiveData<Integer> streakDays          = new androidx.lifecycle.MutableLiveData<>(0);
 
     public DashboardViewModel(@NonNull Application application) {
         super(application);
@@ -43,6 +44,7 @@ public class DashboardViewModel extends AndroidViewModel {
     public LiveData<Integer> getWeeklySessionCount()       { return weeklySessionCount; }
     public LiveData<Integer> getWeeklyCalories()           { return weeklyCalories; }
     public LiveData<Integer> getWeeklyDuration()           { return weeklyDuration; }
+    public LiveData<Integer> getStreakDays()               { return streakDays; }
     public ExerciseRepository getExerciseRepository()      { return exerciseRepository; }
     public WorkoutRepository  getWorkoutRepository()       { return workoutRepository; }
 
@@ -61,6 +63,16 @@ public class DashboardViewModel extends AndroidViewModel {
                 weeklySessionCount.postValue(0);
                 weeklyDuration.postValue(0);
                 weeklyCalories.postValue(0);
+            }
+        });
+        fitnessRepository.getStreakDays(new FitnessRepository.RepositoryCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer days) {
+                streakDays.postValue(days);
+            }
+            @Override
+            public void onError(String errorMessage) {
+                streakDays.postValue(0);
             }
         });
     }

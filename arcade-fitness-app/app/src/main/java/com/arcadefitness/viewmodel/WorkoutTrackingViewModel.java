@@ -27,6 +27,7 @@ public class WorkoutTrackingViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> elapsedSeconds = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isRunning = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> completedSets = new MutableLiveData<>(0);
+    private double totalVolumeKg = 0.0;
 
     public WorkoutTrackingViewModel(@NonNull Application application) {
         super(application);
@@ -53,6 +54,15 @@ public class WorkoutTrackingViewModel extends AndroidViewModel {
 
     public LiveData<Integer> getCompletedSets() {
         return completedSets;
+    }
+
+    public void incrementCompletedSets() {
+        Integer current = completedSets.getValue();
+        completedSets.postValue(current != null ? current + 1 : 1);
+    }
+
+    public void addVolume(double weightKg, int reps) {
+        totalVolumeKg += (weightKg * reps);
     }
 
     public void startSession(int workoutId) {
@@ -105,7 +115,7 @@ public class WorkoutTrackingViewModel extends AndroidViewModel {
         int minutes = seconds / 60;
         int calories = (int) (minutes * 7.5);
 
-        fitnessRepository.completeWorkoutSession(session.getId(), minutes, calories, 0, rating, notes,
+        fitnessRepository.completeWorkoutSession(session.getId(), minutes, calories, (int) totalVolumeKg, rating, notes,
                 new FitnessRepository.RepositoryCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {

@@ -2,6 +2,7 @@ package com.arcadefitness.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
@@ -54,14 +55,21 @@ public class SessionManager {
 
     // ── SAVE SESSION ─────────────────────────────────────────────────
 
-    public void saveSession(String userId, String userName, String email, String token) {
+    public void saveSession(String userId, String userName, String email, String authToken) {
         prefs.edit()
                 .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
                 .putString(AppConstants.KEY_USER_ID,       userId)
                 .putString(AppConstants.KEY_USER_NAME,     userName)
                 .putString(AppConstants.KEY_USER_EMAIL,    email)
-                .putString(AppConstants.KEY_USER_TOKEN,    token)
+                .putString(AppConstants.KEY_USER_TOKEN,    authToken)
                 .apply();
+        if (isUsingMockToken()) {
+            Log.w("SessionManager", "Using mock token — replace with real JWT in Phase 3");
+        }
+    }
+
+    public boolean isUsingMockToken() {
+        return "mock_token".equals(getToken());
     }
 
     public void saveGoogleSession(String userId, String userName, String email) {

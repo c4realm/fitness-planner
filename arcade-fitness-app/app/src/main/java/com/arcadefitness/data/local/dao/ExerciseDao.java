@@ -68,4 +68,7 @@ public interface ExerciseDao {
 
     @Query("UPDATE exercises SET is_synced = 0 WHERE id = :id")
     void markUnsynced(int id);
+
+    @Query("SELECT e.* FROM exercises e INNER JOIN workout_exercises we ON e.id = we.exercise_id WHERE we.workout_id = :workoutId ORDER BY we.order_index ASC")
+    List<ExerciseEntity> getExercisesForWorkout(int workoutId);
 }

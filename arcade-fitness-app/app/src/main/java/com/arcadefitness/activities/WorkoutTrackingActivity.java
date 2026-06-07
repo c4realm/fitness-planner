@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +42,9 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
     private CountDownTimer timer;
     private int completedSetsCount  = 0;
-    private int resolvedExerciseId  = -1;
+    private int selectedExerciseId  = -1;
+    private Spinner spinnerExercise;
+    private List<ExerciseEntity> exerciseList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,6 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
         initViews();
         setupViewModel();
-        resolveFirstExerciseId();
 
         int workoutId = getIntent().getIntExtra("workout_id", -1);
         if (workoutId > 0) {
@@ -125,13 +129,31 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
     // ── RESOLVE EXERCISE ID ──────────────────────────────────────────
 
-    private void resolveFirstExerciseId() {
+    private void loadExercisesForSpinner(int workoutId) {
         AppDatabase.DATABASE_WRITE_EXECUTOR.execute(() -> {
-            List<ExerciseEntity> all = AppDatabase.getInstance(this)
+            List<ExerciseEntity> exercises = AppDatabase.getInstance(this)
                     .exerciseDao().getAll();
-            if (all != null && !all.isEmpty()) {
-                resolvedExerciseId = all.get(0).getId();
-            }
+            runOnUiThread(() -> {
+                exerciseList = exercises != null ? exercises : new java.util.ArrayList<>();
+                String[] names = new String[exerciseList.size()];
+                for (int i = 0; i < exerciseList.size(); i++) {
+                    names[i] = exerciseList.get(i).getName();
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item, names);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerExercise.setAdapter(adapter);
+                spinnerExercise.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                        selectedExerciseId = exerciseList.get(pos).getId();
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        selectedExerciseId = -1;
+                    }
+                });
+            });
         });
     }
 
@@ -153,11 +175,11 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
         btnPause              = findViewById(R.id.btnPause);
         btnComplete           = findViewById(R.id.btnComplete);
         btnBackToDashboard    = findViewById(R.id.btnBackToDashboard);
+        spinnerExercise       = findViewById(R.id.spinnerExercise);
         etSetWeight           = findViewById(R.id.etSetWeight);
         etSetReps             = findViewById(R.id.etSetReps);
         btnMarkSetDone        = findViewById(R.id.btnMarkSetDone);
 
-        updateSetsCompletedText();
         btnMarkSetDone.setOnClickListener(v -> markSetDone());
 
         btnPause.setOnClickListener(v -> {
@@ -201,7 +223,6 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                 layoutActiveControls.setVisibility(View.VISIBLE);
                 layoutSessionSummary.setVisibility(View.GONE);
                 completedSetsCount = 0;
-                updateSetsCompletedText();
             }
         });
 
@@ -210,6 +231,7 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                 tvCurrentExerciseName.setText(workout.getName());
                 tvCurrentSetsInfo.setText(workout.getExerciseCount()
                         + " exercises · " + workout.getTargetMuscleGroup());
+                loadExercisesForSpinner(workout.getId());
             }
         });
 
@@ -224,6 +246,10 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
         viewModel.getIsRunning().observe(this, running -> {
             if (Boolean.TRUE.equals(running)) startTimer();
             else stopTimer();
+        });
+
+        viewModel.getCompletedSets().observe(this, count -> {
+            tvSetsCompleted.setText((count != null ? count : 0) + " sets completed");
         });
     }
 
@@ -267,7 +293,11 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
             return;
         }
 
-        int exerciseId = resolvedExerciseId > 0 ? resolvedExerciseId : 1;
+        if (selectedExerciseId <= 0) {
+            Toast.makeText(this, "Please select an exercise", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int exerciseId = selectedExerciseId;
 
         SetRecordEntity setRecord = new SetRecordEntity();
         setRecord.setWorkoutId(session.getWorkoutId());
@@ -283,7 +313,8 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Integer result) {
                         completedSetsCount++;
-                        updateSetsCompletedText();
+                        viewModel.incrementCompletedSets();
+                        viewModel.addVolume(weight, reps);
                         etSetWeight.setText("");
                         etSetReps.setText("");
                         Toast.makeText(WorkoutTrackingActivity.this,

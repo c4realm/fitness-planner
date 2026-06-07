@@ -756,7 +756,7 @@ public class FitnessRepository {
     public void getSessionsSince(long fromTimestamp, RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSessions();
+                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSince(fromTimestamp);
                 postSuccess(callback, sessions);
             } catch (Exception e) {
                 postError(callback, "Failed to load sessions: " + e.getMessage());
@@ -780,6 +780,31 @@ public class FitnessRepository {
                 });
             } catch (Exception e) {
                 postError(callback, "Failed to load weekly stats: " + e.getMessage());
+            }
+        });
+    }
+
+    public void getStreakDays(RepositoryCallback<Integer> callback) {
+        executor.execute(() -> {
+            try {
+                List<String> dates = workoutSessionDao.getCompletedSessionDates();
+                int streak = 0;
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                for (int i = 0; i < dates.size(); i++) {
+                    String expected = String.format("%04d-%02d-%02d",
+                            cal.get(java.util.Calendar.YEAR),
+                            cal.get(java.util.Calendar.MONTH) + 1,
+                            cal.get(java.util.Calendar.DAY_OF_MONTH));
+                    if (dates.get(i).equals(expected)) {
+                        streak++;
+                        cal.add(java.util.Calendar.DAY_OF_MONTH, -1);
+                    } else {
+                        break;
+                    }
+                }
+                postSuccess(callback, streak);
+            } catch (Exception e) {
+                postError(callback, "Failed to calculate streak: " + e.getMessage());
             }
         });
     }

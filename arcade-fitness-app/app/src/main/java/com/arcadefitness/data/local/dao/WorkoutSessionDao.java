@@ -51,6 +51,9 @@ public interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions WHERE status = 'COMPLETED' ORDER BY end_timestamp DESC")
     List<WorkoutSessionEntity> getCompletedSessions();
 
+    @Query("SELECT * FROM workout_sessions WHERE status = 'COMPLETED' AND start_timestamp >= :fromTimestamp ORDER BY start_timestamp DESC")
+    List<WorkoutSessionEntity> getCompletedSince(long fromTimestamp);
+
     @Query("SELECT * FROM workout_sessions WHERE start_timestamp >= :fromTimestamp ORDER BY start_timestamp DESC")
     LiveData<List<WorkoutSessionEntity>> getSessionsSinceLiveData(long fromTimestamp);
 
@@ -101,4 +104,7 @@ public interface WorkoutSessionDao {
 
     @Query("UPDATE workout_sessions SET is_synced = 0 WHERE id = :id")
     void markUnsynced(int id);
+
+    @Query("SELECT DISTINCT date(start_timestamp / 1000, 'unixepoch') as session_date FROM workout_sessions WHERE status = 'COMPLETED' ORDER BY session_date DESC")
+    List<String> getCompletedSessionDates();
 }

@@ -132,6 +132,8 @@ public class RegisterActivity extends AppCompatActivity {
         // ────────────────────────────────────────────────────────────
 
         sessionManager.saveRegisteredAccount(email, password, fullName);
+        // TODO Phase 3: Replace mock_token with real JWT from Retrofit login/register response
+        // ApiClient.getInstance().getApiService().register(req).enqueue(callback → saveSession(..., response.token))
         sessionManager.saveSession("user_" + email, fullName, email, "mock_token");
         goToDashboard();
     }

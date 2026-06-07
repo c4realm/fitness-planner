@@ -87,9 +87,9 @@ public class DashboardActivity extends AppCompatActivity {
         dashboardViewModel.getWeeklyCalories().observe(this, kcal -> {
             if (tvCaloriesValue != null) tvCaloriesValue.setText(String.valueOf(kcal));
         });
-        // Streak = total completed sessions (simple proxy until streak logic built)
-        dashboardViewModel.getWeeklySessionCount().observe(this, count -> {
-            if (tvStreakValue != null) tvStreakValue.setText(String.valueOf(count));
+        // Real consecutive-day streak
+        dashboardViewModel.getStreakDays().observe(this, days -> {
+            if (tvStreakValue != null) tvStreakValue.setText(String.valueOf(days));
         });
     }
 
