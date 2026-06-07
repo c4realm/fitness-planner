@@ -18,12 +18,25 @@
             android:padding="@dimen/screen_padding_h">
 
             <!-- Top accent bar -->
-            <View
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/top_bar_height"
                 android:background="@color/orange_primary"
                 android:layout_marginStart="-24dp"
-                android:layout_marginEnd="-24dp" />
+                android:layout_marginEnd="-24dp">
+
+                <TextView
+                    android:id="@+id/btnThemeToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="☀️"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_marginEnd="@dimen/space_sm" />
+            </RelativeLayout>
 
             <!-- ── HERO BANNER ── -->
             <FrameLayout
@@ -496,16 +509,6 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never" />
-
-            <!-- Logout — kept because DashboardActivity.java requires btnLogout -->
-            <Button
-                android:id="@+id/btnLogout"
-                style="@style/Button.Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="Logout"
-                android:letterSpacing="0.03"
-                android:layout_marginTop="@dimen/space_lg" />
 
             <View android:layout_width="match_parent" android:layout_height="80dp" />
 

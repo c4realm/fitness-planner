@@ -11,7 +11,7 @@
         <item name="android:windowBackground">@color/bg_primary</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">@color/nav_bar</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">@bool/use_light_status_bar</item>
         <item name="android:textColor">@color/text_primary</item>
     </style>
 

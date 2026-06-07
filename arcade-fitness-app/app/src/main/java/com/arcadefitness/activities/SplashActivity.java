@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.arcadefitness.R;
 import com.arcadefitness.utils.AppConstants;
 import com.arcadefitness.utils.SessionManager;
+import com.arcadefitness.utils.ThemeUtil;
 
 /**
  * SplashActivity.java
@@ -28,6 +29,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ThemeUtil.applyTheme(this);
 
         // Full screen — hide status bar
         getWindow().setFlags(

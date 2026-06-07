@@ -64,7 +64,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void loadProfile() {
         String name = sessionManager.getUserName();
-        userEmail = sessionManager.getEmail();
+        userEmail = sessionManager.getUserEmail();
 
         tvProfileName.setText(name);
         tvProfileEmail.setText(userEmail);
