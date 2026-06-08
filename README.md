@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/readme_banner.png" width="100%" alt="Arcade Fitness Planner Logo" />
+<img src="/arcade-fitness-app/docs/readme_banner.png" width="100%" alt="Arcade Fitness Planner Logo" />
 
 # Arcade Fitness Planner
 
@@ -311,4 +311,3 @@ Academic Project — **St. Mary's University © 2025**
 *Built with Java & Android Studio by the Arcade Fitness Planner Team*
 
 </div>
-Done
