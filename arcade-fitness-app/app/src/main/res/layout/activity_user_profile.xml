@@ -298,14 +298,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ══ EDIT MODE (hidden by default) ══ -->
-            <LinearLayout
-                android:id="@+id/layoutEditMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
             <!-- BMI Calculator button -->
             <Button
                 android:id="@+id/btnBmiCalculator"
@@ -443,7 +435,6 @@
                     android:text="@string/btn_save_changes"
                     android:layout_marginTop="@dimen/space_lg" />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
