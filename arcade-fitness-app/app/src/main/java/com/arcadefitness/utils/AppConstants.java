@@ -26,6 +26,8 @@ public final class AppConstants {
     public static final String KEY_USER_EMAIL     = "user_email";
     public static final String KEY_IS_LOGGED_IN   = "is_logged_in";
     public static final String KEY_GOOGLE_LOGIN   = "google_login";
+    public static final String KEY_IS_GUEST       = "is_guest";
+    public static final String GUEST_USER_ID      = "guest";
 
     // ── INTENT EXTRAS ────────────────────────────────────────────────
     public static final String EXTRA_USER_ID      = "extra_user_id";

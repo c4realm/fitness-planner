@@ -72,6 +72,16 @@ public class SessionManager {
         return "mock_token".equals(getToken());
     }
 
+    public void saveGuestSession() {
+        prefs.edit()
+            .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
+            .putBoolean(AppConstants.KEY_IS_GUEST, true)
+            .putString(AppConstants.KEY_USER_ID, AppConstants.GUEST_USER_ID)
+            .putString(AppConstants.KEY_USER_NAME, "Guest")
+            .putString(AppConstants.KEY_USER_EMAIL, "")
+            .apply();
+    }
+
     public void saveGoogleSession(String userId, String userName, String email) {
         prefs.edit()
                 .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
@@ -86,6 +96,7 @@ public class SessionManager {
 
     public boolean isLoggedIn()  { return prefs.getBoolean(AppConstants.KEY_IS_LOGGED_IN, false); }
     public boolean isGoogleUser(){ return prefs.getBoolean(AppConstants.KEY_GOOGLE_LOGIN,  false); }
+    public boolean isGuest()     { return prefs.getBoolean(AppConstants.KEY_IS_GUEST, false); }
     public String  getUserId()   { return prefs.getString(AppConstants.KEY_USER_ID,    ""); }
     public String  getUserName() { return prefs.getString(AppConstants.KEY_USER_NAME,  ""); }
     public String  getUserEmail(){ return prefs.getString(AppConstants.KEY_USER_EMAIL, ""); }

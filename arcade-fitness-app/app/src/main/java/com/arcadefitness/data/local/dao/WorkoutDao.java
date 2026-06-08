@@ -15,11 +15,11 @@ import java.util.List;
 @Dao
 public interface WorkoutDao {
 
-    @Query("SELECT * FROM workouts ORDER BY updated_at DESC")
-    List<WorkoutEntity> getAll();
+    @Query("SELECT * FROM workouts WHERE owner_id = :ownerId ORDER BY updated_at DESC")
+    List<WorkoutEntity> getAll(String ownerId);
 
-    @Query("SELECT * FROM workouts ORDER BY updated_at DESC")
-    LiveData<List<WorkoutEntity>> getAllLiveData();
+    @Query("SELECT * FROM workouts WHERE owner_id = :ownerId ORDER BY updated_at DESC")
+    LiveData<List<WorkoutEntity>> getAllLiveData(String ownerId);
 
     @Query("SELECT * FROM workouts WHERE id = :id LIMIT 1")
     WorkoutEntity getById(int id);
@@ -60,8 +60,8 @@ public interface WorkoutDao {
     @Query("DELETE FROM workouts")
     void deleteAll();
 
-    @Query("SELECT COUNT(*) FROM workouts")
-    int getCount();
+    @Query("SELECT COUNT(*) FROM workouts WHERE owner_id = :ownerId")
+    int getCount(String ownerId);
 
     @Query("UPDATE workouts SET is_synced = 1, remote_id = :remoteId WHERE id = :id")
     void markSynced(int id, String remoteId);

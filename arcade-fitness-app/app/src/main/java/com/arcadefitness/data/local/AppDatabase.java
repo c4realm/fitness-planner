@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
                 WorkoutSessionEntity.class,
                 WorkoutExerciseEntity.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -71,7 +71,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     "arcade_fitness_db"
                             )
                             .addCallback(sRoomDatabaseCallback)
-                            .addMigrations(MIGRATION_2_3)
+                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                             .build();
                 }
             }
@@ -96,6 +96,16 @@ public abstract class AppDatabase extends RoomDatabase {
                 "`workout_id` INTEGER NOT NULL, " +
                 "`exercise_id` INTEGER NOT NULL)"
             );
+        }
+    };
+
+    static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE workouts ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'guest'");
+            database.execSQL("ALTER TABLE workout_sessions ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'guest'");
+            database.execSQL("ALTER TABLE goals ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'guest'");
+            database.execSQL("ALTER TABLE set_records ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'guest'");
         }
     };
 

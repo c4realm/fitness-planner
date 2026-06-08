@@ -63,10 +63,14 @@ public class SetRecordEntity {
     @ColumnInfo(name = "remote_id")
     private String remoteId;
 
+    @ColumnInfo(name = "owner_id", defaultValue = "guest")
+    private String ownerId;
+
     public SetRecordEntity() {
         this.timestamp = System.currentTimeMillis();
         this.isCompleted = 0;
         this.isSynced = 0;
+        this.ownerId = "guest";
     }
 
     public int getId() {
@@ -147,5 +151,13 @@ public class SetRecordEntity {
 
     public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }

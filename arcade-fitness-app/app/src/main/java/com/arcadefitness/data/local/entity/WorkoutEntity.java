@@ -45,12 +45,16 @@ public class WorkoutEntity {
     @ColumnInfo(name = "remote_id")
     private String remoteId;
 
+    @ColumnInfo(name = "owner_id", defaultValue = "guest")
+    private String ownerId;
+
     public WorkoutEntity() {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
         this.isSynced = 0;
         this.estimatedDurationMinutes = 0;
         this.exerciseCount = 0;
+        this.ownerId = "guest";
     }
 
     @Ignore
@@ -139,5 +143,13 @@ public class WorkoutEntity {
 
     public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }

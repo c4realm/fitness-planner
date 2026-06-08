@@ -15,11 +15,11 @@ import java.util.List;
 @Dao
 public interface GoalDao {
 
-    @Query("SELECT * FROM goals ORDER BY created_at DESC")
-    List<GoalEntity> getAll();
+    @Query("SELECT * FROM goals WHERE owner_id = :ownerId ORDER BY created_at DESC")
+    List<GoalEntity> getAll(String ownerId);
 
-    @Query("SELECT * FROM goals ORDER BY created_at DESC")
-    LiveData<List<GoalEntity>> getAllLiveData();
+    @Query("SELECT * FROM goals WHERE owner_id = :ownerId ORDER BY created_at DESC")
+    LiveData<List<GoalEntity>> getAllLiveData(String ownerId);
 
     @Query("SELECT * FROM goals WHERE id = :id LIMIT 1")
     GoalEntity getById(int id);
@@ -39,11 +39,11 @@ public interface GoalDao {
     @Query("SELECT * FROM goals WHERE type = :type ORDER BY created_at DESC")
     LiveData<List<GoalEntity>> getByTypeLiveData(String type);
 
-    @Query("SELECT * FROM goals WHERE status = 'ACTIVE' ORDER BY target_date ASC")
-    LiveData<List<GoalEntity>> getActiveGoalsLiveData();
+    @Query("SELECT * FROM goals WHERE status = 'ACTIVE' AND owner_id = :ownerId ORDER BY target_date ASC")
+    LiveData<List<GoalEntity>> getActiveGoalsLiveData(String ownerId);
 
-    @Query("SELECT * FROM goals WHERE status = 'ACTIVE' ORDER BY target_date ASC")
-    List<GoalEntity> getActiveGoals();
+    @Query("SELECT * FROM goals WHERE status = 'ACTIVE' AND owner_id = :ownerId ORDER BY target_date ASC")
+    List<GoalEntity> getActiveGoals(String ownerId);
 
     @Query("SELECT * FROM goals WHERE is_synced = 0 ORDER BY updated_at ASC")
     List<GoalEntity> getUnsynced();

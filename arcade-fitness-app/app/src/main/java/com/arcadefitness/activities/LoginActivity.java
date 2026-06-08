@@ -65,7 +65,10 @@ public class LoginActivity extends AppCompatActivity {
         btnGoogle.setOnClickListener(v ->
             Toast.makeText(this,
                 "Google Sign-In coming in Phase 3", Toast.LENGTH_SHORT).show());
-        btnGuest.setOnClickListener(v -> goToDashboard());
+        btnGuest.setOnClickListener(v -> {
+            sessionManager.saveGuestSession();
+            goToDashboard();
+        });
         tvCreateAccount.setOnClickListener(v -> goToRegister());
         tvForgotPassword.setOnClickListener(v -> handleForgotPassword());
         btnTogglePassword.setOnClickListener(v -> togglePasswordVisibility());

@@ -22,6 +22,8 @@ import com.arcadefitness.data.local.entity.WorkoutEntity;
 import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
 import com.arcadefitness.data.remote.ApiService;
 import com.arcadefitness.data.remote.RetrofitClient;
+import com.arcadefitness.utils.AppConstants;
+import com.arcadefitness.utils.SessionManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -49,6 +51,8 @@ public class FitnessRepository {
     private final ApiService apiService;
     private final Gson gson;
 
+    private final SessionManager sessionManager;
+
     private final MutableLiveData<Boolean> syncInProgress = new MutableLiveData<>(false);
     private final MutableLiveData<String> syncStatusMessage = new MutableLiveData<>("");
 
@@ -69,6 +73,12 @@ public class FitnessRepository {
         this.executor = AppDatabase.DATABASE_WRITE_EXECUTOR;
         this.apiService = RetrofitClient.getInstance().getApiService();
         this.gson = new Gson();
+        this.sessionManager = new SessionManager(context);
+    }
+
+    private String currentUserId() {
+        String id = sessionManager.getUserId();
+        return (id == null || id.isEmpty()) ? AppConstants.GUEST_USER_ID : id;
     }
 
     public static FitnessRepository getInstance(Context context) {
@@ -97,7 +107,18 @@ public class FitnessRepository {
     public void getAllWorkouts(RepositoryCallback<List<WorkoutEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutEntity> workouts = workoutDao.getAll();
+                List<WorkoutEntity> workouts = workoutDao.getAll(currentUserId());
+                postSuccess(callback, workouts);
+            } catch (Exception e) {
+                postError(callback, "Failed to load workouts: " + e.getMessage());
+            }
+        });
+    }
+
+    public void getAllWorkoutsLiveData(RepositoryCallback<LiveData<List<WorkoutEntity>>> callback) {
+        executor.execute(() -> {
+            try {
+                LiveData<List<WorkoutEntity>> workouts = workoutDao.getAllLiveData(currentUserId());
                 postSuccess(callback, workouts);
             } catch (Exception e) {
                 postError(callback, "Failed to load workouts: " + e.getMessage());
@@ -123,6 +144,7 @@ public class FitnessRepository {
     public void insertWorkout(WorkoutEntity workout, RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
+                workout.setOwnerId(currentUserId());
                 long id = workoutDao.insert(workout);
                 int localId = (int) id;
                 workout.setId(localId);
@@ -301,6 +323,7 @@ public class FitnessRepository {
     public void insertSetRecord(SetRecordEntity setRecord, RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
+                setRecord.setOwnerId(currentUserId());
                 long id = setRecordDao.insert(setRecord);
                 int localId = (int) id;
                 setRecord.setId(localId);
@@ -511,7 +534,7 @@ public class FitnessRepository {
     public void getAllGoals(RepositoryCallback<List<GoalEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<GoalEntity> goals = goalDao.getAll();
+                List<GoalEntity> goals = goalDao.getAll(currentUserId());
                 postSuccess(callback, goals);
             } catch (Exception e) {
                 postError(callback, "Failed to load goals: " + e.getMessage());
@@ -522,7 +545,7 @@ public class FitnessRepository {
     public void getActiveGoals(RepositoryCallback<List<GoalEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<GoalEntity> goals = goalDao.getActiveGoals();
+                List<GoalEntity> goals = goalDao.getActiveGoals(currentUserId());
                 postSuccess(callback, goals);
             } catch (Exception e) {
                 postError(callback, "Failed to load active goals: " + e.getMessage());
@@ -548,6 +571,7 @@ public class FitnessRepository {
     public void insertGoal(GoalEntity goal, RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
+                goal.setOwnerId(currentUserId());
                 long id = goalDao.insert(goal);
                 int localId = (int) id;
                 goal.setId(localId);
@@ -631,7 +655,7 @@ public class FitnessRepository {
     public void getCompletedSessions(RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSessions();
+                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSessions(currentUserId());
                 postSuccess(callback, sessions);
             } catch (Exception e) {
                 postError(callback, "Failed to load completed sessions: " + e.getMessage());
@@ -657,7 +681,18 @@ public class FitnessRepository {
     public void getCurrentSession(RepositoryCallback<WorkoutSessionEntity> callback) {
         executor.execute(() -> {
             try {
-                WorkoutSessionEntity session = workoutSessionDao.getCurrentSession();
+                WorkoutSessionEntity session = workoutSessionDao.getCurrentSession(currentUserId());
+                postSuccess(callback, session);
+            } catch (Exception e) {
+                postError(callback, "Failed to load current session: " + e.getMessage());
+            }
+        });
+    }
+
+    public void getCurrentSessionLiveData(RepositoryCallback<LiveData<WorkoutSessionEntity>> callback) {
+        executor.execute(() -> {
+            try {
+                LiveData<WorkoutSessionEntity> session = workoutSessionDao.getCurrentSessionLiveData(currentUserId());
                 postSuccess(callback, session);
             } catch (Exception e) {
                 postError(callback, "Failed to load current session: " + e.getMessage());
@@ -668,6 +703,7 @@ public class FitnessRepository {
     public void insertWorkoutSession(WorkoutSessionEntity session, RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
+                session.setOwnerId(currentUserId());
                 long id = workoutSessionDao.insert(session);
                 int localId = (int) id;
                 session.setId(localId);
@@ -756,7 +792,7 @@ public class FitnessRepository {
     public void getSessionsSince(long fromTimestamp, RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSince(fromTimestamp);
+                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSince(currentUserId(), fromTimestamp);
                 postSuccess(callback, sessions);
             } catch (Exception e) {
                 postError(callback, "Failed to load sessions: " + e.getMessage());
@@ -767,11 +803,12 @@ public class FitnessRepository {
     public void getWeeklyStats(RepositoryCallback<int[]> callback) {
         executor.execute(() -> {
             try {
+                String userId = currentUserId();
                 long weekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000;
-                int sessionsCount = workoutSessionDao.getCompletedCountSince(weekAgo);
-                Integer totalDuration = workoutSessionDao.getTotalDurationSince(weekAgo);
-                Integer totalCalories = workoutSessionDao.getTotalCaloriesSince(weekAgo);
-                Double totalVolume = workoutSessionDao.getTotalVolumeSince(weekAgo);
+                int sessionsCount = workoutSessionDao.getCompletedCountSince(userId, weekAgo);
+                Integer totalDuration = workoutSessionDao.getTotalDurationSince(userId, weekAgo);
+                Integer totalCalories = workoutSessionDao.getTotalCaloriesSince(userId, weekAgo);
+                Double totalVolume = workoutSessionDao.getTotalVolumeSince(userId, weekAgo);
                 postSuccess(callback, new int[]{
                     sessionsCount,
                     totalDuration != null ? totalDuration : 0,
@@ -784,10 +821,21 @@ public class FitnessRepository {
         });
     }
 
+    public void getCompletedSessionCount(RepositoryCallback<Integer> callback) {
+        executor.execute(() -> {
+            try {
+                int count = workoutSessionDao.getCompletedCount(currentUserId());
+                postSuccess(callback, count);
+            } catch (Exception e) {
+                postError(callback, "Failed to get completed session count: " + e.getMessage());
+            }
+        });
+    }
+
     public void getStreakDays(RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
-                List<String> dates = workoutSessionDao.getCompletedSessionDates();
+                List<String> dates = workoutSessionDao.getCompletedSessionDates(currentUserId());
                 int streak = 0;
                 java.util.Calendar cal = java.util.Calendar.getInstance();
                 for (int i = 0; i < dates.size(); i++) {

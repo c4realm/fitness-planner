@@ -24,6 +24,8 @@ import com.arcadefitness.data.local.entity.SetRecordEntity;
 import com.arcadefitness.data.local.entity.WorkoutEntity;
 import com.arcadefitness.data.local.entity.WorkoutSessionEntity;
 import com.arcadefitness.data.repository.FitnessRepository;
+import com.arcadefitness.utils.AppConstants;
+import com.arcadefitness.utils.SessionManager;
 import com.arcadefitness.viewmodel.WorkoutTrackingViewModel;
 
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.List;
 public class WorkoutTrackingActivity extends AppCompatActivity {
 
     private WorkoutTrackingViewModel viewModel;
+    private SessionManager sessionManager;
 
     private TextView tvElapsedTime, tvSetsCompleted;
     private TextView tvCurrentExerciseName, tvCurrentSetsInfo;
@@ -53,6 +56,7 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
 
         initViews();
         setupViewModel();
+        sessionManager = new SessionManager(this);
 
         int workoutId = getIntent().getIntExtra("workout_id", -1);
         if (workoutId > 0) {
@@ -74,8 +78,10 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
      */
     private void showWorkoutPickerOrResume() {
         AppDatabase.DATABASE_WRITE_EXECUTOR.execute(() -> {
+            String uid = sessionManager.getUserId();
+            if (uid == null || uid.isEmpty()) uid = AppConstants.GUEST_USER_ID;
             WorkoutSessionEntity active = AppDatabase.getInstance(this)
-                    .workoutSessionDao().getCurrentSession();
+                    .workoutSessionDao().getCurrentSession(uid);
 
             if (active != null) {
                 // Resume existing session — no picker needed
@@ -84,7 +90,7 @@ public class WorkoutTrackingActivity extends AppCompatActivity {
             }
 
             List<WorkoutEntity> workouts = AppDatabase.getInstance(this)
-                    .workoutDao().getAll();
+                    .workoutDao().getAll(uid);
 
             runOnUiThread(() -> {
                 if (workouts == null || workouts.isEmpty()) {

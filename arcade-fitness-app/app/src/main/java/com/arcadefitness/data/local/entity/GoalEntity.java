@@ -58,6 +58,9 @@ public class GoalEntity {
     @ColumnInfo(name = "remote_id")
     private String remoteId;
 
+    @ColumnInfo(name = "owner_id", defaultValue = "guest")
+    private String ownerId;
+
     public GoalEntity() {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
@@ -65,6 +68,7 @@ public class GoalEntity {
         this.status = "ACTIVE";
         this.currentValue = 0;
         this.startDate = System.currentTimeMillis();
+        this.ownerId = "guest";
     }
 
     @Ignore
@@ -187,5 +191,13 @@ public class GoalEntity {
 
     public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 }
