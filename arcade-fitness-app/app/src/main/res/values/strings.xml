@@ -119,6 +119,14 @@
     <string name="error_network">No internet connection</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
 
+    <!-- Gender options -->
+    <string-array name="gender_options">
+        <item>Select gender</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
+
     <!-- Auth -->
     <string name="btn_google_soon">Google Sign-In (Coming Soon)</string>
     <string name="btn_guest">Continue as Guest</string>

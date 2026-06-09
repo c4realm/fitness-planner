@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -55,6 +56,10 @@ public class RegisterActivity extends AppCompatActivity {
         etPassword       = findViewById(R.id.etPassword);
         etConfirmPassword= findViewById(R.id.etConfirmPassword);
         spinnerGender    = findViewById(R.id.spinnerGender);
+        ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(this,
+                R.array.gender_options, android.R.layout.simple_spinner_item);
+        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerGender.setAdapter(genderAdapter);
         btnCreateAccount = findViewById(R.id.btnCreateAccount);
         btnGuest         = findViewById(R.id.btnGuest);
         tvSignIn         = findViewById(R.id.tvSignIn);
@@ -98,10 +103,13 @@ public class RegisterActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Backend only needs email + password for registration
+        String gender = spinnerGender.getSelectedItem() != null
+                ? spinnerGender.getSelectedItem().toString() : "";
+
         JsonObject body = new JsonObject();
         body.addProperty("email", email);
         body.addProperty("password", password);
+        body.addProperty("gender", gender);
 
         ApiHelper.call(
                 RetrofitClient.getApi().register(body),
