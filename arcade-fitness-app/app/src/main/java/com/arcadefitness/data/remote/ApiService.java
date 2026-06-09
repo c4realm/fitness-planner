@@ -1,9 +1,20 @@
 package com.arcadefitness.data.remote;
 
-import com.google.gson.JsonObject;
+import com.arcadefitness.data.remote.model.AuthRequest;
+import com.arcadefitness.data.remote.model.AuthResponse;
+import com.arcadefitness.data.remote.model.ExerciseResponse;
+import com.arcadefitness.data.remote.model.GoalResponse;
+import com.arcadefitness.data.remote.model.SetRecordResponse;
+import com.arcadefitness.data.remote.model.SyncBatchRequest;
+import com.arcadefitness.data.remote.model.SyncBatchResponse;
+import com.arcadefitness.data.remote.model.UserProfileResponse;
+import com.arcadefitness.data.remote.model.WorkoutResponse;
+import com.arcadefitness.data.remote.model.WorkoutSessionResponse;
+import com.arcadefitness.utils.AppConstants;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -11,149 +22,88 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
 
-/**
- * ApiService.java
- *
- * All endpoints match the actual backend routes in arcade-fitness-backend/routes/.
- * Base URL is set in AppConstants.BASE_URL (must end with /api/).
- *
- * Backend route map:
- *   POST   /api/auth/register
- *   POST   /api/auth/login
- *   GET    /api/workouts
- *   GET    /api/workouts/:id
- *   POST   /api/workouts
- *   PUT    /api/workouts/:id
- *   DELETE /api/workouts/:id
- *   GET    /api/exercises                  (?muscle_group= optional)
- *   GET    /api/set-records/workout/:id
- *   GET    /api/set-records/session/:id
- *   POST   /api/set-records
- *   PUT    /api/set-records/:id
- *   DELETE /api/set-records/:id
- *   GET    /api/profiles
- *   PUT    /api/profiles
- *   GET    /api/goals
- *   POST   /api/goals
- *   PUT    /api/goals/:id
- *   DELETE /api/goals/:id
- *   GET    /api/sessions
- *   GET    /api/sessions/:id
- *   POST   /api/sessions
- *   PUT    /api/sessions/:id/complete
- *   DELETE /api/sessions/:id
- *   POST   /api/sync                       (batch sync)
- *   GET    /api/health
- */
 public interface ApiService {
 
-    // ── AUTH ─────────────────────────────────────────────────────────
-    // Response: { status, data: { user: { user_id, email }, token } }
+    // ── Health check ─────────────────────────────────────────────────────────
+    // Use this to verify the server is reachable before any real call.
+    // Expected response: { "status": "ok" }
+    @GET(AppConstants.ENDPOINT_HEALTH_CHECK)
+    Call<ResponseBody> healthCheck();
 
-    @POST("auth/register")
-    Call<JsonObject> register(@Body JsonObject credentials);
+    // ── Auth ──────────────────────────────────────────────────────────────────
+    @POST(AppConstants.ENDPOINT_REGISTER)
+    Call<AuthResponse> register(@Body AuthRequest request);
 
-    @POST("auth/login")
-    Call<JsonObject> login(@Body JsonObject credentials);
+    @POST(AppConstants.ENDPOINT_LOGIN)
+    Call<AuthResponse> login(@Body AuthRequest request);
 
-    // ── WORKOUTS ─────────────────────────────────────────────────────
-    // All require Authorization: Bearer <token>
-    // Response body: { status, data: { workout } } or { status, data: { workouts: [] } }
+    @POST(AppConstants.ENDPOINT_LOGOUT)
+    Call<ResponseBody> logout();
 
-    @GET("workouts")
-    Call<JsonObject> getWorkouts();
+    // ── User profile ──────────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_PROFILE)
+    Call<UserProfileResponse> getProfile();
 
-    @GET("workouts/{id}")
-    Call<JsonObject> getWorkout(@Path("id") int remoteId);
+    @PUT(AppConstants.ENDPOINT_PROFILE)
+    Call<UserProfileResponse> updateProfile(@Body UserProfileResponse profile);
 
-    @POST("workouts")
-    Call<JsonObject> createWorkout(@Body JsonObject workout);
+    // ── Workouts ──────────────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_WORKOUTS)
+    Call<List<WorkoutResponse>> getWorkouts();
 
-    @PUT("workouts/{id}")
-    Call<JsonObject> updateWorkout(@Path("id") int remoteId, @Body JsonObject workout);
+    @GET(AppConstants.ENDPOINT_WORKOUT_BY_ID)
+    Call<WorkoutResponse> getWorkoutById(@Path("id") String id);
 
-    @DELETE("workouts/{id}")
-    Call<JsonObject> deleteWorkout(@Path("id") int remoteId);
+    @POST(AppConstants.ENDPOINT_WORKOUTS)
+    Call<WorkoutResponse> createWorkout(@Body WorkoutResponse workout);
 
-    // ── EXERCISES ────────────────────────────────────────────────────
-    // GET /api/exercises?muscle_group=Chest  (optional filter)
-    // Backend is read-only — no POST/PUT/DELETE for exercises
+    @PUT(AppConstants.ENDPOINT_WORKOUT_BY_ID)
+    Call<WorkoutResponse> updateWorkout(@Path("id") String id, @Body WorkoutResponse workout);
 
-    @GET("exercises")
-    Call<JsonObject> getExercises();
+    @DELETE(AppConstants.ENDPOINT_WORKOUT_BY_ID)
+    Call<ResponseBody> deleteWorkout(@Path("id") String id);
 
-    @GET("exercises")
-    Call<JsonObject> getExercisesByMuscleGroup(@Query("muscle_group") String muscleGroup);
+    // ── Exercises ─────────────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_EXERCISES)
+    Call<List<ExerciseResponse>> getExercises();
 
-    // ── SET RECORDS ──────────────────────────────────────────────────
+    @POST(AppConstants.ENDPOINT_EXERCISES)
+    Call<ExerciseResponse> createExercise(@Body ExerciseResponse exercise);
 
-    @GET("set-records/workout/{workoutId}")
-    Call<JsonObject> getSetRecordsByWorkout(@Path("workoutId") int remoteWorkoutId);
+    // ── Workout sessions ──────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_SESSIONS)
+    Call<List<WorkoutSessionResponse>> getSessions();
 
-    @GET("set-records/session/{sessionId}")
-    Call<JsonObject> getSetRecordsBySession(@Path("sessionId") int remoteSessionId);
+    @POST(AppConstants.ENDPOINT_SESSIONS)
+    Call<WorkoutSessionResponse> createSession(@Body WorkoutSessionResponse session);
 
-    @POST("set-records")
-    Call<JsonObject> createSetRecord(@Body JsonObject setRecord);
+    @PUT("sessions/{id}")
+    Call<WorkoutSessionResponse> updateSession(@Path("id") String id, @Body WorkoutSessionResponse session);
 
-    @PUT("set-records/{id}")
-    Call<JsonObject> updateSetRecord(@Path("id") int remoteId, @Body JsonObject setRecord);
+    // ── Set records ───────────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_SET_RECORDS)
+    Call<List<SetRecordResponse>> getSetRecords();
 
-    @DELETE("set-records/{id}")
-    Call<JsonObject> deleteSetRecord(@Path("id") int remoteId);
+    @POST(AppConstants.ENDPOINT_SET_RECORDS)
+    Call<SetRecordResponse> createSetRecord(@Body SetRecordResponse setRecord);
 
-    // ── PROFILES ─────────────────────────────────────────────────────
-    // Backend scopes to the authenticated user — no ID in path
+    // ── Goals ─────────────────────────────────────────────────────────────────
+    @GET(AppConstants.ENDPOINT_GOALS)
+    Call<List<GoalResponse>> getGoals();
 
-    @GET("profiles")
-    Call<JsonObject> getProfile();
-
-    @PUT("profiles")
-    Call<JsonObject> updateProfile(@Body JsonObject profile);
-
-    // ── GOALS ────────────────────────────────────────────────────────
-
-    @GET("goals")
-    Call<JsonObject> getGoals();
-
-    @POST("goals")
-    Call<JsonObject> createGoal(@Body JsonObject goal);
+    @POST(AppConstants.ENDPOINT_GOALS)
+    Call<GoalResponse> createGoal(@Body GoalResponse goal);
 
     @PUT("goals/{id}")
-    Call<JsonObject> updateGoal(@Path("id") int remoteId, @Body JsonObject goal);
+    Call<GoalResponse> updateGoal(@Path("id") String id, @Body GoalResponse goal);
 
     @DELETE("goals/{id}")
-    Call<JsonObject> deleteGoal(@Path("id") int remoteId);
+    Call<ResponseBody> deleteGoal(@Path("id") String id);
 
-    // ── SESSIONS ─────────────────────────────────────────────────────
-    // Note: complete uses PUT /:id/complete (not a standard update)
-
-    @GET("sessions")
-    Call<JsonObject> getSessions();
-
-    @GET("sessions/{id}")
-    Call<JsonObject> getSession(@Path("id") int remoteId);
-
-    @POST("sessions")
-    Call<JsonObject> createSession(@Body JsonObject session);
-
-    @PUT("sessions/{id}/complete")
-    Call<JsonObject> completeSession(@Path("id") int remoteId, @Body JsonObject completionData);
-
-    @DELETE("sessions/{id}")
-    Call<JsonObject> deleteSession(@Path("id") int remoteId);
-
-    // ── BATCH SYNC ───────────────────────────────────────────────────
-    // POST /api/sync
-    // Body: { operations: [ { table, action, data }, ... ] }
-
-    @POST("sync")
-    Call<JsonObject> batchSync(@Body JsonObject batchPayload);
-
-    // ── HEALTH CHECK ─────────────────────────────────────────────────
-
-    @GET("health")
-    Call<JsonObject> health();
+    // ── Sync batch ────────────────────────────────────────────────────────────
+    // Sends all pending local changes in one POST.
+    // The server processes each entry and returns per-entry results.
+    @POST(AppConstants.ENDPOINT_SYNC_BATCH)
+    Call<SyncBatchResponse> syncBatch(@Body SyncBatchRequest request);
 }

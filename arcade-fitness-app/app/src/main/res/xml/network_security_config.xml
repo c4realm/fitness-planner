@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    network_security_config.xml
+    Place this file at:  app/src/main/res/xml/network_security_config.xml
+
+    Then add to your <application> tag in AndroidManifest.xml:
+        android:networkSecurityConfig="@xml/network_security_config"
+
+    This allows HTTP (not just HTTPS) to your local dev server IP.
+    Android 9+ blocks cleartext HTTP by default — this file lifts that block
+    only for your specific IP, keeping all other traffic secure.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!--
+            Replace with your PC's actual local IP address.
+            Find it:
+              Windows → CMD → ipconfig → IPv4 Address
+              Mac     → Terminal → ifconfig | grep "inet "
+              Linux   → Terminal → hostname -I
+
+            For the Android Emulator use 10.0.2.2 (maps to host machine localhost)
+        -->
+        <domain includeSubdomains="false">192.168.1.105</domain>
+
+        <!-- Add 10.0.2.2 as well if you also test on the emulator -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

@@ -1,107 +1,102 @@
 package com.arcadefitness.data.remote;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.arcadefitness.utils.AppConstants;
-import com.arcadefitness.utils.SessionManager;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * RetrofitClient.java
- *
- * Singleton Retrofit client. Initialised once with Context so it can read
- * the JWT token from SessionManager on every request via the auth interceptor.
- *
- * Usage:
- *   RetrofitClient.init(context);               // call once in Application.onCreate()
- *   ApiService api = RetrofitClient.getApi();   // use anywhere after init
- */
-public final class RetrofitClient {
+public class RetrofitClient {
 
     private static final String TAG = "RetrofitClient";
-    private static volatile RetrofitClient INSTANCE;
 
-    private final ApiService apiService;
+    private static RetrofitClient instance;
+    private final Retrofit retrofit;
+    private Context appContext;
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Private constructor — builds OkHttp + Retrofit once
+    // ─────────────────────────────────────────────────────────────────────────
     private RetrofitClient(Context context) {
-        SessionManager sessionManager = new SessionManager(context.getApplicationContext());
+        this.appContext = context.getApplicationContext();
 
-        // ── Logging interceptor (full body in debug, none in release) ──
-        HttpLoggingInterceptor logger = new HttpLoggingInterceptor(message ->
-                Log.d(TAG, message));
-        logger.setLevel(HttpLoggingInterceptor.Level.BODY);
+        // Logging interceptor — prints full request/response in Logcat
+        // Filter by tag "OkHttp" in Logcat to see all API traffic
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message ->
+                Log.d("OkHttp", message));
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        // ── Auth interceptor — attaches JWT Bearer token to every request ──
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request original = chain.request();
-                    Request.Builder builder = original.newBuilder()
-                            .header("Content-Type", "application/json")
-                            .header("Accept", "application/json");
+        // Auth interceptor — attaches Bearer token from SharedPreferences to every request
+        Interceptor authInterceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                SharedPreferences prefs = appContext.getSharedPreferences(
+                        AppConstants.PREF_FILE, Context.MODE_PRIVATE);
+                String token = prefs.getString(AppConstants.PREF_AUTH_TOKEN, "");
 
-                    String token = sessionManager.getToken();
-                    if (token != null && !token.isEmpty() && !token.equals("mock_token")) {
-                        builder.header("Authorization", "Bearer " + token);
-                    }
+                Request original = chain.request();
+                Request.Builder builder = original.newBuilder()
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json");
 
-                    return chain.proceed(builder.build());
-                })
-                .addInterceptor(logger)
-                .connectTimeout(AppConstants.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .readTimeout(AppConstants.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .writeTimeout(AppConstants.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .build();
-
-        // ── Gson — lenient so missing fields don't crash parsing ──
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(AppConstants.BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        apiService = retrofit.create(ApiService.class);
-    }
-
-    /** Call once in Application.onCreate() before anything uses the network. */
-    public static void init(Context context) {
-        if (INSTANCE == null) {
-            synchronized (RetrofitClient.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new RetrofitClient(context.getApplicationContext());
+                if (!token.isEmpty()) {
+                    builder.header("Authorization", "Bearer " + token);
                 }
+
+                return chain.proceed(builder.build());
             }
-        }
+        };
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(AppConstants.TIMEOUT_CONNECT, TimeUnit.SECONDS)
+                .readTimeout(AppConstants.TIMEOUT_READ, TimeUnit.SECONDS)
+                .writeTimeout(AppConstants.TIMEOUT_WRITE, TimeUnit.SECONDS)
+                .addInterceptor(authInterceptor)
+                .addInterceptor(loggingInterceptor)   // always last so it logs the final request
+                .build();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(AppConstants.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        Log.d(TAG, "RetrofitClient initialised → " + AppConstants.BASE_URL);
     }
 
-    /** Returns the singleton. Throws if init() was never called. */
-    public static RetrofitClient getInstance() {
-        if (INSTANCE == null) {
-            throw new IllegalStateException(
-                    "RetrofitClient not initialised. Call RetrofitClient.init(context) in Application.onCreate().");
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Singleton getter — call getInstance(context) anywhere in the app
+    // ─────────────────────────────────────────────────────────────────────────
+    public static synchronized RetrofitClient getInstance(Context context) {
+        if (instance == null) {
+            instance = new RetrofitClient(context);
         }
-        return INSTANCE;
+        return instance;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Create an ApiService implementation
+    // ─────────────────────────────────────────────────────────────────────────
     public ApiService getApiService() {
-        return apiService;
+        return retrofit.create(ApiService.class);
     }
 
-    /** Convenience shortcut. */
-    public static ApiService getApi() {
-        return getInstance().getApiService();
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Reset — call this on logout so the token is dropped on next build
+    // ─────────────────────────────────────────────────────────────────────────
+    public static synchronized void reset() {
+        instance = null;
+        Log.d(TAG, "RetrofitClient reset (token cleared)");
     }
 }
