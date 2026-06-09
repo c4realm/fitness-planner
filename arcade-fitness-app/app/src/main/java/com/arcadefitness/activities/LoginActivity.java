@@ -40,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        RetrofitClient.init(getApplicationContext());
+
         sessionManager = new SessionManager(this);
 
         // Already logged in — skip straight to Dashboard

@@ -11,7 +11,7 @@ public class AppConstants {
     //  If using the Android Emulator (not a real phone) use: 10.0.2.2
     //  If using a real phone on the same Wi-Fi, use your PC's local IP e.g. 192.168.1.105
     // ─────────────────────────────────────────────────────────────────────────
-    private static final String SERVER_IP   = "192.168.1.105";   // <-- CHANGE THIS
+    private static final String SERVER_IP   = "192.168.10.105";   // <-- CHANGE THIS
     private static final String SERVER_PORT = "3000";            // <-- CHANGE THIS if your server uses a different port
 
     public static final String BASE_URL = "http://" + SERVER_IP + ":" + SERVER_PORT + "/api/";
@@ -44,8 +44,17 @@ public class AppConstants {
     public static final String KEY_USER_EMAIL         = "user_email";
     public static final String KEY_USER_TOKEN         = "user_token";
 
+    // ── Validation ──────────────────────────────────────────────────────────────
+    public static final int PASSWORD_MIN_LENGTH       = 6;
+    public static final int NAME_MIN_LENGTH           = 2;
+    public static final int AGE_MIN                   = 13;
+    public static final int AGE_MAX                   = 120;
+
     // ── Guest ─────────────────────────────────────────────────────────────────
     public static final String GUEST_USER_ID          = "guest";
+
+    // ── Splash ──────────────────────────────────────────────────────────────────
+    public static final int SPLASH_DURATION_MS          = 2000;
 
     // ── Timeouts (seconds) ────────────────────────────────────────────────────
     public static final int TIMEOUT_CONNECT           = 15;

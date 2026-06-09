@@ -42,6 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        RetrofitClient.init(getApplicationContext());
+
         sessionManager = new SessionManager(this);
         initViews();
     }

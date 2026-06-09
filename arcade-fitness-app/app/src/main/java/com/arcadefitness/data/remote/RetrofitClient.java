@@ -76,6 +76,15 @@ public class RetrofitClient {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    //  init — ensures the singleton is created with a Context
+    // ─────────────────────────────────────────────────────────────────────────
+    public static synchronized void init(Context context) {
+        if (instance == null) {
+            instance = new RetrofitClient(context);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     //  Singleton getter — call getInstance(context) anywhere in the app
     // ─────────────────────────────────────────────────────────────────────────
     public static synchronized RetrofitClient getInstance(Context context) {
@@ -90,6 +99,17 @@ public class RetrofitClient {
     // ─────────────────────────────────────────────────────────────────────────
     public ApiService getApiService() {
         return retrofit.create(ApiService.class);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Static convenience — returns the ApiService without needing the instance
+    // ─────────────────────────────────────────────────────────────────────────
+    public static ApiService getApi() {
+        if (instance == null) {
+            throw new IllegalStateException(
+                    "RetrofitClient not initialised. Call init(context) first.");
+        }
+        return instance.getApiService();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

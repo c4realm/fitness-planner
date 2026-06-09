@@ -1,16 +1,13 @@
 package com.arcadefitness.data.remote;
 
-import com.arcadefitness.data.remote.model.AuthRequest;
-import com.arcadefitness.data.remote.model.AuthResponse;
 import com.arcadefitness.data.remote.model.ExerciseResponse;
-import com.arcadefitness.data.remote.model.GoalResponse;
-import com.arcadefitness.data.remote.model.SetRecordResponse;
 import com.arcadefitness.data.remote.model.SyncBatchRequest;
 import com.arcadefitness.data.remote.model.SyncBatchResponse;
-import com.arcadefitness.data.remote.model.UserProfileResponse;
 import com.arcadefitness.data.remote.model.WorkoutResponse;
 import com.arcadefitness.data.remote.model.WorkoutSessionResponse;
 import com.arcadefitness.utils.AppConstants;
+
+import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -33,20 +30,20 @@ public interface ApiService {
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     @POST(AppConstants.ENDPOINT_REGISTER)
-    Call<AuthResponse> register(@Body AuthRequest request);
+    Call<JsonObject> register(@Body JsonObject body);
 
     @POST(AppConstants.ENDPOINT_LOGIN)
-    Call<AuthResponse> login(@Body AuthRequest request);
+    Call<JsonObject> login(@Body JsonObject body);
 
     @POST(AppConstants.ENDPOINT_LOGOUT)
     Call<ResponseBody> logout();
 
     // ── User profile ──────────────────────────────────────────────────────────
     @GET(AppConstants.ENDPOINT_PROFILE)
-    Call<UserProfileResponse> getProfile();
+    Call<JsonObject> getProfile();
 
     @PUT(AppConstants.ENDPOINT_PROFILE)
-    Call<UserProfileResponse> updateProfile(@Body UserProfileResponse profile);
+    Call<JsonObject> updateProfile(@Body JsonObject body);
 
     // ── Workouts ──────────────────────────────────────────────────────────────
     @GET(AppConstants.ENDPOINT_WORKOUTS)
@@ -56,13 +53,13 @@ public interface ApiService {
     Call<WorkoutResponse> getWorkoutById(@Path("id") String id);
 
     @POST(AppConstants.ENDPOINT_WORKOUTS)
-    Call<WorkoutResponse> createWorkout(@Body WorkoutResponse workout);
+    Call<JsonObject> createWorkout(@Body JsonObject body);
 
     @PUT(AppConstants.ENDPOINT_WORKOUT_BY_ID)
-    Call<WorkoutResponse> updateWorkout(@Path("id") String id, @Body WorkoutResponse workout);
+    Call<JsonObject> updateWorkout(@Path("id") int id, @Body JsonObject body);
 
     @DELETE(AppConstants.ENDPOINT_WORKOUT_BY_ID)
-    Call<ResponseBody> deleteWorkout(@Path("id") String id);
+    Call<JsonObject> deleteWorkout(@Path("id") int id);
 
     // ── Exercises ─────────────────────────────────────────────────────────────
     @GET(AppConstants.ENDPOINT_EXERCISES)
@@ -76,30 +73,42 @@ public interface ApiService {
     Call<List<WorkoutSessionResponse>> getSessions();
 
     @POST(AppConstants.ENDPOINT_SESSIONS)
-    Call<WorkoutSessionResponse> createSession(@Body WorkoutSessionResponse session);
+    Call<JsonObject> createSession(@Body JsonObject body);
 
     @PUT("sessions/{id}")
     Call<WorkoutSessionResponse> updateSession(@Path("id") String id, @Body WorkoutSessionResponse session);
 
+    @PUT("sessions/{id}/complete")
+    Call<JsonObject> completeSession(@Path("id") int id, @Body JsonObject body);
+
+    @DELETE("sessions/{id}")
+    Call<JsonObject> deleteSession(@Path("id") int id);
+
     // ── Set records ───────────────────────────────────────────────────────────
     @GET(AppConstants.ENDPOINT_SET_RECORDS)
-    Call<List<SetRecordResponse>> getSetRecords();
+    Call<JsonObject> getSetRecords();
 
     @POST(AppConstants.ENDPOINT_SET_RECORDS)
-    Call<SetRecordResponse> createSetRecord(@Body SetRecordResponse setRecord);
+    Call<JsonObject> createSetRecord(@Body JsonObject body);
+
+    @PUT("set-records/{id}")
+    Call<JsonObject> updateSetRecord(@Path("id") int id, @Body JsonObject body);
+
+    @DELETE("set-records/{id}")
+    Call<JsonObject> deleteSetRecord(@Path("id") int id);
 
     // ── Goals ─────────────────────────────────────────────────────────────────
     @GET(AppConstants.ENDPOINT_GOALS)
-    Call<List<GoalResponse>> getGoals();
+    Call<JsonObject> getGoals();
 
     @POST(AppConstants.ENDPOINT_GOALS)
-    Call<GoalResponse> createGoal(@Body GoalResponse goal);
+    Call<JsonObject> createGoal(@Body JsonObject body);
 
     @PUT("goals/{id}")
-    Call<GoalResponse> updateGoal(@Path("id") String id, @Body GoalResponse goal);
+    Call<JsonObject> updateGoal(@Path("id") int id, @Body JsonObject body);
 
     @DELETE("goals/{id}")
-    Call<ResponseBody> deleteGoal(@Path("id") String id);
+    Call<JsonObject> deleteGoal(@Path("id") int id);
 
     // ── Sync batch ────────────────────────────────────────────────────────────
     // Sends all pending local changes in one POST.

@@ -69,7 +69,8 @@ public class FitnessRepository {
         this.goalDao           = db.goalDao();
         this.workoutSessionDao = db.workoutSessionDao();
         this.executor          = AppDatabase.DATABASE_WRITE_EXECUTOR;
-        this.apiService        = RetrofitClient.getInstance().getApiService();
+        RetrofitClient.init(context);
+        this.apiService        = RetrofitClient.getApi();
         this.gson              = new Gson();
         this.sessionManager    = new SessionManager(context);
     }
@@ -722,18 +723,17 @@ public class FitnessRepository {
 
         executor.execute(() -> {
             try {
-                List<SyncQueueEntryEntity> pending = syncQueueDao.getPendingAndFailed();
+                List<SyncQueueEntryEntity> pending = syncQueueDao.getPendingEntries(5);
                 if (pending.isEmpty()) {
                     syncInProgress.postValue(false);
                     syncStatusMessage.postValue("All synced");
                     return;
                 }
                 for (SyncQueueEntryEntity entry : pending) {
-                    syncQueueDao.markInProgress(entry.getId());
                     processSingleSyncEntry(entry);
                 }
-                syncQueueDao.deleteCompleted();
-                syncQueueDao.deleteFailedAboveMaxRetries(5);
+                syncQueueDao.deleteSynced();
+                syncQueueDao.deleteFailed();
                 syncInProgress.postValue(false);
                 syncStatusMessage.postValue("Sync complete");
             } catch (Exception e) {
@@ -752,23 +752,21 @@ public class FitnessRepository {
             Call<JsonObject> call = buildSyncCall(table, op, payload);
             if (call == null) {
                 // Nothing to sync for this table/op — mark done
-                syncQueueDao.markCompleted(entry.getId());
+                syncQueueDao.markSynced(entry.getId());
                 return;
             }
 
             Response<JsonObject> response = call.execute();
             if (response.isSuccessful()) {
-                syncQueueDao.markCompleted(entry.getId());
+                syncQueueDao.markSynced(entry.getId());
                 if (response.body() != null) {
                     markLocalEntitySynced(table, entry.getRecordId(), response.body());
                 }
             } else {
-                syncQueueDao.markFailed(entry.getId(),
-                        "HTTP " + response.code() + ": " + response.message());
+                syncQueueDao.incrementAttempt(entry.getId());
             }
         } catch (Exception e) {
-            syncQueueDao.markFailed(entry.getId(),
-                    e.getMessage() != null ? e.getMessage() : "Unknown error");
+            syncQueueDao.incrementAttempt(entry.getId());
         }
     }
 
