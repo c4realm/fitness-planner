@@ -37,7 +37,7 @@ public class RetrofitClient {
                 Log.d("OkHttp", message));
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        // Auth interceptor — attaches Bearer token from SharedPreferences to every request
+        // Auth interceptor ujh— attaches Bearer token from SharedPreferences to every request
         Interceptor authInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
