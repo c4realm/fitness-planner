@@ -25,6 +25,33 @@
                 android:layout_marginStart="-24dp"
                 android:layout_marginEnd="-24dp" />
 
+            <!-- ── GUEST BANNER ── -->
+            <LinearLayout
+                android:id="@+id/layoutGuestBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:background="@color/bg_card"
+                android:padding="@dimen/space_md"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/space_lg">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="👋 Browsing as Guest — sign up to save your data"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"/>
+                <TextView
+                    android:id="@+id/tvGuestSignUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign Up"
+                    android:textColor="@color/orange_primary"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+
             <!-- ── HERO BANNER ── -->
             <FrameLayout
                 android:id="@+id/cardTodayWorkout"

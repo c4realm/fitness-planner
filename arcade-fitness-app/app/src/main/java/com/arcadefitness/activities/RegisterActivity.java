@@ -2,43 +2,39 @@ package com.arcadefitness.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
+import android.text.TextUtils;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.arcadefitness.R;
+import com.arcadefitness.data.remote.ApiHelper;
+import com.arcadefitness.data.remote.RetrofitClient;
 import com.arcadefitness.utils.AppConstants;
 import com.arcadefitness.utils.SessionManager;
-import com.arcadefitness.utils.ValidationUtils;
+import com.google.gson.JsonObject;
 
 /**
  * RegisterActivity.java
- * Collects: full name, email, age, gender, password, confirm password.
- * Google Sign-In: UI preserved, wired to Phase 3 placeholder toast.
- * Guest access: bypasses registration, lands directly on Dashboard.
+ *
+ * Calls POST /api/auth/register with { email, password }.
+ * On success: saves JWT + user info, also caches credentials locally
+ * for offline fallback, then goes to Dashboard.
  */
 public class RegisterActivity extends AppCompatActivity {
 
-    // Views
-    private EditText    etFullName, etEmail, etAge, etPassword, etConfirmPassword;
-    private Spinner     spinnerGender;
-    private ImageButton btnTogglePassword, btnToggleConfirm;
-    private Button      btnCreateAccount, btnGoogle, btnGuest;
-    private TextView    tvSignIn;
-
-    // State
-    private boolean passwordVisible = false;
-    private boolean confirmVisible  = false;
-
-    // Utils
+    private EditText etFullName, etEmail, etAge, etPassword, etConfirmPassword;
+    private Spinner  spinnerGender;
+    private Button   btnCreateAccount, btnGuest;
+    private TextView tvSignIn;
+    private ProgressBar progressBar;
     private SessionManager sessionManager;
 
     @Override
@@ -48,130 +44,189 @@ public class RegisterActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
         initViews();
-        setupGenderSpinner();
-        setupClickListeners();
-        setupInputFocusHighlight();
     }
-
-    // ── INIT ────────────────────────────────────────────────────────
 
     private void initViews() {
-        etFullName        = findViewById(R.id.etFullName);
-        etEmail           = findViewById(R.id.etEmail);
-        etAge             = findViewById(R.id.etAge);
-        spinnerGender     = findViewById(R.id.spinnerGender);
-        etPassword        = findViewById(R.id.etPassword);
-        etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        btnTogglePassword = findViewById(R.id.btnTogglePassword);
-        btnToggleConfirm  = findViewById(R.id.btnToggleConfirm);
-        btnCreateAccount  = findViewById(R.id.btnCreateAccount);
-        btnGoogle         = findViewById(R.id.btnGoogle);
-        btnGuest          = findViewById(R.id.btnGuest);
-        tvSignIn          = findViewById(R.id.tvSignIn);
-    }
+        etFullName       = findViewById(R.id.etFullName);
+        etEmail          = findViewById(R.id.etEmail);
+        etAge            = findViewById(R.id.etAge);
+        etPassword       = findViewById(R.id.etPassword);
+        etConfirmPassword= findViewById(R.id.etConfirmPassword);
+        spinnerGender    = findViewById(R.id.spinnerGender);
+        btnCreateAccount = findViewById(R.id.btnCreateAccount);
+        btnGuest         = findViewById(R.id.btnGuest);
+        tvSignIn         = findViewById(R.id.tvSignIn);
+        progressBar      = findViewById(R.id.progressBar);
 
-    private void setupGenderSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-            this,
-            android.R.layout.simple_spinner_item,
-            AppConstants.GENDER_OPTIONS
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerGender.setAdapter(adapter);
-    }
+        // Password visibility toggles
+        ImageButton btnTogglePassword = findViewById(R.id.btnTogglePassword);
+        if (btnTogglePassword != null) {
+            btnTogglePassword.setOnClickListener(v -> togglePasswordVisibility(etPassword, btnTogglePassword));
+        }
+        ImageButton btnToggleConfirm = findViewById(R.id.btnToggleConfirm);
+        if (btnToggleConfirm != null) {
+            btnToggleConfirm.setOnClickListener(v -> togglePasswordVisibility(etConfirmPassword, btnToggleConfirm));
+        }
 
-    private void setupClickListeners() {
-        btnCreateAccount.setOnClickListener(v -> attemptRegistration());
-        btnGoogle.setOnClickListener(v ->
-            Toast.makeText(this,
-                "Google Sign-In coming in Phase 3", Toast.LENGTH_SHORT).show());
+        btnCreateAccount.setOnClickListener(v -> attemptRegister());
+
         btnGuest.setOnClickListener(v -> {
             sessionManager.saveGuestSession();
             goToDashboard();
         });
-        tvSignIn.setOnClickListener(v -> goToLogin());
-        btnTogglePassword.setOnClickListener(v -> togglePassword());
-        btnToggleConfirm.setOnClickListener(v -> toggleConfirm());
-    }
 
-    private void setupInputFocusHighlight() {
-        View[] inputs = {etFullName, etEmail, etAge, etPassword, etConfirmPassword};
-        for (View input : inputs) {
-            input.setOnFocusChangeListener((v, hasFocus) -> {
-                v.setBackground(hasFocus
-                    ? getDrawable(R.drawable.bg_input_focused)
-                    : getDrawable(R.drawable.bg_input_default));
+        if (tvSignIn != null) {
+            tvSignIn.setOnClickListener(v -> {
+                startActivity(new Intent(this, LoginActivity.class));
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                finish();
             });
         }
     }
 
-    // ── REGISTRATION ────────────────────────────────────────────────
+    // ── REGISTER ─────────────────────────────────────────────────────
 
-    private void attemptRegistration() {
-        String fullName = etFullName.getText().toString().trim();
+    private void attemptRegister() {
+        String name     = etFullName.getText().toString().trim();
         String email    = etEmail.getText().toString().trim();
-        String ageStr   = etAge.getText().toString().trim();
-        int    gender   = spinnerGender.getSelectedItemPosition();
-        String password = etPassword.getText().toString();
-        String confirm  = etConfirmPassword.getText().toString();
+        String password = etPassword.getText().toString().trim();
+        String confirm  = etConfirmPassword.getText().toString().trim();
 
-        String nameError     = ValidationUtils.validateFullName(fullName);
-        String emailError    = ValidationUtils.validateEmail(email);
-        String ageError      = ValidationUtils.validateAge(ageStr);
-        String genderError   = ValidationUtils.validateGender(gender);
-        String passwordError = ValidationUtils.validatePassword(password);
-        String confirmError  = ValidationUtils.validateConfirmPassword(password, confirm);
+        if (!validate(name, email, password, confirm)) return;
 
-        if (nameError != null)     { etFullName.setError(nameError);           etFullName.requestFocus();        return; }
-        if (emailError != null)    { etEmail.setError(emailError);             etEmail.requestFocus();           return; }
-        if (ageError != null)      { etAge.setError(ageError);                 etAge.requestFocus();             return; }
-        if (genderError != null)   { Toast.makeText(this, genderError, Toast.LENGTH_SHORT).show();              return; }
-        if (passwordError != null) { etPassword.setError(passwordError);       etPassword.requestFocus();        return; }
-        if (confirmError != null)  { etConfirmPassword.setError(confirmError); etConfirmPassword.requestFocus(); return; }
+        setLoading(true);
 
-        // ── TODO (Phase 3): Retrofit API call ───────────────────────
-        // RegisterRequest req = new RegisterRequest(fullName, email, ageStr, gender, password);
-        // ApiClient.getInstance().getApiService().register(req).enqueue(...);
-        // ────────────────────────────────────────────────────────────
+        // Backend only needs email + password for registration
+        JsonObject body = new JsonObject();
+        body.addProperty("email", email);
+        body.addProperty("password", password);
 
-        sessionManager.saveRegisteredAccount(email, password, fullName);
-        // TODO Phase 3: Replace mock_token with real JWT from Retrofit login/register response
-        // ApiClient.getInstance().getApiService().register(req).enqueue(callback → saveSession(..., response.token))
-        sessionManager.saveSession("user_" + email, fullName, email, "mock_token");
+        ApiHelper.call(
+                RetrofitClient.getApi().register(body),
+                new ApiHelper.ApiCallback<JsonObject>() {
+                    @Override
+                    public void onSuccess(JsonObject data) {
+                        setLoading(false);
+                        handleRegisterSuccess(data, name, email, password);
+                    }
+
+                    @Override
+                    public void onError(int code, String message) {
+                        setLoading(false);
+                        if (code == 409) {
+                            etEmail.setError("An account with this email already exists");
+                            etEmail.requestFocus();
+                        } else if (code == 0) {
+                            // No network — save locally and continue
+                            registerOffline(name, email, password);
+                        } else {
+                            Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+        );
+    }
+
+    /**
+     * Backend returns:
+     *   { status: "success", data: { user: { user_id, email }, token } }
+     */
+    private void handleRegisterSuccess(JsonObject data, String name, String email, String password) {
+        try {
+            String token = data.has("token") ? data.get("token").getAsString() : "";
+            String userId;
+
+            if (data.has("user") && data.get("user").isJsonObject()) {
+                JsonObject user = data.getAsJsonObject("user");
+                userId = user.has("user_id") ? String.valueOf(user.get("user_id").getAsInt()) : email;
+            } else {
+                userId = email;
+            }
+
+            // Cache credentials locally for offline fallback
+            sessionManager.cacheCredentials(email, password, userId, name, token);
+            sessionManager.saveSession(userId, name, email, token);
+
+            goToDashboard();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Registration error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * No network: store locally and continue.
+     * The sync queue will push the account to the server when connectivity returns.
+     */
+    private void registerOffline(String name, String email, String password) {
+        String userId = "local_" + System.currentTimeMillis();
+        sessionManager.cacheCredentials(email, password, userId, name, "offline_token");
+        sessionManager.saveSession(userId, name, email, "offline_token");
+        Toast.makeText(this, "Account created offline — will sync when connected",
+                Toast.LENGTH_LONG).show();
         goToDashboard();
     }
 
     // ── HELPERS ──────────────────────────────────────────────────────
 
-    private void togglePassword() {
-        passwordVisible = !passwordVisible;
-        etPassword.setTransformationMethod(
-            passwordVisible ? HideReturnsTransformationMethod.getInstance()
-                            : PasswordTransformationMethod.getInstance());
-        btnTogglePassword.setImageResource(
-            passwordVisible ? R.drawable.ic_eye_off : R.drawable.ic_eye);
-        etPassword.setSelection(etPassword.getText().length());
+    private boolean validate(String name, String email, String password, String confirm) {
+        boolean ok = true;
+
+        if (TextUtils.isEmpty(name) || name.length() < AppConstants.NAME_MIN_LENGTH) {
+            etFullName.setError("Name must be at least " + AppConstants.NAME_MIN_LENGTH + " characters");
+            ok = false;
+        } else {
+            etFullName.setError(null);
+        }
+
+        if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter a valid email");
+            ok = false;
+        } else {
+            etEmail.setError(null);
+        }
+
+        if (TextUtils.isEmpty(password) || password.length() < AppConstants.PASSWORD_MIN_LENGTH) {
+            etPassword.setError("Password must be at least " + AppConstants.PASSWORD_MIN_LENGTH + " characters");
+            ok = false;
+        } else {
+            etPassword.setError(null);
+        }
+
+        if (!password.equals(confirm)) {
+            etConfirmPassword.setError("Passwords do not match");
+            ok = false;
+        } else {
+            etConfirmPassword.setError(null);
+        }
+
+        return ok;
     }
 
-    private void toggleConfirm() {
-        confirmVisible = !confirmVisible;
-        etConfirmPassword.setTransformationMethod(
-            confirmVisible ? HideReturnsTransformationMethod.getInstance()
-                           : PasswordTransformationMethod.getInstance());
-        btnToggleConfirm.setImageResource(
-            confirmVisible ? R.drawable.ic_eye_off : R.drawable.ic_eye);
-        etConfirmPassword.setSelection(etConfirmPassword.getText().length());
+    private void setLoading(boolean loading) {
+        btnCreateAccount.setEnabled(!loading);
+        if (progressBar != null) {
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
     }
 
-    private void goToLogin() {
-        finish();
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    private void togglePasswordVisibility(EditText field, ImageButton toggle) {
+        if (field.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+            field.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                    | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            toggle.setImageResource(R.drawable.ic_eye_off);
+        } else {
+            field.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                    | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            toggle.setImageResource(R.drawable.ic_eye);
+        }
+        field.setSelection(field.getText().length());
     }
 
     private void goToDashboard() {
-        Intent intent = new Intent(this, DashboardActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        startActivity(new Intent(this, DashboardActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
     }

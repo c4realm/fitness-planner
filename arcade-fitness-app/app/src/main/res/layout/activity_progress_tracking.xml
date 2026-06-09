@@ -35,7 +35,15 @@
                 <TextView android:id="@+id/btnAddGoal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/add_goal" style="@style/Text.OrangeLink"/>
             </LinearLayout>
             <!--  Total sessions completed  -->
-            <TextView android:id="@+id/tvTotalSessions" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 sessions completed" android:textSize="13sp" android:textColor="@color/text_muted" android:layout_marginBottom="@dimen/space_md"/>
+            <TextView android:id="@+id/tvTotalSessions" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 sessions completed" android:textSize="13sp" android:textColor="@color/text_muted" android:layout_marginBottom="@dimen/space_sm"/>
+            <Button
+                android:id="@+id/btnViewHistory"
+                style="@style/Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="View Full History"
+                android:layout_marginTop="@dimen/space_sm"
+                android:layout_marginBottom="@dimen/space_md"/>
             <!--  Goals RecyclerView  -->
             <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvGoals" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" android:overScrollMode="never"/>
             <!--  No Goals State  -->

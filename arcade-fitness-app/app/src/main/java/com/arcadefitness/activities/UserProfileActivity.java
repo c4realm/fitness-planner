@@ -107,6 +107,19 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfile() {
+        if (sessionManager.isGuest()) {
+            new AlertDialog.Builder(this)
+                .setTitle("Account Required")
+                .setMessage("Create a free account to save your profile.")
+                .setPositiveButton("Register", (d, w) -> {
+                    startActivity(new Intent(this, RegisterActivity.class));
+                    finish();
+                })
+                .setNegativeButton("Back", (d, w) -> finish())
+                .setCancelable(false)
+                .show();
+            return;
+        }
         String name = sessionManager.getUserName();
         userEmail = sessionManager.getUserEmail();
 

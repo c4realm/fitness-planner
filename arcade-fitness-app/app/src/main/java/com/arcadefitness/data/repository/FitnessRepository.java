@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class FitnessRepository {
@@ -50,7 +49,6 @@ public class FitnessRepository {
     private final ExecutorService executor;
     private final ApiService apiService;
     private final Gson gson;
-
     private final SessionManager sessionManager;
 
     private final MutableLiveData<Boolean> syncInProgress = new MutableLiveData<>(false);
@@ -63,22 +61,17 @@ public class FitnessRepository {
 
     private FitnessRepository(Context context) {
         AppDatabase db = AppDatabase.getInstance(context);
-        this.workoutDao = db.workoutDao();
-        this.exerciseDao = db.exerciseDao();
-        this.setRecordDao = db.setRecordDao();
-        this.syncQueueDao = db.syncQueueDao();
-        this.userProfileDao = db.userProfileDao();
-        this.goalDao = db.goalDao();
+        this.workoutDao        = db.workoutDao();
+        this.exerciseDao       = db.exerciseDao();
+        this.setRecordDao      = db.setRecordDao();
+        this.syncQueueDao      = db.syncQueueDao();
+        this.userProfileDao    = db.userProfileDao();
+        this.goalDao           = db.goalDao();
         this.workoutSessionDao = db.workoutSessionDao();
-        this.executor = AppDatabase.DATABASE_WRITE_EXECUTOR;
-        this.apiService = RetrofitClient.getInstance().getApiService();
-        this.gson = new Gson();
-        this.sessionManager = new SessionManager(context);
-    }
-
-    private String currentUserId() {
-        String id = sessionManager.getUserId();
-        return (id == null || id.isEmpty()) ? AppConstants.GUEST_USER_ID : id;
+        this.executor          = AppDatabase.DATABASE_WRITE_EXECUTOR;
+        this.apiService        = RetrofitClient.getInstance().getApiService();
+        this.gson              = new Gson();
+        this.sessionManager    = new SessionManager(context);
     }
 
     public static FitnessRepository getInstance(Context context) {
@@ -92,13 +85,15 @@ public class FitnessRepository {
         return INSTANCE;
     }
 
-    public LiveData<Boolean> getSyncInProgress() {
-        return syncInProgress;
+    // ── Current user ─────────────────────────────────────────────────
+
+    private String currentUserId() {
+        String id = sessionManager.getUserId();
+        return (id == null || id.isEmpty()) ? AppConstants.GUEST_USER_ID : id;
     }
 
-    public LiveData<String> getSyncStatusMessage() {
-        return syncStatusMessage;
-    }
+    public LiveData<Boolean> getSyncInProgress()     { return syncInProgress; }
+    public LiveData<String>  getSyncStatusMessage()  { return syncStatusMessage; }
 
     // ═════════════════════════════════════════════════════════════════
     //  WORKOUTS
@@ -107,8 +102,7 @@ public class FitnessRepository {
     public void getAllWorkouts(RepositoryCallback<List<WorkoutEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutEntity> workouts = workoutDao.getAll(currentUserId());
-                postSuccess(callback, workouts);
+                postSuccess(callback, workoutDao.getAll(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load workouts: " + e.getMessage());
             }
@@ -118,8 +112,7 @@ public class FitnessRepository {
     public void getAllWorkoutsLiveData(RepositoryCallback<LiveData<List<WorkoutEntity>>> callback) {
         executor.execute(() -> {
             try {
-                LiveData<List<WorkoutEntity>> workouts = workoutDao.getAllLiveData(currentUserId());
-                postSuccess(callback, workouts);
+                postSuccess(callback, workoutDao.getAllLiveData(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load workouts: " + e.getMessage());
             }
@@ -130,11 +123,8 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 WorkoutEntity workout = workoutDao.getById(workoutId);
-                if (workout != null) {
-                    postSuccess(callback, workout);
-                } else {
-                    postError(callback, "Workout not found");
-                }
+                if (workout != null) postSuccess(callback, workout);
+                else postError(callback, "Workout not found");
             } catch (Exception e) {
                 postError(callback, "Failed to load workout: " + e.getMessage());
             }
@@ -148,13 +138,7 @@ public class FitnessRepository {
                 long id = workoutDao.insert(workout);
                 int localId = (int) id;
                 workout.setId(localId);
-
-                String payload = gson.toJson(workout);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workouts", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workouts", localId, "INSERT", gson.toJson(workout));
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save workout: " + e.getMessage());
@@ -167,13 +151,7 @@ public class FitnessRepository {
             try {
                 workout.setUpdatedAt(System.currentTimeMillis());
                 workoutDao.update(workout);
-
-                String payload = gson.toJson(workout);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workouts", workout.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workouts", workout.getId(), "UPDATE", gson.toJson(workout));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update workout: " + e.getMessage());
@@ -185,13 +163,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 workoutDao.delete(workout);
-
-                String payload = gson.toJson(workout);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workouts", workout.getId(), "DELETE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workouts", workout.getId(), "DELETE", gson.toJson(workout));
                 setRecordDao.deleteByWorkoutId(workout.getId());
                 postSuccess(callback, null);
             } catch (Exception e) {
@@ -207,8 +179,7 @@ public class FitnessRepository {
     public void getAllExercises(RepositoryCallback<List<ExerciseEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<ExerciseEntity> exercises = exerciseDao.getAll();
-                postSuccess(callback, exercises);
+                postSuccess(callback, exerciseDao.getAll());
             } catch (Exception e) {
                 postError(callback, "Failed to load exercises: " + e.getMessage());
             }
@@ -218,12 +189,9 @@ public class FitnessRepository {
     public void getExerciseById(int exerciseId, RepositoryCallback<ExerciseEntity> callback) {
         executor.execute(() -> {
             try {
-                ExerciseEntity exercise = exerciseDao.getById(exerciseId);
-                if (exercise != null) {
-                    postSuccess(callback, exercise);
-                } else {
-                    postError(callback, "Exercise not found");
-                }
+                ExerciseEntity ex = exerciseDao.getById(exerciseId);
+                if (ex != null) postSuccess(callback, ex);
+                else postError(callback, "Exercise not found");
             } catch (Exception e) {
                 postError(callback, "Failed to load exercise: " + e.getMessage());
             }
@@ -233,8 +201,7 @@ public class FitnessRepository {
     public void searchExercises(String query, RepositoryCallback<List<ExerciseEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<ExerciseEntity> results = exerciseDao.search(query);
-                postSuccess(callback, results);
+                postSuccess(callback, exerciseDao.search(query));
             } catch (Exception e) {
                 postError(callback, "Search failed: " + e.getMessage());
             }
@@ -245,8 +212,7 @@ public class FitnessRepository {
                                           RepositoryCallback<List<ExerciseEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<ExerciseEntity> results = exerciseDao.getByMuscleGroup(muscleGroup);
-                postSuccess(callback, results);
+                postSuccess(callback, exerciseDao.getByMuscleGroup(muscleGroup));
             } catch (Exception e) {
                 postError(callback, "Failed to load exercises: " + e.getMessage());
             }
@@ -259,13 +225,7 @@ public class FitnessRepository {
                 long id = exerciseDao.insert(exercise);
                 int localId = (int) id;
                 exercise.setId(localId);
-
-                String payload = gson.toJson(exercise);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "exercises", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                // Exercises are read-only on the backend — no sync needed
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save exercise: " + e.getMessage());
@@ -277,13 +237,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 exerciseDao.update(exercise);
-
-                String payload = gson.toJson(exercise);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "exercises", exercise.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                // Exercises are read-only on the backend — no sync needed
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update exercise: " + e.getMessage());
@@ -299,8 +253,7 @@ public class FitnessRepository {
                                        RepositoryCallback<List<SetRecordEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<SetRecordEntity> records = setRecordDao.getByWorkoutId(workoutId);
-                postSuccess(callback, records);
+                postSuccess(callback, setRecordDao.getByWorkoutId(workoutId));
             } catch (Exception e) {
                 postError(callback, "Failed to load set records: " + e.getMessage());
             }
@@ -311,9 +264,7 @@ public class FitnessRepository {
                                                   RepositoryCallback<List<SetRecordEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<SetRecordEntity> records =
-                    setRecordDao.getByWorkoutAndExercise(workoutId, exerciseId);
-                postSuccess(callback, records);
+                postSuccess(callback, setRecordDao.getByWorkoutAndExercise(workoutId, exerciseId));
             } catch (Exception e) {
                 postError(callback, "Failed to load set records: " + e.getMessage());
             }
@@ -327,13 +278,7 @@ public class FitnessRepository {
                 long id = setRecordDao.insert(setRecord);
                 int localId = (int) id;
                 setRecord.setId(localId);
-
-                String payload = gson.toJson(setRecord);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "set_records", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("set_records", localId, "INSERT", gson.toJson(setRecord));
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save set record: " + e.getMessage());
@@ -345,13 +290,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 setRecordDao.update(setRecord);
-
-                String payload = gson.toJson(setRecord);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "set_records", setRecord.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("set_records", setRecord.getId(), "UPDATE", gson.toJson(setRecord));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update set record: " + e.getMessage());
@@ -363,23 +302,16 @@ public class FitnessRepository {
                                  RepositoryCallback<Void> callback) {
         executor.execute(() -> {
             try {
-                long timestamp = System.currentTimeMillis();
-                setRecordDao.markCompleted(setId, weight, reps, timestamp);
-
+                long ts = System.currentTimeMillis();
+                setRecordDao.markCompleted(setId, weight, reps, ts);
                 SetRecordEntity record = setRecordDao.getById(setId);
                 if (record != null) {
                     record.setIsCompleted(1);
                     record.setWeight(weight);
                     record.setReps(reps);
-                    record.setTimestamp(timestamp);
-
-                    String payload = gson.toJson(record);
-                    SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                        "set_records", setId, "UPDATE", payload
-                    );
-                    syncQueueDao.insert(syncEntry);
+                    record.setTimestamp(ts);
+                    queueSync("set_records", setId, "UPDATE", gson.toJson(record));
                 }
-
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to mark set completed: " + e.getMessage());
@@ -391,13 +323,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 setRecordDao.delete(setRecord);
-
-                String payload = gson.toJson(setRecord);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "set_records", setRecord.getId(), "DELETE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("set_records", setRecord.getId(), "DELETE", gson.toJson(setRecord));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to delete set record: " + e.getMessage());
@@ -409,16 +335,14 @@ public class FitnessRepository {
                                            RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
-                int count = setRecordDao.getCompletedCountByWorkout(workoutId);
-                postSuccess(callback, count);
+                postSuccess(callback, setRecordDao.getCompletedCountByWorkout(workoutId));
             } catch (Exception e) {
                 postError(callback, "Failed to get completed count: " + e.getMessage());
             }
         });
     }
 
-    public void getTotalVolumeByWorkout(int workoutId,
-                                        RepositoryCallback<Double> callback) {
+    public void getTotalVolumeByWorkout(int workoutId, RepositoryCallback<Double> callback) {
         executor.execute(() -> {
             try {
                 Double volume = setRecordDao.getTotalVolumeByWorkout(workoutId);
@@ -436,8 +360,7 @@ public class FitnessRepository {
     public void getAllUserProfiles(RepositoryCallback<List<UserProfileEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<UserProfileEntity> profiles = userProfileDao.getAll();
-                postSuccess(callback, profiles);
+                postSuccess(callback, userProfileDao.getAll());
             } catch (Exception e) {
                 postError(callback, "Failed to load profiles: " + e.getMessage());
             }
@@ -447,12 +370,9 @@ public class FitnessRepository {
     public void getUserProfileById(int profileId, RepositoryCallback<UserProfileEntity> callback) {
         executor.execute(() -> {
             try {
-                UserProfileEntity profile = userProfileDao.getById(profileId);
-                if (profile != null) {
-                    postSuccess(callback, profile);
-                } else {
-                    postError(callback, "Profile not found");
-                }
+                UserProfileEntity p = userProfileDao.getById(profileId);
+                if (p != null) postSuccess(callback, p);
+                else postError(callback, "Profile not found");
             } catch (Exception e) {
                 postError(callback, "Failed to load profile: " + e.getMessage());
             }
@@ -462,8 +382,7 @@ public class FitnessRepository {
     public void getUserProfileByEmail(String email, RepositoryCallback<UserProfileEntity> callback) {
         executor.execute(() -> {
             try {
-                UserProfileEntity profile = userProfileDao.getByEmail(email);
-                postSuccess(callback, profile);
+                postSuccess(callback, userProfileDao.getByEmail(email));
             } catch (Exception e) {
                 postError(callback, "Failed to load profile: " + e.getMessage());
             }
@@ -476,13 +395,7 @@ public class FitnessRepository {
                 long id = userProfileDao.insert(profile);
                 int localId = (int) id;
                 profile.setId(localId);
-
-                String payload = gson.toJson(profile);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "user_profiles", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("user_profiles", localId, "INSERT", gson.toJson(profile));
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save profile: " + e.getMessage());
@@ -495,13 +408,7 @@ public class FitnessRepository {
             try {
                 profile.setUpdatedAt(System.currentTimeMillis());
                 userProfileDao.update(profile);
-
-                String payload = gson.toJson(profile);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "user_profiles", profile.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("user_profiles", profile.getId(), "UPDATE", gson.toJson(profile));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update profile: " + e.getMessage());
@@ -513,13 +420,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 userProfileDao.delete(profile);
-
-                String payload = gson.toJson(profile);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "user_profiles", profile.getId(), "DELETE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("user_profiles", profile.getId(), "DELETE", gson.toJson(profile));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to delete profile: " + e.getMessage());
@@ -534,8 +435,7 @@ public class FitnessRepository {
     public void getAllGoals(RepositoryCallback<List<GoalEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<GoalEntity> goals = goalDao.getAll(currentUserId());
-                postSuccess(callback, goals);
+                postSuccess(callback, goalDao.getAll(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load goals: " + e.getMessage());
             }
@@ -545,8 +445,7 @@ public class FitnessRepository {
     public void getActiveGoals(RepositoryCallback<List<GoalEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<GoalEntity> goals = goalDao.getActiveGoals(currentUserId());
-                postSuccess(callback, goals);
+                postSuccess(callback, goalDao.getActiveGoals(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load active goals: " + e.getMessage());
             }
@@ -557,11 +456,8 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 GoalEntity goal = goalDao.getById(goalId);
-                if (goal != null) {
-                    postSuccess(callback, goal);
-                } else {
-                    postError(callback, "Goal not found");
-                }
+                if (goal != null) postSuccess(callback, goal);
+                else postError(callback, "Goal not found");
             } catch (Exception e) {
                 postError(callback, "Failed to load goal: " + e.getMessage());
             }
@@ -575,13 +471,7 @@ public class FitnessRepository {
                 long id = goalDao.insert(goal);
                 int localId = (int) id;
                 goal.setId(localId);
-
-                String payload = gson.toJson(goal);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "goals", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("goals", localId, "INSERT", gson.toJson(goal));
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save goal: " + e.getMessage());
@@ -594,13 +484,7 @@ public class FitnessRepository {
             try {
                 goal.setUpdatedAt(System.currentTimeMillis());
                 goalDao.update(goal);
-
-                String payload = gson.toJson(goal);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "goals", goal.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("goals", goal.getId(), "UPDATE", gson.toJson(goal));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update goal: " + e.getMessage());
@@ -623,13 +507,7 @@ public class FitnessRepository {
         executor.execute(() -> {
             try {
                 goalDao.delete(goal);
-
-                String payload = gson.toJson(goal);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "goals", goal.getId(), "DELETE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("goals", goal.getId(), "DELETE", gson.toJson(goal));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to delete goal: " + e.getMessage());
@@ -644,8 +522,7 @@ public class FitnessRepository {
     public void getAllWorkoutSessions(RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getAll();
-                postSuccess(callback, sessions);
+                postSuccess(callback, workoutSessionDao.getAll());
             } catch (Exception e) {
                 postError(callback, "Failed to load sessions: " + e.getMessage());
             }
@@ -655,23 +532,20 @@ public class FitnessRepository {
     public void getCompletedSessions(RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSessions(currentUserId());
-                postSuccess(callback, sessions);
+                postSuccess(callback, workoutSessionDao.getCompletedSessions(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load completed sessions: " + e.getMessage());
             }
         });
     }
 
-    public void getWorkoutSessionById(int sessionId, RepositoryCallback<WorkoutSessionEntity> callback) {
+    public void getWorkoutSessionById(int sessionId,
+                                      RepositoryCallback<WorkoutSessionEntity> callback) {
         executor.execute(() -> {
             try {
-                WorkoutSessionEntity session = workoutSessionDao.getById(sessionId);
-                if (session != null) {
-                    postSuccess(callback, session);
-                } else {
-                    postError(callback, "Session not found");
-                }
+                WorkoutSessionEntity s = workoutSessionDao.getById(sessionId);
+                if (s != null) postSuccess(callback, s);
+                else postError(callback, "Session not found");
             } catch (Exception e) {
                 postError(callback, "Failed to load session: " + e.getMessage());
             }
@@ -681,39 +555,34 @@ public class FitnessRepository {
     public void getCurrentSession(RepositoryCallback<WorkoutSessionEntity> callback) {
         executor.execute(() -> {
             try {
-                WorkoutSessionEntity session = workoutSessionDao.getCurrentSession(currentUserId());
-                postSuccess(callback, session);
+                postSuccess(callback, workoutSessionDao.getCurrentSession(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load current session: " + e.getMessage());
             }
         });
     }
 
-    public void getCurrentSessionLiveData(RepositoryCallback<LiveData<WorkoutSessionEntity>> callback) {
+    public void getCurrentSessionLiveData(
+            RepositoryCallback<LiveData<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                LiveData<WorkoutSessionEntity> session = workoutSessionDao.getCurrentSessionLiveData(currentUserId());
-                postSuccess(callback, session);
+                postSuccess(callback,
+                        workoutSessionDao.getCurrentSessionLiveData(currentUserId()));
             } catch (Exception e) {
                 postError(callback, "Failed to load current session: " + e.getMessage());
             }
         });
     }
 
-    public void insertWorkoutSession(WorkoutSessionEntity session, RepositoryCallback<Integer> callback) {
+    public void insertWorkoutSession(WorkoutSessionEntity session,
+                                     RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
                 session.setOwnerId(currentUserId());
                 long id = workoutSessionDao.insert(session);
                 int localId = (int) id;
                 session.setId(localId);
-
-                String payload = gson.toJson(session);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workout_sessions", localId, "INSERT", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workout_sessions", localId, "INSERT", gson.toJson(session));
                 postSuccess(callback, localId);
             } catch (Exception e) {
                 postError(callback, "Failed to save session: " + e.getMessage());
@@ -721,17 +590,12 @@ public class FitnessRepository {
         });
     }
 
-    public void updateWorkoutSession(WorkoutSessionEntity session, RepositoryCallback<Void> callback) {
+    public void updateWorkoutSession(WorkoutSessionEntity session,
+                                     RepositoryCallback<Void> callback) {
         executor.execute(() -> {
             try {
                 workoutSessionDao.update(session);
-
-                String payload = gson.toJson(session);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workout_sessions", session.getId(), "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workout_sessions", session.getId(), "UPDATE", gson.toJson(session));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to update session: " + e.getMessage());
@@ -739,16 +603,14 @@ public class FitnessRepository {
         });
     }
 
-    public void completeWorkoutSession(int sessionId, int durationMinutes, int caloriesBurned,
-                                       double totalVolume, int rating, String notes,
+    public void completeWorkoutSession(int sessionId, int durationMinutes,
+                                       int caloriesBurned, double totalVolume,
+                                       int rating, String notes,
                                        RepositoryCallback<Void> callback) {
         executor.execute(() -> {
             try {
                 WorkoutSessionEntity session = workoutSessionDao.getById(sessionId);
-                if (session == null) {
-                    postError(callback, "Session not found");
-                    return;
-                }
+                if (session == null) { postError(callback, "Session not found"); return; }
                 session.setStatus("COMPLETED");
                 session.setEndTimestamp(System.currentTimeMillis());
                 session.setDurationMinutes(durationMinutes);
@@ -757,13 +619,7 @@ public class FitnessRepository {
                 session.setRating(rating);
                 session.setNotes(notes);
                 workoutSessionDao.update(session);
-
-                String payload = gson.toJson(session);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workout_sessions", sessionId, "UPDATE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workout_sessions", sessionId, "UPDATE", gson.toJson(session));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to complete session: " + e.getMessage());
@@ -771,17 +627,12 @@ public class FitnessRepository {
         });
     }
 
-    public void deleteWorkoutSession(WorkoutSessionEntity session, RepositoryCallback<Void> callback) {
+    public void deleteWorkoutSession(WorkoutSessionEntity session,
+                                     RepositoryCallback<Void> callback) {
         executor.execute(() -> {
             try {
                 workoutSessionDao.delete(session);
-
-                String payload = gson.toJson(session);
-                SyncQueueEntryEntity syncEntry = new SyncQueueEntryEntity(
-                    "workout_sessions", session.getId(), "DELETE", payload
-                );
-                syncQueueDao.insert(syncEntry);
-
+                queueSync("workout_sessions", session.getId(), "DELETE", gson.toJson(session));
                 postSuccess(callback, null);
             } catch (Exception e) {
                 postError(callback, "Failed to delete session: " + e.getMessage());
@@ -789,11 +640,12 @@ public class FitnessRepository {
         });
     }
 
-    public void getSessionsSince(long fromTimestamp, RepositoryCallback<List<WorkoutSessionEntity>> callback) {
+    public void getSessionsSince(long fromTimestamp,
+                                 RepositoryCallback<List<WorkoutSessionEntity>> callback) {
         executor.execute(() -> {
             try {
-                List<WorkoutSessionEntity> sessions = workoutSessionDao.getCompletedSince(currentUserId(), fromTimestamp);
-                postSuccess(callback, sessions);
+                postSuccess(callback,
+                        workoutSessionDao.getCompletedSince(currentUserId(), fromTimestamp));
             } catch (Exception e) {
                 postError(callback, "Failed to load sessions: " + e.getMessage());
             }
@@ -803,17 +655,17 @@ public class FitnessRepository {
     public void getWeeklyStats(RepositoryCallback<int[]> callback) {
         executor.execute(() -> {
             try {
-                String userId = currentUserId();
-                long weekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000;
-                int sessionsCount = workoutSessionDao.getCompletedCountSince(userId, weekAgo);
-                Integer totalDuration = workoutSessionDao.getTotalDurationSince(userId, weekAgo);
-                Integer totalCalories = workoutSessionDao.getTotalCaloriesSince(userId, weekAgo);
-                Double totalVolume = workoutSessionDao.getTotalVolumeSince(userId, weekAgo);
+                String uid    = currentUserId();
+                long weekAgo  = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000;
+                int  sessions = workoutSessionDao.getCompletedCountSince(uid, weekAgo);
+                Integer dur   = workoutSessionDao.getTotalDurationSince(uid, weekAgo);
+                Integer cal   = workoutSessionDao.getTotalCaloriesSince(uid, weekAgo);
+                Double  vol   = workoutSessionDao.getTotalVolumeSince(uid, weekAgo);
                 postSuccess(callback, new int[]{
-                    sessionsCount,
-                    totalDuration != null ? totalDuration : 0,
-                    totalCalories != null ? totalCalories : 0,
-                    totalVolume != null ? totalVolume.intValue() : 0
+                        sessions,
+                        dur != null ? dur : 0,
+                        cal != null ? cal : 0,
+                        vol != null ? vol.intValue() : 0
                 });
             } catch (Exception e) {
                 postError(callback, "Failed to load weekly stats: " + e.getMessage());
@@ -824,10 +676,9 @@ public class FitnessRepository {
     public void getCompletedSessionCount(RepositoryCallback<Integer> callback) {
         executor.execute(() -> {
             try {
-                int count = workoutSessionDao.getCompletedCount(currentUserId());
-                postSuccess(callback, count);
+                postSuccess(callback, workoutSessionDao.getCompletedCount(currentUserId()));
             } catch (Exception e) {
-                postError(callback, "Failed to get completed session count: " + e.getMessage());
+                postError(callback, "Failed to get session count: " + e.getMessage());
             }
         });
     }
@@ -838,12 +689,12 @@ public class FitnessRepository {
                 List<String> dates = workoutSessionDao.getCompletedSessionDates(currentUserId());
                 int streak = 0;
                 java.util.Calendar cal = java.util.Calendar.getInstance();
-                for (int i = 0; i < dates.size(); i++) {
+                for (String date : dates) {
                     String expected = String.format("%04d-%02d-%02d",
                             cal.get(java.util.Calendar.YEAR),
                             cal.get(java.util.Calendar.MONTH) + 1,
                             cal.get(java.util.Calendar.DAY_OF_MONTH));
-                    if (dates.get(i).equals(expected)) {
+                    if (date.equals(expected)) {
                         streak++;
                         cal.add(java.util.Calendar.DAY_OF_MONTH, -1);
                     } else {
@@ -861,40 +712,30 @@ public class FitnessRepository {
     //  SYNC ENGINE
     // ═════════════════════════════════════════════════════════════════
 
-    public void syncOfflineQueue() {
-        processSyncQueue();
-    }
+    public void syncOfflineQueue() { processSyncQueue(); }
 
     public void processSyncQueue() {
-        if (Boolean.TRUE.equals(syncInProgress.getValue())) {
-            return;
-        }
+        if (Boolean.TRUE.equals(syncInProgress.getValue())) return;
 
         syncInProgress.postValue(true);
         syncStatusMessage.postValue("Syncing...");
 
         executor.execute(() -> {
             try {
-                List<SyncQueueEntryEntity> pendingEntries =
-                    syncQueueDao.getPendingAndFailed();
-
-                if (pendingEntries.isEmpty()) {
+                List<SyncQueueEntryEntity> pending = syncQueueDao.getPendingAndFailed();
+                if (pending.isEmpty()) {
                     syncInProgress.postValue(false);
                     syncStatusMessage.postValue("All synced");
                     return;
                 }
-
-                for (SyncQueueEntryEntity entry : pendingEntries) {
+                for (SyncQueueEntryEntity entry : pending) {
                     syncQueueDao.markInProgress(entry.getId());
                     processSingleSyncEntry(entry);
                 }
-
                 syncQueueDao.deleteCompleted();
                 syncQueueDao.deleteFailedAboveMaxRetries(5);
-
                 syncInProgress.postValue(false);
                 syncStatusMessage.postValue("Sync complete");
-
             } catch (Exception e) {
                 syncInProgress.postValue(false);
                 syncStatusMessage.postValue("Sync failed: " + e.getMessage());
@@ -905,207 +746,186 @@ public class FitnessRepository {
     private void processSingleSyncEntry(SyncQueueEntryEntity entry) {
         try {
             JsonObject payload = JsonParser.parseString(entry.getPayload()).getAsJsonObject();
-            String tableName = entry.getTableName();
-            String operation = entry.getOperationType();
-            Call<JsonObject> call = null;
+            String table       = entry.getTableName();
+            String op          = entry.getOperationType();
 
-            if ("workouts".equals(tableName)) {
-                call = buildWorkoutSyncCall(operation, payload);
-            } else if ("exercises".equals(tableName)) {
-                call = buildExerciseSyncCall(operation, payload);
-            } else if ("set_records".equals(tableName)) {
-                call = buildSetRecordSyncCall(operation, payload);
-            } else if ("user_profiles".equals(tableName)) {
-                call = buildUserProfileSyncCall(operation, payload);
-            } else if ("goals".equals(tableName)) {
-                call = buildGoalSyncCall(operation, payload);
-            } else if ("workout_sessions".equals(tableName)) {
-                call = buildWorkoutSessionSyncCall(operation, payload);
+            Call<JsonObject> call = buildSyncCall(table, op, payload);
+            if (call == null) {
+                // Nothing to sync for this table/op — mark done
+                syncQueueDao.markCompleted(entry.getId());
+                return;
             }
 
-            if (call != null) {
-                Response<JsonObject> response = call.execute();
-                if (response.isSuccessful()) {
-                    syncQueueDao.markCompleted(entry.getId());
-                    markLocalEntitySynced(tableName, entry.getRecordId(), response.body());
-                } else {
-                    syncQueueDao.markFailed(entry.getId(),
-                        "HTTP " + response.code() + ": " + response.message());
+            Response<JsonObject> response = call.execute();
+            if (response.isSuccessful()) {
+                syncQueueDao.markCompleted(entry.getId());
+                if (response.body() != null) {
+                    markLocalEntitySynced(table, entry.getRecordId(), response.body());
                 }
             } else {
-                syncQueueDao.markCompleted(entry.getId());
+                syncQueueDao.markFailed(entry.getId(),
+                        "HTTP " + response.code() + ": " + response.message());
             }
         } catch (Exception e) {
-            syncQueueDao.markFailed(entry.getId(), e.getMessage());
+            syncQueueDao.markFailed(entry.getId(),
+                    e.getMessage() != null ? e.getMessage() : "Unknown error");
         }
     }
 
-    private Call<JsonObject> buildWorkoutSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createWorkout(payload);
-            case "UPDATE":
-                String workoutRemoteId = getRemoteId(payload, "remoteId");
-                if (workoutRemoteId != null) {
-                    return apiService.updateWorkout(workoutRemoteId, payload);
-                }
-                return apiService.createWorkout(payload);
-            case "DELETE":
-                String deleteWorkoutRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteWorkoutRemoteId != null) {
-                    return apiService.deleteWorkout(deleteWorkoutRemoteId);
-                }
-                return null;
-            default:
-                return null;
+    /**
+     * Maps a (tableName, operation, payload) triple to the correct ApiService call.
+     *
+     * Remote IDs are stored as Strings in the local DB (remote_id column) because
+     * they come back from the server as JSON integers but we store them as text.
+     * ApiService methods accept int, so we parse with Integer.parseInt() here.
+     * If the String is null / not yet synced, we fall back to a CREATE call.
+     */
+    private Call<JsonObject> buildSyncCall(String table, String op, JsonObject payload) {
+        switch (table) {
+            case "workouts":        return buildWorkoutSyncCall(op, payload);
+            case "set_records":     return buildSetRecordSyncCall(op, payload);
+            case "user_profiles":   return buildUserProfileSyncCall(op, payload);
+            case "goals":           return buildGoalSyncCall(op, payload);
+            case "workout_sessions":return buildWorkoutSessionSyncCall(op, payload);
+            // exercises are read-only on the backend — skip
+            default:                return null;
         }
     }
 
-    private Call<JsonObject> buildExerciseSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createExercise(payload);
-            case "UPDATE":
-                String exerciseRemoteId = getRemoteId(payload, "remoteId");
-                if (exerciseRemoteId != null) {
-                    return apiService.updateExercise(exerciseRemoteId, payload);
-                }
-                return apiService.createExercise(payload);
-            case "DELETE":
-                String deleteExerciseRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteExerciseRemoteId != null) {
-                    return apiService.deleteExercise(deleteExerciseRemoteId);
-                }
-                return null;
-            default:
-                return null;
+    private Call<JsonObject> buildWorkoutSyncCall(String op, JsonObject p) {
+        switch (op) {
+            case "INSERT": return apiService.createWorkout(p);
+            case "UPDATE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.updateWorkout(rid, p)
+                        : apiService.createWorkout(p);
+            }
+            case "DELETE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.deleteWorkout(rid) : null;
+            }
+            default: return null;
         }
     }
 
-    private Call<JsonObject> buildSetRecordSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createSetRecord(payload);
-            case "UPDATE":
-                String setRemoteId = getRemoteId(payload, "remoteId");
-                if (setRemoteId != null) {
-                    return apiService.updateSetRecord(setRemoteId, payload);
-                }
-                return apiService.createSetRecord(payload);
-            case "DELETE":
-                String deleteSetRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteSetRemoteId != null) {
-                    return null;
-                }
-                return null;
-            default:
-                return null;
+    private Call<JsonObject> buildSetRecordSyncCall(String op, JsonObject p) {
+        switch (op) {
+            case "INSERT": return apiService.createSetRecord(p);
+            case "UPDATE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.updateSetRecord(rid, p)
+                        : apiService.createSetRecord(p);
+            }
+            case "DELETE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.deleteSetRecord(rid) : null;
+            }
+            default: return null;
         }
     }
 
-    private Call<JsonObject> buildUserProfileSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createUserProfile(payload);
-            case "UPDATE":
-                String profileRemoteId = getRemoteId(payload, "remoteId");
-                if (profileRemoteId != null) {
-                    return apiService.updateUserProfile(profileRemoteId, payload);
-                }
-                return apiService.createUserProfile(payload);
-            case "DELETE":
-                String deleteProfileRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteProfileRemoteId != null) {
-                    return apiService.deleteUserProfile(deleteProfileRemoteId);
-                }
-                return null;
-            default:
-                return null;
+    private Call<JsonObject> buildUserProfileSyncCall(String op, JsonObject p) {
+        switch (op) {
+            // Backend scopes profiles to the auth user — no ID in path
+            case "INSERT": return apiService.updateProfile(p); // upsert via PUT
+            case "UPDATE": return apiService.updateProfile(p);
+            case "DELETE": return null; // no DELETE endpoint on backend
+            default: return null;
         }
     }
 
-    private Call<JsonObject> buildGoalSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createGoal(payload);
-            case "UPDATE":
-                String goalRemoteId = getRemoteId(payload, "remoteId");
-                if (goalRemoteId != null) {
-                    return apiService.updateGoal(goalRemoteId, payload);
-                }
-                return apiService.createGoal(payload);
-            case "DELETE":
-                String deleteGoalRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteGoalRemoteId != null) {
-                    return apiService.deleteGoal(deleteGoalRemoteId);
-                }
-                return null;
-            default:
-                return null;
+    private Call<JsonObject> buildGoalSyncCall(String op, JsonObject p) {
+        switch (op) {
+            case "INSERT": return apiService.createGoal(p);
+            case "UPDATE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.updateGoal(rid, p)
+                        : apiService.createGoal(p);
+            }
+            case "DELETE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.deleteGoal(rid) : null;
+            }
+            default: return null;
         }
     }
 
-    private Call<JsonObject> buildWorkoutSessionSyncCall(String operation, JsonObject payload) {
-        switch (operation) {
-            case "INSERT":
-                return apiService.createWorkoutSession(payload);
-            case "UPDATE":
-                String sessionRemoteId = getRemoteId(payload, "remoteId");
-                if (sessionRemoteId != null) {
-                    return apiService.updateWorkoutSession(sessionRemoteId, payload);
+    private Call<JsonObject> buildWorkoutSessionSyncCall(String op, JsonObject p) {
+        switch (op) {
+            case "INSERT": return apiService.createSession(p);
+            case "UPDATE": {
+                int rid = parseRemoteId(p);
+                if (rid <= 0) return apiService.createSession(p);
+                // If status is COMPLETED, use the /complete endpoint
+                if (p.has("status") && "COMPLETED".equals(p.get("status").getAsString())) {
+                    return apiService.completeSession(rid, p);
                 }
-                return apiService.createWorkoutSession(payload);
-            case "DELETE":
-                String deleteSessionRemoteId = getRemoteId(payload, "remoteId");
-                if (deleteSessionRemoteId != null) {
-                    return apiService.deleteWorkoutSession(deleteSessionRemoteId);
-                }
-                return null;
-            default:
-                return null;
+                return null; // no generic update for sessions in this backend
+            }
+            case "DELETE": {
+                int rid = parseRemoteId(p);
+                return rid > 0 ? apiService.deleteSession(rid) : null;
+            }
+            default: return null;
         }
     }
 
-    private String getRemoteId(JsonObject payload, String key) {
-        if (payload.has(key) && !payload.get(key).isJsonNull()) {
-            String value = payload.get(key).getAsString();
-            if (value != null && !value.isEmpty() && !value.equals("null")) {
-                return value;
+    /**
+     * Reads the "remote_id" (or "remoteId") field from a sync payload and
+     * parses it to int. Returns 0 if absent, null, or unparseable.
+     */
+    private int parseRemoteId(JsonObject payload) {
+        for (String key : new String[]{"remote_id", "remoteId"}) {
+            if (payload.has(key) && !payload.get(key).isJsonNull()) {
+                try {
+                    String raw = payload.get(key).getAsString();
+                    if (raw != null && !raw.isEmpty() && !raw.equals("null")) {
+                        return Integer.parseInt(raw);
+                    }
+                } catch (NumberFormatException ignored) {}
             }
         }
-        return null;
+        return 0;
     }
 
-    private void markLocalEntitySynced(String tableName, int localId, JsonObject response) {
+    private void markLocalEntitySynced(String table, int localId, JsonObject response) {
         if (response == null) return;
-
-        String remoteId = null;
-        if (response.has("id") && !response.get("id").isJsonNull()) {
-            remoteId = response.get("id").getAsString();
-        } else if (response.has("_id") && !response.get("_id").isJsonNull()) {
-            remoteId = response.get("_id").getAsString();
+        // Backend wraps the actual object in a "data" field
+        JsonObject data = response;
+        if (response.has("data") && response.get("data").isJsonObject()) {
+            data = response.getAsJsonObject("data");
         }
+        // Look for the server-assigned ID
+        String remoteId = null;
+        for (String key : new String[]{"id", "workout_id", "session_id", "goal_id",
+                "set_id", "profile_id"}) {
+            if (data.has(key) && !data.get(key).isJsonNull()) {
+                remoteId = data.get(key).getAsString();
+                break;
+            }
+        }
+        if (remoteId == null || remoteId.isEmpty()) return;
+        final String finalRemoteId = remoteId;
+        switch (table) {
+            case "workouts":         workoutDao.markSynced(localId, finalRemoteId);        break;
+            case "set_records":      setRecordDao.markSynced(localId, finalRemoteId);      break;
+            case "user_profiles":    userProfileDao.markSynced(localId, finalRemoteId);    break;
+            case "goals":            goalDao.markSynced(localId, finalRemoteId);           break;
+            case "workout_sessions": workoutSessionDao.markSynced(localId, finalRemoteId); break;
+        }
+    }
 
-        String finalRemoteId = (remoteId != null && !remoteId.isEmpty()) ? remoteId : null;
-        switch (tableName) {
-            case "workouts":
-                workoutDao.markSynced(localId, finalRemoteId);
-                break;
-            case "exercises":
-                exerciseDao.markSynced(localId, finalRemoteId);
-                break;
-            case "set_records":
-                setRecordDao.markSynced(localId, finalRemoteId);
-                break;
-            case "user_profiles":
-                userProfileDao.markSynced(localId, finalRemoteId);
-                break;
-            case "goals":
-                goalDao.markSynced(localId, finalRemoteId);
-                break;
-            case "workout_sessions":
-                workoutSessionDao.markSynced(localId, finalRemoteId);
-                break;
+    // ═════════════════════════════════════════════════════════════════
+    //  UTILITY
+    // ═════════════════════════════════════════════════════════════════
+
+    /** Inserts an entry into the local sync queue. */
+    private void queueSync(String table, int localId, String operation, String payload) {
+        try {
+            syncQueueDao.insert(new SyncQueueEntryEntity(table, localId, operation, payload));
+        } catch (Exception e) {
+            android.util.Log.e("FitnessRepository",
+                    "Failed to queue sync entry: " + e.getMessage());
         }
     }
 
@@ -1126,23 +946,17 @@ public class FitnessRepository {
         });
     }
 
-    // ═════════════════════════════════════════════════════════════════
-    //  HELPERS
-    // ═════════════════════════════════════════════════════════════════
-
-    private <T> void postSuccess(final RepositoryCallback<T> callback, final T result) {
+    private <T> void postSuccess(RepositoryCallback<T> callback, T result) {
         if (callback != null) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(
-                () -> callback.onSuccess(result)
-            );
+            new android.os.Handler(android.os.Looper.getMainLooper())
+                    .post(() -> callback.onSuccess(result));
         }
     }
 
-    private <T> void postError(final RepositoryCallback<T> callback, final String errorMessage) {
+    private <T> void postError(RepositoryCallback<T> callback, String message) {
         if (callback != null) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(
-                () -> callback.onError(errorMessage)
-            );
+            new android.os.Handler(android.os.Looper.getMainLooper())
+                    .post(() -> callback.onError(message));
         }
     }
 }

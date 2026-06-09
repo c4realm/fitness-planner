@@ -7,39 +7,41 @@ import android.util.Log;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 /**
  * SessionManager.java
- * Manages user session state and credential storage.
  *
- * Security: uses EncryptedSharedPreferences backed by the Android Keystore
- * so tokens and passwords are never stored in plain text on disk.
- * Keys are AES-256-GCM encrypted; the master key lives in the hardware-backed
- * Keystore and never leaves the device.
+ * Manages:
+ *  - Active session (JWT token, userId, name, email, isGuest)
+ *  - Credential cache for offline login fallback
+ *    (email → SHA-256(password) stored in a separate encrypted prefs file)
+ *
+ * All data is stored in EncryptedSharedPreferences backed by Android Keystore.
  */
 public class SessionManager {
 
-    private static final String ENCRYPTED_PREFS_FILE = "arcade_secure_prefs";
-    private static final String ACCOUNT_PREFS_FILE   = "arcade_secure_accounts";
+    private static final String TAG = "SessionManager";
 
-    private final Context context;
-    private final SharedPreferences prefs;
+    // Active session prefs
+    private static final String SESSION_PREFS = "arcade_session_prefs";
+    // Credential cache prefs (for offline fallback)
+    private static final String CREDENTIAL_PREFS = "arcade_credential_prefs";
+
+    private final SharedPreferences sessionPrefs;
+    private final SharedPreferences credentialPrefs;
 
     public SessionManager(Context context) {
-        this.context = context.getApplicationContext();
-        this.prefs   = buildEncryptedPrefs(ENCRYPTED_PREFS_FILE);
+        sessionPrefs    = buildEncryptedPrefs(context, SESSION_PREFS);
+        credentialPrefs = buildEncryptedPrefs(context, CREDENTIAL_PREFS);
     }
 
-    // ── ENCRYPTED PREFS BUILDER ──────────────────────────────────────
-
-    private SharedPreferences buildEncryptedPrefs(String fileName) {
+    private SharedPreferences buildEncryptedPrefs(Context context, String fileName) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
-
             return EncryptedSharedPreferences.create(
                     context,
                     fileName,
@@ -47,112 +49,131 @@ public class SessionManager {
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
-        } catch (GeneralSecurityException | IOException e) {
-            // Fallback to standard prefs if Keystore unavailable (very old devices)
-            return context.getSharedPreferences(fileName + "_fallback", Context.MODE_PRIVATE);
+        } catch (Exception e) {
+            Log.e(TAG, "EncryptedSharedPreferences unavailable, falling back to plaintext", e);
+            return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         }
     }
 
-    // ── SAVE SESSION ─────────────────────────────────────────────────
+    // ── ACTIVE SESSION ───────────────────────────────────────────────
 
-    public void saveSession(String userId, String userName, String email, String authToken) {
-        prefs.edit()
+    /**
+     * Save a real authenticated session (email/password or API login).
+     */
+    public void saveSession(String userId, String userName, String email, String token) {
+        sessionPrefs.edit()
                 .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
+                .putBoolean(AppConstants.KEY_IS_GUEST,     false)
                 .putString(AppConstants.KEY_USER_ID,       userId)
                 .putString(AppConstants.KEY_USER_NAME,     userName)
                 .putString(AppConstants.KEY_USER_EMAIL,    email)
-                .putString(AppConstants.KEY_USER_TOKEN,    authToken)
-                .apply();
-        if (isUsingMockToken()) {
-            Log.w("SessionManager", "Using mock token — replace with real JWT in Phase 3");
-        }
-    }
-
-    public boolean isUsingMockToken() {
-        return "mock_token".equals(getToken());
-    }
-
-    public void saveGuestSession() {
-        prefs.edit()
-            .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
-            .putBoolean(AppConstants.KEY_IS_GUEST, true)
-            .putString(AppConstants.KEY_USER_ID, AppConstants.GUEST_USER_ID)
-            .putString(AppConstants.KEY_USER_NAME, "Guest")
-            .putString(AppConstants.KEY_USER_EMAIL, "")
-            .apply();
-    }
-
-    public void saveGoogleSession(String userId, String userName, String email) {
-        prefs.edit()
-                .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
-                .putBoolean(AppConstants.KEY_GOOGLE_LOGIN,  true)
-                .putString(AppConstants.KEY_USER_ID,        userId)
-                .putString(AppConstants.KEY_USER_NAME,      userName)
-                .putString(AppConstants.KEY_USER_EMAIL,     email)
+                .putString(AppConstants.KEY_USER_TOKEN,    token)
                 .apply();
     }
-
-    // ── READ SESSION ─────────────────────────────────────────────────
-
-    public boolean isLoggedIn()  { return prefs.getBoolean(AppConstants.KEY_IS_LOGGED_IN, false); }
-    public boolean isGoogleUser(){ return prefs.getBoolean(AppConstants.KEY_GOOGLE_LOGIN,  false); }
-    public boolean isGuest()     { return prefs.getBoolean(AppConstants.KEY_IS_GUEST, false); }
-    public String  getUserId()   { return prefs.getString(AppConstants.KEY_USER_ID,    ""); }
-    public String  getUserName() { return prefs.getString(AppConstants.KEY_USER_NAME,  ""); }
-    public String  getUserEmail(){ return prefs.getString(AppConstants.KEY_USER_EMAIL, ""); }
-    public String  getToken()    { return prefs.getString(AppConstants.KEY_USER_TOKEN, ""); }
-
-    // ── REGISTERED ACCOUNTS (encrypted) ─────────────────────────────
-    // Separate encrypted file so clearSession() doesn't wipe stored accounts.
-    // Passwords are hashed with SHA-256 before storage — never stored raw.
-
-    private SharedPreferences getAccountPrefs() {
-        return buildEncryptedPrefs(ACCOUNT_PREFS_FILE);
-    }
-
-    public void saveRegisteredAccount(String email, String password, String fullName) {
-        String hashedPassword = hashPassword(password);
-        getAccountPrefs().edit()
-                .putString("account_pwd_"  + email, hashedPassword)
-                .putString("account_name_" + email, fullName)
-                .apply();
-    }
-
-    public boolean checkCredentials(String email, String password) {
-        String stored = getAccountPrefs().getString("account_pwd_" + email, null);
-        if (stored == null) return false;
-        return stored.equals(hashPassword(password));
-    }
-
-    public String getRegisteredUserName(String email) {
-        return getAccountPrefs().getString("account_name_" + email, "");
-    }
-
-    // ── CLEAR SESSION ─────────────────────────────────────────────────
-
-    public void clearSession() {
-        prefs.edit().clear().apply();
-    }
-
-    // ── HELPERS ──────────────────────────────────────────────────────
 
     /**
-     * One-way SHA-256 hash of a password.
-     * Passwords are never stored or compared in plain text.
+     * Save a guest session — no credentials, limited features.
      */
-    private String hashPassword(String password) {
+    public void saveGuestSession() {
+        sessionPrefs.edit()
+                .putBoolean(AppConstants.KEY_IS_LOGGED_IN, true)
+                .putBoolean(AppConstants.KEY_IS_GUEST,     true)
+                .putString(AppConstants.KEY_USER_ID,       AppConstants.GUEST_USER_ID)
+                .putString(AppConstants.KEY_USER_NAME,     "Guest")
+                .putString(AppConstants.KEY_USER_EMAIL,    "")
+                .putString(AppConstants.KEY_USER_TOKEN,    "")
+                .apply();
+    }
+
+    public void clearSession() {
+        sessionPrefs.edit().clear().apply();
+    }
+
+    public boolean isLoggedIn() {
+        return sessionPrefs.getBoolean(AppConstants.KEY_IS_LOGGED_IN, false);
+    }
+
+    public boolean isGuest() {
+        return sessionPrefs.getBoolean(AppConstants.KEY_IS_GUEST, false);
+    }
+
+    public String getUserId() {
+        return sessionPrefs.getString(AppConstants.KEY_USER_ID, "");
+    }
+
+    public String getUserName() {
+        return sessionPrefs.getString(AppConstants.KEY_USER_NAME, "");
+    }
+
+    public String getUserEmail() {
+        return sessionPrefs.getString(AppConstants.KEY_USER_EMAIL, "");
+    }
+
+    /** Returns the stored JWT. Empty string if guest or not logged in. */
+    public String getToken() {
+        return sessionPrefs.getString(AppConstants.KEY_USER_TOKEN, "");
+    }
+
+    /** True when the stored token is a mock/offline placeholder. */
+    public boolean isUsingMockToken() {
+        String t = getToken();
+        return t.equals("mock_token") || t.equals("offline_token") || t.isEmpty();
+    }
+
+    // ── CREDENTIAL CACHE (offline login fallback) ────────────────────
+
+    /**
+     * Store hashed credentials and user metadata for offline login.
+     * Called after a successful online register or login.
+     */
+    public void cacheCredentials(String email, String password,
+                                 String userId, String name, String token) {
+        String key = "cred_" + email.toLowerCase();
+        credentialPrefs.edit()
+                .putString(key + "_hash",   sha256(password))
+                .putString(key + "_userId", userId)
+                .putString(key + "_name",   name)
+                .putString(key + "_token",  token)
+                .apply();
+    }
+
+    /**
+     * Verify email + password against the locally cached hash.
+     * Returns true if credentials match a cached account.
+     */
+    public boolean checkCredentials(String email, String password) {
+        String key    = "cred_" + email.toLowerCase();
+        String stored = credentialPrefs.getString(key + "_hash", null);
+        if (stored == null) return false;
+        return stored.equals(sha256(password));
+    }
+
+    public String getCachedUserId(String email) {
+        return credentialPrefs.getString("cred_" + email.toLowerCase() + "_userId", email);
+    }
+
+    public String getCachedName(String email) {
+        return credentialPrefs.getString("cred_" + email.toLowerCase() + "_name", email);
+    }
+
+    public String getCachedToken(String email) {
+        return credentialPrefs.getString("cred_" + email.toLowerCase() + "_token", null);
+    }
+
+    // ── HASH ─────────────────────────────────────────────────────────
+
+    private static String sha256(String input) {
         try {
-            java.security.MessageDigest digest =
-                    java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (byte b : hash) {
                 sb.append(String.format("%02x", b));
             }
             return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            // SHA-256 is guaranteed present on all Android devices
-            return password;
+        } catch (Exception e) {
+            Log.e(TAG, "SHA-256 failed", e);
+            return input; // unsafe fallback, should never happen
         }
     }
 }

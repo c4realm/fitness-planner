@@ -37,6 +37,10 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.GoalVi
         return goals.size();
     }
 
+    public GoalEntity getGoalAt(int position) {
+        return goals.get(position);
+    }
+
     public void setGoals(List<GoalEntity> goals) {
         this.goals.clear();
         if (goals != null) {

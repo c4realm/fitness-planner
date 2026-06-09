@@ -20,15 +20,31 @@ import java.util.Locale;
 public class WorkoutSessionAdapter extends RecyclerView.Adapter<WorkoutSessionAdapter.WorkoutSessionViewHolder> {
 
     private final List<WorkoutEntity> workouts = new ArrayList<>();
-    private OnWorkoutClickListener listener;
 
+    // ── Listeners — held on the adapter (non-static), passed into bind() ──
+    private OnWorkoutClickListener clickListener;
+    private OnWorkoutLongClickListener longClickListener;
+
+    // ── Click listener interface ──────────────────────────────────────
     public interface OnWorkoutClickListener {
         void onWorkoutClick(WorkoutEntity workout);
     }
 
     public void setOnWorkoutClickListener(OnWorkoutClickListener listener) {
-        this.listener = listener;
+        this.clickListener = listener;
     }
+
+    // ── Long-click listener interface (used by WorkoutPlannerActivity
+    //    to show Edit / Delete options on long-press) ──────────────────
+    public interface OnWorkoutLongClickListener {
+        void onWorkoutLongClick(WorkoutEntity workout);
+    }
+
+    public void setOnWorkoutLongClickListener(OnWorkoutLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
+    // ── RecyclerView boilerplate ──────────────────────────────────────
 
     @NonNull
     @Override
@@ -41,7 +57,9 @@ public class WorkoutSessionAdapter extends RecyclerView.Adapter<WorkoutSessionAd
     @Override
     public void onBindViewHolder(@NonNull WorkoutSessionViewHolder holder, int position) {
         WorkoutEntity workout = workouts.get(position);
-        holder.bind(workout, listener);
+        // Both listeners are passed explicitly so the static ViewHolder
+        // never needs to reference the outer adapter instance.
+        holder.bind(workout, clickListener, longClickListener);
     }
 
     @Override
@@ -49,13 +67,18 @@ public class WorkoutSessionAdapter extends RecyclerView.Adapter<WorkoutSessionAd
         return workouts.size();
     }
 
-    public void setWorkouts(List<WorkoutEntity> workouts) {
+    public void setWorkouts(List<WorkoutEntity> list) {
         this.workouts.clear();
-        if (workouts != null) {
-            this.workouts.addAll(workouts);
-        }
+        if (list != null) this.workouts.addAll(list);
         notifyDataSetChanged();
     }
+
+    /** Used by WorkoutPlannerActivity swipe-to-delete / long-press delete. */
+    public WorkoutEntity getWorkoutAt(int position) {
+        return workouts.get(position);
+    }
+
+    // ── ViewHolder ────────────────────────────────────────────────────
 
     static class WorkoutSessionViewHolder extends RecyclerView.ViewHolder {
 
@@ -67,22 +90,32 @@ public class WorkoutSessionAdapter extends RecyclerView.Adapter<WorkoutSessionAd
         WorkoutSessionViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSessionWorkoutName = itemView.findViewById(R.id.tvSessionWorkoutName);
-            tvSessionDate = itemView.findViewById(R.id.tvSessionDate);
-            tvSessionDuration = itemView.findViewById(R.id.tvSessionDuration);
-            tvSessionStatus = itemView.findViewById(R.id.tvSessionStatus);
+            tvSessionDate        = itemView.findViewById(R.id.tvSessionDate);
+            tvSessionDuration    = itemView.findViewById(R.id.tvSessionDuration);
+            tvSessionStatus      = itemView.findViewById(R.id.tvSessionStatus);
         }
 
-        void bind(WorkoutEntity workout, OnWorkoutClickListener listener) {
+        void bind(WorkoutEntity workout,
+                  OnWorkoutClickListener clickListener,
+                  OnWorkoutLongClickListener longClickListener) {
+
             tvSessionWorkoutName.setText(workout.getName());
+
             String dateStr = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
                     .format(new Date(workout.getCreatedAt()));
             tvSessionDate.setText(dateStr);
             tvSessionDuration.setText(workout.getEstimatedDurationMinutes() + " min");
             tvSessionStatus.setText(workout.getTargetMuscleGroup());
 
-            if (listener != null) {
-                itemView.setOnClickListener(v -> listener.onWorkoutClick(workout));
-            }
+            // Single tap — navigate to tracking
+            itemView.setOnClickListener(clickListener != null
+                    ? v -> clickListener.onWorkoutClick(workout)
+                    : null);
+
+            // Long press — show Edit / Delete dialog in WorkoutPlannerActivity
+            itemView.setOnLongClickListener(longClickListener != null
+                    ? v -> { longClickListener.onWorkoutLongClick(workout); return true; }
+                    : null);
         }
     }
 }

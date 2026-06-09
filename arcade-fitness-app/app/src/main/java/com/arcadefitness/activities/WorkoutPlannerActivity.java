@@ -63,6 +63,15 @@ public class WorkoutPlannerActivity extends AppCompatActivity {
             intent.putExtra("workout_id", workout.getId());
             startActivity(intent);
         });
+        adapter.setOnWorkoutLongClickListener(workout -> {
+            new AlertDialog.Builder(this)
+                .setTitle(workout.getName())
+                .setItems(new String[]{"Edit", "Delete"}, (dialog, which) -> {
+                    if (which == 0) showEditWorkoutDialog(workout);
+                    else showDeleteWorkoutDialog(workout);
+                })
+                .show();
+        });
         rvWorkouts.setAdapter(adapter);
     }
 
@@ -162,5 +171,110 @@ public class WorkoutPlannerActivity extends AppCompatActivity {
         }));
 
         dialog.show();
+    }
+
+    private void showEditWorkoutDialog(WorkoutEntity workout) {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        container.setPadding(padding, padding, padding, padding);
+
+        EditText etName = new EditText(this);
+        etName.setHint("Workout name");
+        etName.setText(workout.getName());
+        etName.setTextColor(getColor(R.color.text_primary));
+        etName.setHintTextColor(getColor(R.color.text_muted));
+        etName.setBackgroundColor(getColor(R.color.bg_input));
+        etName.setPadding(padding, padding, padding, padding);
+        container.addView(etName);
+
+        Spinner spinnerMuscleGroup = new Spinner(this);
+        ArrayAdapter<String> muscleAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                Arrays.asList(MUSCLE_GROUPS)
+        );
+        muscleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMuscleGroup.setAdapter(muscleAdapter);
+        String muscle = workout.getTargetMuscleGroup();
+        if (muscle != null) {
+            for (int i = 0; i < MUSCLE_GROUPS.length; i++) {
+                if (MUSCLE_GROUPS[i].equals(muscle)) {
+                    spinnerMuscleGroup.setSelection(i);
+                    break;
+                }
+            }
+        }
+        LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        spinnerParams.topMargin = padding;
+        spinnerMuscleGroup.setLayoutParams(spinnerParams);
+        container.addView(spinnerMuscleGroup);
+
+        EditText etDuration = new EditText(this);
+        etDuration.setHint("Estimated duration (minutes)");
+        etDuration.setInputType(InputType.TYPE_CLASS_NUMBER);
+        etDuration.setText(String.valueOf(workout.getEstimatedDurationMinutes()));
+        etDuration.setTextColor(getColor(R.color.text_primary));
+        etDuration.setHintTextColor(getColor(R.color.text_muted));
+        etDuration.setBackgroundColor(getColor(R.color.bg_input));
+        etDuration.setPadding(padding, padding, padding, padding);
+        LinearLayout.LayoutParams durationParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        durationParams.topMargin = padding;
+        etDuration.setLayoutParams(durationParams);
+        container.addView(etDuration);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Edit Workout")
+                .setView(container)
+                .setPositiveButton("Save", null)
+                .setNegativeButton("Cancel", (dialogInterface, which) -> dialogInterface.dismiss())
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            if (name.isEmpty()) {
+                etName.setError("Workout name is required");
+                etName.requestFocus();
+                return;
+            }
+
+            String durationText = etDuration.getText().toString().trim();
+            int durationMinutes;
+            try {
+                durationMinutes = Integer.parseInt(durationText);
+            } catch (NumberFormatException e) {
+                etDuration.setError("Enter a valid number");
+                etDuration.requestFocus();
+                return;
+            }
+
+            workout.setName(name);
+            workout.setTargetMuscleGroup((String) spinnerMuscleGroup.getSelectedItem());
+            workout.setEstimatedDurationMinutes(durationMinutes);
+
+            viewModel.getWorkoutRepository().update(workout, () -> {
+                Toast.makeText(WorkoutPlannerActivity.this, "Workout updated", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+        }));
+
+        dialog.show();
+    }
+
+    private void showDeleteWorkoutDialog(WorkoutEntity workout) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Workout")
+                .setMessage("Delete \"" + workout.getName() + "\"? This cannot be undone.")
+                .setPositiveButton("Delete", (d, w) ->
+                        viewModel.getWorkoutRepository().delete(workout,
+                                () -> Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show()))
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

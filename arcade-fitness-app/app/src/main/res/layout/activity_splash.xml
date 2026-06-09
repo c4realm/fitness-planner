@@ -104,28 +104,28 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="52dp"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ProgressBar
             android:id="@+id/loadingBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="160dp"
             android:layout_height="3dp"
-            android:progressDrawable="@drawable/bg_progress_bar"
+            android:indeterminate="true"
             android:max="100"
             android:progress="65"
-            android:indeterminate="true" />
+            android:progressDrawable="@drawable/bg_progress_bar" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/loading"
-            android:textSize="10sp"
-            android:textColor="@color/text_disabled"
+            android:layout_marginTop="@dimen/space_sm"
             android:letterSpacing="0.10"
+            android:text="@string/loading"
             android:textAllCaps="true"
-            android:layout_marginTop="@dimen/space_sm" />
+            android:textColor="@color/text_disabled"
+            android:textSize="11sp" />
 
     </LinearLayout>
 

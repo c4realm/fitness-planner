@@ -97,6 +97,21 @@ public class DashboardActivity extends AppCompatActivity {
         if (firstName.isEmpty()) firstName = "there";
         if (tvUserName != null) tvUserName.setText(firstName);
         // Stats populated by ViewModel observers — no hardcoded values
+
+        View guestBanner = findViewById(R.id.layoutGuestBanner);
+        if (guestBanner != null) {
+            if (sessionManager.isGuest()) {
+                guestBanner.setVisibility(View.VISIBLE);
+                View tvSignUp = guestBanner.findViewById(R.id.tvGuestSignUp);
+                if (tvSignUp != null) {
+                    tvSignUp.setOnClickListener(v -> {
+                        startActivity(new Intent(this, RegisterActivity.class));
+                    });
+                }
+            } else {
+                guestBanner.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void setupBottomNav() {
@@ -116,7 +131,7 @@ public class DashboardActivity extends AppCompatActivity {
         });
         navHistory.setOnClickListener(v -> {
             setActiveNav(v);
-            startActivity(new Intent(this, ProgressTrackingActivity.class));
+            startActivity(new Intent(this, WorkoutHistoryActivity.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
         navProfile.setOnClickListener(v -> {

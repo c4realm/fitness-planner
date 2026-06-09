@@ -1,17 +1,21 @@
 package com.arcadefitness.activities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +47,10 @@ public class ProgressTrackingActivity extends AppCompatActivity {
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnAddGoal).setOnClickListener(v -> showAddGoalDialog());
+        findViewById(R.id.btnViewHistory).setOnClickListener(v -> {
+            startActivity(new Intent(this, WorkoutHistoryActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
     }
 
     private void initViews() {
@@ -59,6 +67,37 @@ public class ProgressTrackingActivity extends AppCompatActivity {
         rvGoals.setHasFixedSize(true);
         progressAdapter = new ProgressAdapter();
         rvGoals.setAdapter(progressAdapter);
+
+        ItemTouchHelper.SimpleCallback swipeCallback =
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+                    @Override
+                    public boolean onMove(@androidx.annotation.NonNull RecyclerView recyclerView,
+                                          @androidx.annotation.NonNull RecyclerView.ViewHolder viewHolder,
+                                          @androidx.annotation.NonNull RecyclerView.ViewHolder target) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(@androidx.annotation.NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                        int pos = viewHolder.getAdapterPosition();
+                        GoalEntity goal = progressAdapter.getGoalAt(pos);
+                        FitnessRepository.getInstance(ProgressTrackingActivity.this)
+                                .deleteGoal(goal, new FitnessRepository.RepositoryCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void r) {
+                                        viewModel.refresh();
+                                        Toast.makeText(ProgressTrackingActivity.this,
+                                                "Goal deleted", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onError(String e) {
+                                        progressAdapter.notifyItemChanged(pos);
+                                    }
+                                });
+                    }
+                };
+        new ItemTouchHelper(swipeCallback).attachToRecyclerView(rvGoals);
     }
 
     private void setupViewModel() {
@@ -108,6 +147,22 @@ public class ProgressTrackingActivity extends AppCompatActivity {
         etTitle.setPadding(padding, padding, padding, padding);
         container.addView(etTitle);
 
+        String[] goalTypes = {"WEIGHT_LOSS", "MUSCLE_GAIN", "ENDURANCE", "CUSTOM"};
+        Spinner spinnerType = new Spinner(this);
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                goalTypes
+        );
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        LinearLayout.LayoutParams typeParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        typeParams.topMargin = padding;
+        spinnerType.setLayoutParams(typeParams);
+        container.addView(spinnerType);
+
         EditText etTarget = new EditText(this);
         etTarget.setHint("Target value");
         etTarget.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -122,6 +177,20 @@ public class ProgressTrackingActivity extends AppCompatActivity {
         targetParams.topMargin = padding;
         etTarget.setLayoutParams(targetParams);
         container.addView(etTarget);
+
+        EditText etUnit = new EditText(this);
+        etUnit.setHint("Unit (e.g. kg, sessions, km)");
+        etUnit.setTextColor(getColor(R.color.text_primary));
+        etUnit.setHintTextColor(getColor(R.color.text_muted));
+        etUnit.setBackgroundColor(getColor(R.color.bg_input));
+        etUnit.setPadding(padding, padding, padding, padding);
+        LinearLayout.LayoutParams unitParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        unitParams.topMargin = padding;
+        etUnit.setLayoutParams(unitParams);
+        container.addView(etUnit);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Add Goal")
@@ -149,7 +218,10 @@ public class ProgressTrackingActivity extends AppCompatActivity {
                 return;
             }
 
-            GoalEntity goal = new GoalEntity(title, "CUSTOM", targetValue, "sessions", 0L);
+            String selectedType = (String) spinnerType.getSelectedItem();
+            String unitText = etUnit.getText().toString().trim();
+            if (unitText.isEmpty()) unitText = "sessions";
+            GoalEntity goal = new GoalEntity(title, selectedType, targetValue, unitText, 0L);
             FitnessRepository.getInstance(this).insertGoal(goal, new FitnessRepository.RepositoryCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {
