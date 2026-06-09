@@ -61,6 +61,10 @@
             android:name=".activities.UserProfileActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".activities.BmiCalculatorActivity"
+            android:exported="false" />
+
         <!-- ── NetworkChangeReceiver ─────────────────────────────────────────── -->
         <!--
             CONNECTIVITY_CHANGE is deprecated on Android 7+ for manifest receivers,

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import java.util.Locale;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -24,7 +25,8 @@ public class BmiCalculatorActivity extends AppCompatActivity {
     private FitnessRepository fitnessRepository;
 
     private EditText etHeight, etWeight;
-    private Button btnMetric, btnImperial, btnCalculate;
+    private Button btnMetric;
+    private Button btnImperial;
     private LinearLayout resultCard;
     private TextView tvBmiValue, tvBmiCategory, tvBmiAdvice;
     private ProgressBar progressBar;
@@ -44,14 +46,15 @@ public class BmiCalculatorActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        View back = findViewById(R.id.btnBack);
+        if (back != null) back.setOnClickListener(v -> finish());
 
         etHeight = findViewById(R.id.etBmiHeight);
         etWeight = findViewById(R.id.etBmiWeight);
 
         btnMetric = findViewById(R.id.btnMetric);
         btnImperial = findViewById(R.id.btnImperial);
-        btnCalculate = findViewById(R.id.btnCalculate);
+        Button btnCalculate = findViewById(R.id.btnCalculate);
 
         resultCard = findViewById(R.id.resultCard);
         tvBmiValue = findViewById(R.id.tvBmiValue);
@@ -82,11 +85,11 @@ public class BmiCalculatorActivity extends AppCompatActivity {
 
     private void updateUnitHints() {
         if (isMetric) {
-            etHeight.setHint("Height (cm)");
-            etWeight.setHint("Weight (kg)");
+            etHeight.setHint(getString(R.string.bmi_hint_height_cm));
+            etWeight.setHint(getString(R.string.bmi_hint_weight_kg));
         } else {
-            etHeight.setHint("Height (in)");
-            etWeight.setHint("Weight (lbs)");
+            etHeight.setHint(getString(R.string.bmi_hint_height_in));
+            etWeight.setHint(getString(R.string.bmi_hint_weight_lbs));
         }
     }
 
@@ -111,14 +114,14 @@ public class BmiCalculatorActivity extends AppCompatActivity {
         boolean valid = true;
 
         if (TextUtils.isEmpty(heightStr)) {
-            etHeight.setError("Height is required");
+            etHeight.setError(getString(R.string.bmi_error_height_required));
             valid = false;
         } else {
             etHeight.setError(null);
         }
 
         if (TextUtils.isEmpty(weightStr)) {
-            etWeight.setError("Weight is required");
+            etWeight.setError(getString(R.string.bmi_error_weight_required));
             valid = false;
         } else {
             etWeight.setError(null);
@@ -132,17 +135,17 @@ public class BmiCalculatorActivity extends AppCompatActivity {
             heightInput = Double.parseDouble(heightStr);
             weightInput = Double.parseDouble(weightStr);
         } catch (NumberFormatException e) {
-            etHeight.setError("Enter a valid number");
-            etWeight.setError("Enter a valid number");
+            etHeight.setError(getString(R.string.bmi_error_invalid_number));
+            etWeight.setError(getString(R.string.bmi_error_invalid_number));
             return;
         }
 
         if (heightInput <= 0) {
-            etHeight.setError("Must be greater than 0");
+            etHeight.setError(getString(R.string.bmi_error_must_be_positive));
             valid = false;
         }
         if (weightInput <= 0) {
-            etWeight.setError("Must be greater than 0");
+            etWeight.setError(getString(R.string.bmi_error_must_be_positive));
             valid = false;
         }
         if (!valid) return;
@@ -164,26 +167,26 @@ public class BmiCalculatorActivity extends AppCompatActivity {
         int colorRes;
 
         if (bmi < 18.5) {
-            category = "Underweight";
-            advice = "Consider increasing caloric intake";
+            category = getString(R.string.bmi_underweight);
+            advice = getString(R.string.bmi_underweight_advice);
             colorRes = R.color.bmi_underweight;
         } else if (bmi < 25) {
-            category = "Normal weight";
-            advice = "Great! Maintain your current lifestyle";
+            category = getString(R.string.bmi_normal);
+            advice = getString(R.string.bmi_normal_advice);
             colorRes = R.color.bmi_normal;
         } else if (bmi < 30) {
-            category = "Overweight";
-            advice = "Regular exercise and balanced diet recommended";
+            category = getString(R.string.bmi_overweight);
+            advice = getString(R.string.bmi_overweight_advice);
             colorRes = R.color.bmi_overweight;
         } else {
-            category = "Obese";
-            advice = "Consult a healthcare professional";
+            category = getString(R.string.bmi_obese);
+            advice = getString(R.string.bmi_obese_advice);
             colorRes = R.color.bmi_obese;
         }
 
         int color = ContextCompat.getColor(this, colorRes);
 
-        tvBmiValue.setText(String.format("%.1f", bmi));
+        tvBmiValue.setText(String.format(Locale.US, "%.1f", bmi));
         tvBmiValue.setTextColor(color);
         tvBmiCategory.setText(category);
         tvBmiCategory.setTextColor(color);
@@ -202,17 +205,17 @@ public class BmiCalculatorActivity extends AppCompatActivity {
         String userEmail = sessionManager.getUserEmail();
         if (userEmail == null || userEmail.isEmpty()) return;
 
-        fitnessRepository.getUserProfileByEmail(userEmail, new FitnessRepository.RepositoryCallback<UserProfileEntity>() {
+        fitnessRepository.getUserProfileByEmail(userEmail, new FitnessRepository.RepositoryCallback<>() {
             @Override
             public void onSuccess(UserProfileEntity profile) {
                 if (profile != null) {
                     profile.setWeightKg(weightKg);
                     profile.setHeightCm(heightCm);
-                    fitnessRepository.updateUserProfile(profile, new FitnessRepository.RepositoryCallback<Void>() {
+                    fitnessRepository.updateUserProfile(profile, new FitnessRepository.RepositoryCallback<>() {
                         @Override
                         public void onSuccess(Void result) {
                             runOnUiThread(() -> Toast.makeText(BmiCalculatorActivity.this,
-                                    "Profile updated", Toast.LENGTH_SHORT).show());
+                                    R.string.bmi_profile_updated, Toast.LENGTH_SHORT).show());
                         }
 
                         @Override

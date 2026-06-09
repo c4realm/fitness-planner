@@ -45,7 +45,8 @@ public class LoginActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
 
         // Already logged in — skip straight to Dashboard
-        if (sessionManager.isLoggedIn()) {
+        // (but not if guest, they need to sign in to convert to real account)
+        if (sessionManager.isLoggedIn() && !sessionManager.isGuest()) {
             goToDashboard();
             return;
         }

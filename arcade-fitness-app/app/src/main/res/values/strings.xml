@@ -119,6 +119,31 @@
     <string name="error_network">No internet connection</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
 
+    <!-- BMI Calculator -->
+    <string name="bmi_title">BMI Calculator</string>
+    <string name="bmi_metric">Metric</string>
+    <string name="bmi_imperial">Imperial</string>
+    <string name="bmi_calculate">Calculate BMI</string>
+    <string name="bmi_unit">UNIT</string>
+    <string name="bmi_measurements">MEASUREMENTS</string>
+    <string name="bmi_hint_height_cm">Height (cm)</string>
+    <string name="bmi_hint_weight_kg">Weight (kg)</string>
+    <string name="bmi_hint_height_in">Height (in)</string>
+    <string name="bmi_hint_weight_lbs">Weight (lbs)</string>
+    <string name="bmi_error_height_required">Height is required</string>
+    <string name="bmi_error_weight_required">Weight is required</string>
+    <string name="bmi_error_invalid_number">Enter a valid number</string>
+    <string name="bmi_error_must_be_positive">Must be greater than 0</string>
+    <string name="bmi_underweight">Underweight</string>
+    <string name="bmi_underweight_advice">Consider increasing caloric intake</string>
+    <string name="bmi_normal">Normal weight</string>
+    <string name="bmi_normal_advice">Great! Maintain your current lifestyle</string>
+    <string name="bmi_overweight">Overweight</string>
+    <string name="bmi_overweight_advice">Regular exercise and balanced diet recommended</string>
+    <string name="bmi_obese">Obese</string>
+    <string name="bmi_obese_advice">Consult a healthcare professional</string>
+    <string name="bmi_profile_updated">Profile updated</string>
+
     <!-- Gender options -->
     <string-array name="gender_options">
         <item>Select gender</item>
