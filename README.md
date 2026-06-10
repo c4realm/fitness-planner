@@ -21,9 +21,10 @@
 
 ## Overview
 
-**Arcade Fitness Planner** is a native Android application built in Java for the **Mobile Application Development** course at **St. Mary's University**. It follows the **MVVM architecture pattern** with a 7-table Room local database, LiveData-driven UI, an offline-first sync queue, and a polished dark-themed Material UI.
+**Arcade Fitness Planner** is a full-stack Android fitness application developed as a project for the **Mobile Application Development** course at **St. Mary's University**.
 
-Users can plan workouts, browse an exercise library, track live workout sessions with set logging, monitor progress goals, and access the app as a guest before registering.
+The system allows users to plan workouts, track live sessions with set-by-set logging, browse an exercise library, monitor progress, set goals, calculate BMI, and sync all data to a PostgreSQL backend — working fully offline when no connection is available.
+
 
 ---
 
@@ -49,44 +50,46 @@ Users can plan workouts, browse an exercise library, track live workout sessions
 
 ---
 
-## Development Roadmap
+## ✅ Development Phases
 
-###  Phase 1 — Onboarding
-
+### Phase 1 — Onboarding
 | Screen | Status |
 | ------------------- | ------------ |
-| Splash Screen | ✅ Complete |
-| Login Screen | ✅ Complete |
-| Registration Screen | ✅ Complete |
+| Splash Screen — animated rotating rings | ✅ Complete |
+| Login Screen — validation, offline fallback | ✅ Complete |
+| Registration Screen — full field validation | ✅ Complete |
 | Dashboard Screen | ✅ Complete |
 
-###  Phase 2 — Core MVVM Engine & Features
-
+### Phase 2 — Core MVVM Engine
 | Feature | Status |
 | --------------------------------------- | ------------ |
-| 7-Table Room Database Schema | ✅ Complete |
+| 8-Table Room Database Schema | ✅ Complete |
 | MVVM ViewModels — 4 screens | ✅ Complete |
 | Repository Layer — 3 repositories | ✅ Complete |
-| Workout Planner (create & browse) | ✅ Complete |
-| Exercise Library (filter by muscle) | ✅ Complete |
-| Live Workout Tracking (timer + set log) | ✅ Complete |
+| Workout Planner — create and browse | ✅ Complete |
+| Exercise Library — 25 exercises, muscle group filter | ✅ Complete |
+| Live Workout Tracking — timer, set logging, complete flow | ✅ Complete |
+| Workout History Screen | ✅ Complete |
 | Progress & Goals Tracking | ✅ Complete |
-| Offline-First Sync Queue | ✅ Complete |
-| NetworkChangeReceiver | ✅ Complete |
+| Offline-First Sync Queue + NetworkChangeReceiver | ✅ Complete |
 | Guest Access Flow | ✅ Complete |
-| Dark Theme UI Polish | ✅ Complete |
-| Animated Splash Screen | ✅ Complete |
+| Dark / Light Theme | ✅ Complete |
 
-###  Phase 3 — Backend & Profile
-
+### Phase 3 — Backend, Profile & Health
 | Feature | Status |
-| ------------------------- | ----------- |
-| Retrofit API Integration | 🔜 Pending |
-| Google Sign-In | 🔜 Pending |
-| User Profile Screen | 🔜 Pending |
-| BMI Calculator | 🔜 Pending |
-| Workout History | 🔜 Pending |
-| Push Notifications | 🔜 Pending |
+| --------------------------------------- | ------------ |
+| Node.js / Express REST API — 8 route groups | ✅ Complete |
+| PostgreSQL Schema — 8 tables, 3NF, 25 exercises seeded | ✅ Complete |
+| JWT authentication + bcrypt password hashing | ✅ Complete |
+| Retrofit2 live API integration — login, register, sync | ✅ Complete |
+| EncryptedSharedPreferences + SHA-256 credential hashing | ✅ Complete |
+| User Profile Screen — view, edit, body metrics | ✅ Complete |
+| BMI Calculator — metric / imperial, health category, saves to profile | ✅ Complete |
+| Professional vector icon system | ✅ Complete |
+| Glide image loading for exercise library | ✅ Complete |
+| Offline fallback — local auth when server unreachable | ✅ Complete |
+| Google Sign-In | 🔜 Future |
+| Push Notifications | 🔜 Future |
 
 ---
 
@@ -279,35 +282,92 @@ app/src/main/java/com/arcadefitness/
 - Android SDK 34
 - Physical device or emulator — Android 7.0+ (API 24+)
 
-### Steps
+### Android App
 
 ```bash
-# 1. Clone the repository
+# 1. Clone
 git clone https://github.com/c4realm/fitness-planner.git
 
-# 2. Open in Android Studio
-# File → Open → Select the fitness-planner folder
+# 2. Open arcade-fitness-app/ in Android Studio
 
-# 3. Sync Gradle
-# Click "Sync Now" when prompted — all dependencies resolve automatically
+# 3. Set your machine's local IP in AppConstants.java
+#    private static final String SERVER_IP = "YOUR_LOCAL_IP";
 
-# 4. Run on device or emulator
-# Run → Run 'app'   or press Shift + F10
+# 4. Sync Gradle → Run
 ```
 
-> **Note:** `google-services.json` is intentionally absent for Phase 2.
-> Google Sign-In is preserved in the UI and wired to a Phase 3 placeholder.
-> The app runs fully offline. Use **Browse as Guest** on the login screen
-> to explore all features without an account.
+### Backend
+
+```bash
+cd arcade-fitness-backend
+
+# 1. Install dependencies
+npm install
+
+# 2. Create .env file
+cp .env.example .env
+# Fill in DATABASE_URL and JWT_SECRET
+
+# 3. Create database and run schema
+psql -U postgres -c "CREATE DATABASE arcade_fitness;"
+psql -U postgres -d arcade_fitness -f database/schema.sql
+
+# 4. Start server
+node server.js
+# Server runs on http://localhost:3000
+```
+
+> **Network note:** When testing on a real device, set `SERVER_IP` in `AppConstants.java` to your machine's local IP address (run `ip addr` on Linux or `ipconfig` on Windows). When using the emulator, use `10.0.2.2`.
 
 ---
 
-##  License
+## Screens
 
-Academic Project — **St. Mary's University © 2025**
+| # | Screen | Activity |
+| -- | ---------------------- | -------------------------- |
+| 1 | Splash | `SplashActivity` |
+| 2 | Login | `LoginActivity` |
+| 3 | Register | `RegisterActivity` |
+| 4 | Dashboard | `DashboardActivity` |
+| 5 | Workout Planner | `WorkoutPlannerActivity` |
+| 6 | Exercise Library | `ExerciseLibraryActivity` |
+| 7 | Workout Tracking | `WorkoutTrackingActivity` |
+| 8 | Workout History | `WorkoutHistoryActivity` |
+| 9 | Progress Tracking | `ProgressTrackingActivity` |
+| 10 | User Profile | `UserProfileActivity` |
+| 11 | BMI Calculator | `BmiCalculatorActivity` |
+| 12 | Network Test | `NetworkTestActivity` |
+
+---
+
+## Security
+
+- Passwords hashed with **SHA-256** before local storage — never stored in plain text
+- Session tokens stored in **EncryptedSharedPreferences** backed by Android Keystore (AES-256-GCM)
+- Backend passwords hashed with **bcryptjs** at cost factor 10
+- All API routes protected with **JWT Bearer token** middleware
+- HTTP security headers via **Helmet.js**
+- All database queries use **parameterised statements** — no SQL injection exposure
+
+---
+
+##  Future Enhancements
+
+- Google Sign-In with Firebase Authentication
+- Push notifications for workout reminders
+- Wearable fitness device integration
+- Social features — achievements and challenges
+- Advanced analytics with performance charts
+- Personalised AI workout recommendations
+
+---
+
+## License
+
+Academic Project — **St. Mary's University © 2026**
 
 <div align="center">
 
-*Built with Java & Android Studio by the Arcade Fitness Planner Team*
+*Built with Java, Node.js, and PostgreSQL by the Arcade Fitness Planner Team*
 
 </div>
